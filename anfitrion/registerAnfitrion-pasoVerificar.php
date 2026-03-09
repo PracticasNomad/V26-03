@@ -180,6 +180,7 @@ function insertarDatos()
         'name' => $_SESSION['host']['nombre'],
         'phone' => $_SESSION['host']['telefono'],
         'empresa' => $_SESSION['host']['razonsocial'],
+        'plan' => isset($_SESSION['plan_seleccionado']) ? $_SESSION['plan_seleccionado'] : 'Basico',
     ];
 
     $payload = json_encode($data);

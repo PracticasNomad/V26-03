@@ -170,7 +170,7 @@ if (isset($_POST['siguiente'])) {
         /* Barra de progreso */
         .progress-bar {
             height: 100%;
-            width: 60%;
+            width: 40%;
             background-color: #28a745;
         }
 
@@ -441,7 +441,7 @@ if (isset($_POST['siguiente'])) {
         </form>
         <div class="container-fluid p-3">
             <div class="row text-center">
-                <div class="col-12">Paso 3 de 5</div>
+                <div class="col-12">Paso 3 de 6</div>
             </div>
         </div>
         <script>

@@ -378,7 +378,7 @@ if (isset($_POST['siguiente'])) {
 
         .progress-bar {
             height: 100%;
-            width: 80%;
+            width: 60%;
             background-color: #28a745;
         }
 
@@ -699,7 +699,7 @@ if (isset($_POST['siguiente'])) {
 
         <div class="container-fluid p-3">
             <div class="row text-center">
-                <div class="col-12">Paso 4 de 5</div>
+                <div class="col-12">Paso 4 de 6</div>
             </div>
         </div>
     </div>

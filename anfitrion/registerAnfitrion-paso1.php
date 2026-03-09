@@ -117,7 +117,7 @@
                     </div>
 
                     <div class="progress-step">
-                        Paso 1 de 5
+                        Paso 1 de 6
                     </div>
                 </div>
             </div>

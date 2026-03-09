@@ -69,13 +69,15 @@ if (isset($_POST['siguiente'])) {
             'horarios' => $horarios
         ];
 
-        $formSuccess = "Datos guardados correctamente. Redirigiendo...";
+        // Guardamos el mensaje para el Toast y hacemos la redirección con retardo
+        $formSuccess = "Espacio de trabajo guardado correctamente.";
 
         echo "<script>
             setTimeout(function() {
-                window.location.href = 'registerAnfitrion-pasoVerificar.php';
+                window.location.href = 'registerAnfitrion-paso6.php';
             }, 1500);
         </script>";
+
     } else {
         $formError = implode(' ', $errors);
     }
@@ -164,8 +166,8 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
 
         .progress-bar {
             height: 100%;
-            width: 100%;
-            /* Paso 5 de 5 = 100% */
+            width: 80%;
+            /* Paso 5 de 6 = 83% */
             background-color: #28a745;
         }
 
@@ -451,7 +453,7 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                                                 $nombres_dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
                                                 foreach ($dias_semana as $i => $dia_codigo):
                                                     $checked = in_array($dia_codigo, $horario['dias']) ? 'checked' : '';
-                                                ?>
+                                                    ?>
                                                     <div class="day-checkbox">
                                                         <input type="checkbox"
                                                             id="dia_<?php echo $h_index; ?>_<?php echo $dia_codigo; ?>"
@@ -559,7 +561,7 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                     </div>
                     <div class="col-6">
                         <button type="submit" name="siguiente" id="btnSiguiente"
-                            class="btn btn-success rounded-pill">Finalizar</button>
+                            class="btn btn-success rounded-pill">Siguiente</button>
                     </div>
                 </div>
             </div>
@@ -567,7 +569,7 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
 
         <div class="container-fluid p-3">
             <div class="row text-center">
-                <div class="col-12">Paso 5 de 5</div>
+                <div class="col-12">Paso 5 de 6</div>
             </div>
         </div>
     </div>
@@ -683,8 +685,15 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
     </template>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             let horarioCount = $('.horario-container').length;
+
+            // Mostrar el Toast flotante si hay un mensaje de éxito desde PHP
+        <?php if (!empty($formSuccess)): ?>
+            const toastEl = document.getElementById('toastExitoPaso5');
+            const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
+            toast.show();
+        <?php endif; ?>
 
             function updateNoHorariosMessage() {
                 if ($('.horario-container').length > 0) {
@@ -695,12 +704,12 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
             }
 
             function updateHorarioNumbers() {
-                $('.horario-container').each(function(index) {
+                $('.horario-container').each(function (index) {
                     $(this).find('.horario-num').text(index + 1);
                 });
             }
 
-            $('#add-horario').click(function() {
+            $('#add-horario').click(function () {
                 const template = document.getElementById('horario-template').content.cloneNode(true);
                 const horarioIndex = horarioCount++;
 
@@ -713,13 +722,13 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                 updateNoHorariosMessage();
             });
 
-            $(document).on('click', '.remove-horario', function() {
+            $(document).on('click', '.remove-horario', function () {
                 $(this).closest('.horario-container').remove();
                 updateHorarioNumbers();
                 updateNoHorariosMessage();
             });
 
-            $(document).on('click', '.add-servicio', function() {
+            $(document).on('click', '.add-servicio', function () {
                 const horarioIndex = $(this).data('horario');
                 const serviciosContainer = $(this).closest('.servicios-container').find('.servicios-list');
                 const servicioIndex = serviciosContainer.children().length;
@@ -732,11 +741,11 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                 serviciosContainer.append(templateHTML);
             });
 
-            $(document).on('click', '.remove-servicio', function() {
+            $(document).on('click', '.remove-servicio', function () {
                 $(this).closest('.servicio-item').remove();
             });
 
-            $('#espacioTrabajoForm').submit(function(e) {
+            $('#espacioTrabajoForm').submit(function (e) {
                 let valid = true;
                 let errorMessages = [];
 
@@ -744,7 +753,7 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                     valid = false;
                     errorMessages.push('Debe agregar al menos un horario para el espacio de trabajo.');
                 } else {
-                    $('.horario-container').each(function(index) {
+                    $('.horario-container').each(function (index) {
                         const diasSeleccionados = $(this).find('input[type="checkbox"]:checked').length;
                         if (diasSeleccionados === 0) {
                             valid = false;
