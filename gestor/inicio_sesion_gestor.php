@@ -64,7 +64,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             $datosGestor = json_decode($resultadoGestor, true);
             if (count($datosGestor) > 0) {
                 // ✅ Es un gestor
-                header('Location: gestor/tuPerfil.php');
+                header('Location: tuPerfil.php');
                 exit();
             }
         }
@@ -91,7 +91,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             $datosAdmin = json_decode($resultadoAdmin, true);
             if (count($datosAdmin) > 0) {
                 // ✅ Es un administrador
-                header('Location: administrador/tuPerfil.php');
+                header('Location: ../administrador/tuPerfil.php');
                 exit();
             }
         }
@@ -104,35 +104,6 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     } else {
         $error = 'Correo o contraseña incorrectos';
     }
-}
-//Insertar Gestora
-$url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gestor';
-$ch = curl_init($url);
-$data = [
-    'id' => $user_id,
-    'email' => $_SESSION['host']['email'],
-    'nif' => $_SESSION['host']['nif'],
-    'name' => $_SESSION['host']['nombre'],
-    'phone' => $_SESSION['host']['telefono'],
-    'empresa' => $_SESSION['host']['razonsocial'],
-];
-
-$payload = json_encode($data);
-
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Content-Type: application/json',
-    'apikey: ' . $supabaseKey
-]);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-$result = curl_exec($ch);
-$responseData = json_decode($result, true);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-if ($httpCode >= 300) {
-    echo 'Error al insertar el anfitrión: ' . $responseData['message'];
-} else {
-    curl_close($ch);
 }
 ?>
 
@@ -283,7 +254,7 @@ if ($httpCode >= 300) {
                 </div>
 
                 <div class="mb-3">
-                    <a href="recuperar_password.php" class="forgot-password">He olvidado mi contraseña</a>
+                    <a href="../recuperar_password.php" class="forgot-password">He olvidado mi contraseña</a>
                 </div>
 
 
