@@ -567,7 +567,7 @@ if ($codigoRespuesta === 200) {
 
             <label for="val" id="lbl_val" class="col-2 text-center footer-item">
                 <div class="row">
-                    <a href="validar.php">
+                    <a href="verValidar.php">
                         <div class="col-12 icon-container">
                             <i class="h2 fas fa-check-circle p-1 m-0"></i>
                             <div>Validar</div>
