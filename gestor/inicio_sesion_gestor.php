@@ -50,8 +50,9 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             CURLOPT_CUSTOMREQUEST => "GET",
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $_SESSION["token"],
-                'apikey: ' . $supabaseKey
+                // CAMBIAMOS ESTAS DOS LÍNEAS PARA USAR LA SERVICE KEY:
+                'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+                'apikey: ' . $_ENV['SERVICE_APIKEY']
             ),
             CURLOPT_RETURNTRANSFER => true,
         ));
@@ -254,7 +255,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 </div>
 
                 <div class="mb-3">
-                    <a href="../recuperar_password.php" class="forgot-password">He olvidado mi contraseña</a>
+                    <a href="recuperar_password.php" class="forgot-password">He olvidado mi contraseña</a>
                 </div>
 
 
