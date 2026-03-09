@@ -42,7 +42,7 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     echo json_encode(['success' => true, 'message' => 'Perfil actualizado correctamente']);
     unset($_SESSION['direccion'], $_SESSION['plan'], $_SESSION['total'], $_SESSION['tipoSuscripcion']);
     curl_close($ch);
-    header('Location: VistaProCompletada.php');
+    header('Location: VistaPremiumCompletada.php');
     exit;
 } else {
     echo json_encode(['success' => false, 'message' => 'Error al actualizar el perfil. Código: ' . $codigoRespuesta]);
