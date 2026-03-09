@@ -1,0 +1,30 @@
+# Dependencias de Composer
+/vendor/
+
+# Archivos de entorno (¡NUNCA subas tus credenciales a GitHub!)
+.env
+.env.local
+.env.*.local
+
+# Archivos de caché y logs de PHP
+*.log
+/var/cache/
+/var/logs/
+
+# Configuraciones de Entornos de Desarrollo (IDEs)
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Archivos del Sistema Operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

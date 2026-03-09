@@ -1,0 +1,185 @@
+body{
+    font-family: 'Nunito', sans-serif;  
+	background-color: #E3E1E1;
+}
+.header{
+    background-color: black;
+    opacity: 0.9;
+}
+.header div a{
+    color: grey;
+    text-decoration: none;
+}
+.header div a:hover{
+    color: white;
+    text-decoration: none;
+}
+.carousel-inner{
+    max-height: 70vh;
+}
+.carousel_box{
+    padding-left: 10vw;
+    padding-right: 10vw;
+}
+.anfitrion{
+    font-size: 3em;
+    padding-left: 5vw;
+}
+.item{
+    object-fit: fill;
+
+}
+#navbar{
+    position:fixed;
+    top: 0;
+    transition: all 1000ms cubic-bezier(.88,.43,.1,.57);
+    z-index: 10;
+}
+.space_1{
+    height: 6.5rem;
+    background: white;
+    z-index: -10;
+}
+.space_2{
+    height: 3rem;
+    background: white;
+    z-index: -10;
+}
+.espacios_anfitrion{
+    margin-left: 5vw !important;
+    padding-right: 5vw !important;
+}
+.info, .info:focus, .info:hover{
+    background-color: #00B7CF;
+    border: #00B7CF;
+}
+#hidden{
+    display: none;
+}
+#sidemenu{
+    position: fixed;
+    top: 3rem;
+    z-index:10;
+    display: none ;
+    height: 100vh
+}
+.menu_button{
+    border: none;
+    background-color: black;
+    color:grey;
+}
+.sidemenu{
+    height:3rem;
+    position:fixed;
+    top: 0;
+    background-color: black;
+    width: 100%;
+    z-index: 1000;
+}
+#content{
+    display:none;
+}
+.background{
+    background: url("img/logo.jpg");
+    background-repeat: no-repeat;;
+    background-position-y: center;
+    background-position-x: center;
+    background-size: contain;
+}
+label, .form-check input[type=checkbox]{
+    position: relative;
+}
+label{
+	font-size: small;
+    position: relative;
+    top: 0.8rem;
+    padding:0.2rem;
+}
+.btn-primary, .btn-primary:focus{
+    background-color: #00B7CF;
+    border: none;
+}
+.btn-success, .btn-success:focus{
+    background-color: #81ba18;
+    border: none;
+}
+.btn-primary:hover{
+    background-color: #4CCBD4;
+}
+.btn-success:hover{
+    background-color: #BDE742;
+}
+.table-header{
+    background-color: #212529;
+}
+.form-label{
+    font-size: 12px;
+}
+.form-control{
+    border: #646464 2px solid;
+    border-radius: 8px;
+}
+.form-control:focus{
+    border-color: #4d4d4dc2;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px #4d4d4db2;
+}
+.color-white{
+    color: white;
+}
+.fontawesom-color:active{
+    color:#00B7CF;
+}
+input{
+    font-weight: bold !important;
+}
+select{
+    font-weight: bold !important;
+}
+option{
+    font-weight: bold !important;
+}
+.color-blue{
+    color:#00B7CF;
+}
+.color-bluelight{
+    color:#4CCBD4;
+}
+a{
+    text-decoration: none;
+    color:#00B7CF;
+}
+.bold-xl{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    color: #3d4042;
+}
+.color-greymedium{
+    color: #646464;
+}
+.font-distinto{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.bg-blanco{
+    background-color: rgb(247, 247, 247);
+}
+
+.contenedorLogin {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 5vh;
+}
+
+.form-check-input[type="checkbox"] {
+    width: 3em;
+    height: 1.5em;
+    display: inline-block;
+    margin: 0.5em auto;
+    vertical-align: middle;
+    position: relative !important;
+    opacity: 1 !important;
+}
+.form-check-label span {
+    margin-left: 0.5em;
+    font-weight: bold;
+    color: #646464;
+}

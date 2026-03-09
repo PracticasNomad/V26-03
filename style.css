@@ -1,0 +1,493 @@
+@font-face {
+    font-family: 'Bebas Neue';
+    src: url('fonts/BebasNeue.ttf') format('truetype');
+    font-style: normal;
+    font-weight: normal;
+}
+
+
+/* En tu CSS */
+.textoBienvenida {
+    font-family: 'Nunito', sans-serif;
+    font-display: swap;
+    visibility: hidden;
+}
+
+body.fonts-loaded .textoBienvenida {
+    visibility: visible;
+}
+
+
+*{
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #E3E1E1;
+}
+
+a{
+    text-decoration: none;
+}
+
+.contenedor-index{
+    margin: 5vh 3vw;
+    height: 90vh;
+    width: 93vw;
+}
+
+.header{
+    height: 45px;
+    font-size: 30px;
+    font-weight: 600;
+}
+
+.hr {
+    border-bottom: 2px solid rgb(182, 182, 182);
+    margin: 1vh;
+}
+
+.header img{
+    width:50px;
+    vertical-align: bottom;
+}
+
+.logoSmart{
+    font-size:medium;
+    position: relative;
+    top: 10px;
+    padding: 3px;
+}
+
+.sombra{
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .25), 0 8px 16px rgba(0, 0, 0, .25);
+}
+
+
+.logo{
+    color:black;
+    font-size: 25px;
+    font-weight: 600;
+}
+
+.bienvenida{
+    width:38%;
+    height: 85%;
+    padding: 5vmin;
+    margin-top: 6vmin;
+    border-radius: 30px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.5) ;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .25), 0 8px 16px rgba(0, 0, 0, .25);
+}
+
+.map{
+    margin-top: 6vmin;
+    border-radius: 30px;
+    width:60%;
+    height: 85%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .25), 0 8px 16px rgba(0, 0, 0, .25);
+}
+
+.textoBienvenida{
+    font-family: "Bebas Neue";
+    font-size: 4vw;
+    z-index: 0;
+    display: block;
+}
+
+.login{
+    display: none;
+    position: static;
+    z-index: 1;
+    border:1px solid black;
+    margin: 10% auto;
+    padding:40px 20px;
+    width:70%;
+    height:fit-content;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1);
+    background-color: white;
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+
+}
+
+.input
+{
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid lightgray;
+    font-size: 16px;
+    line-height: 25px;
+}
+
+.w-100{
+    width:100%;
+}
+.w-50{
+    width: 40%;
+}
+
+.inline{
+    display: inline-block;
+}
+
+.izquierda{
+    float:left;
+}
+
+.derecha{
+    float:right;
+}
+
+.centrar{
+    margin-inline: auto;
+    text-align: center;
+    align-items: center;
+}
+
+.flex{
+    display:flex;
+}
+
+.btn-index{
+    margin: 5px auto;
+    color:whitesmoke;
+    text-transform: uppercase;
+    font-family:sans-serif; 
+    font-size: 2vmin;
+    border-radius: 20px;
+    cursor:pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .15), 0 8px 16px rgba(0, 0, 0, .15);
+    padding: 20px;
+}
+
+.btn{
+    margin: 5px auto;
+    color:whitesmoke;
+    text-transform:initial ;
+    font-family:sans-serif; 
+    font-size: 16px;
+    border-radius: 20px;
+    cursor:pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .15), 0 8px 16px rgba(0, 0, 0, .15);
+    padding: 5px;
+}
+.btn-primary, .btn-primary:focus{
+    background-color: #00B7CF;
+    border: none;
+}
+.btn-success, .btn-success:focus{
+    background-color: #81ba18;
+    border: none;
+}
+
+.btn-cancel, .btn-cancel:focus{
+    background-color: #a4a4a4;
+    border: none;
+}
+
+.btn-primary:hover{
+    background-color: #4CCBD4;
+}
+.btn-success:hover{
+    background-color: #BDE742;
+}
+
+.btn-cancel:hover{
+    background-color: #c6c6c6;
+    color:white;
+}
+
+.btn-login{
+    padding: 5px 20px;
+    width:46%;
+    display: inline;
+    font-size: 15px;
+    text-transform:initial;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.contenedorAlta {
+    margin: 0 auto;
+    width: 90%;
+    max-width: 400px;
+    margin-top: 2vh;
+    font-size:15px
+}
+
+.contenedorLogin {
+    font-size:15px;
+    margin: 0 auto;
+    width: 90%;
+    max-width: 400px;
+    margin-top: 5vh;
+    align-content: center
+}
+
+.contenedorLogin input, .contenedorAlta input{
+    border-radius: 20px;
+    width: 100%;
+    padding-left:20px;
+    height: fit-content;
+}
+
+.width-auto{
+width:fit-content !important;
+}    
+
+.botonesMovil{
+    display: none;
+}
+
+.contenedorPerfil{
+    background-color: white;
+    border-radius: 30px;
+    width:95vw;
+    max-width: 850px;
+    height: 60vh;
+    margin-inline: auto;
+    margin-top: 15vh;
+    padding: 35px 30px;
+    overflow-y: auto;
+}
+
+.contenedorPerfil img{
+    width:150px;
+    border-radius: 50%;
+    border: 8px solid #BDE742;
+    margin:0 auto;
+}
+
+.overflowY{
+    overflow-y: auto;
+}
+
+.overflowX{
+    overflow-x: auto;
+}
+
+.height-auto{
+    height: auto;
+}
+
+.contenedorPerfil button{
+    font-size: 2vmin;
+}
+
+.perfilInfo{
+    width:67%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.perfilFotoBotones{
+    display: block;
+    padding-top: 20px;
+}
+
+.fotoPerfilMovil{
+    display: none;
+}
+
+.botonesMovil{
+    display: none;
+}
+
+
+.footer {
+    width: 100%;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    bottom: 0;
+    color: black;
+    font-size: 15px;
+    opacity: 0.9;
+    background: #E3E1E1;
+    text-align: center;
+    position: fixed;
+}
+
+.footer i {
+    font-size: 2em;
+}
+
+.footer input[type="radio"] {
+    display: none
+}
+
+#exp:checked~#lbl_exp a,
+#res:checked~#lbl_res a,
+#per:checked~#lbl_per a {
+    color: #81ba18;
+}
+
+.footer a, .footer a:visited, .footer a:active {
+    color: black;
+    text-decoration: none;
+}
+
+.contenedorBusAnf{
+    width: 100%;
+    max-width: 200px;
+}
+
+.anfitrion {
+    border:0px;
+    color:white;
+    border-radius: 30px;
+    min-height :12rem;
+    height: auto;
+}
+
+.gradient{
+    background-image: linear-gradient(to right, black , transparent, transparent);
+    width:100%;
+    height: 100%;
+    border-radius: 20px;
+    padding:10px 20px;
+}
+
+.enlace a{
+    color:white;
+}
+
+.contenedorAnfitriones{
+    margin-inline: 50px;
+    margin-bottom: 75px;
+}
+
+.btn-google {
+    width: 100%;
+    color: white;
+    background-color: black;
+    border-color: #000;
+    padding: 10px 0;
+    position: relative;
+    font-size: 18px;
+    line-height: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 500;
+}
+
+.btn-google:focus {
+    color: #fff;
+    background-color: #555;
+    border-color: #000
+}
+
+.btn-google:active,
+.btn-google:hover {
+    color: #fff;
+    background-color: #555;
+    border-color: #000;
+}
+
+.btn-google:before {
+    content: "";
+    background-image: url('img/playstore.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    margin-top: -15px
+}
+
+.btn-google:after {
+    content: "GET IT ON";
+    position: absolute;
+    top: 11px;
+    left: 39px;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+@media only screen and (max-width: 700px) {
+    .bienvenida{
+        display: none;
+    }
+    .map{
+        margin-top: 5vh;
+        margin: 0 auto;
+        width: 90vw;
+        height: 70vh;
+        float:none;
+    }
+    .botonesMovil{
+        display: block;
+        width:100%;
+        height: fit-content;
+        margin-top: 15px;
+        text-align: center;
+        padding:0;
+    }
+
+    .botonesMovil button {
+        text-align: center;
+        display:inline-block;
+        width: 48%;
+        font-size: 3.5vw;
+        padding: 15px 10px;
+    }
+
+    .contenedor-index{
+        margin: 5vh 2vw;
+        height: 90vh;
+        width: 93vw;
+    }
+
+    .contenedorPerfil{
+        height: auto;
+        margin:0 auto;
+        margin-top: 40px;
+        padding: 7vmin;
+        margin-bottom: 75px;
+    }
+    
+    .contenedorPerfil img, .fotoPerfilMovil img{
+        width:90px;
+        border: 5px solid #BDE742;
+    }
+
+    .perfilFotoBotones{
+        display: none;
+        padding-top: 20px;
+    }
+    
+    .fotoPerfilMovil{
+        display: block;
+    }
+    
+    .botonesMovil{
+        display: block;
+    }
+
+    .perfilInfo{
+        float:none;
+        width: 100%;
+        height:60%
+    }
+
+    .contenedorBusAnf{
+        margin: 0 auto;
+        width: 100%;
+        max-width: 999px;
+    }
+
+    .contenedorAnfitriones{
+        margin-inline: 0px;
+        margin-bottom: 75px;
+    }
+
+}

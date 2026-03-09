@@ -1,0 +1,819 @@
+<?php
+require_once 'verificar_sesion_guest.php';
+
+$nombreCookie = "mi_cookie_visitas";
+if (isset($_COOKIE[$nombreCookie])) {
+} else {
+    $tiempoExpiracion = time() + 60 * 60 * 24 * 30;
+    setcookie($nombreCookie, true, $tiempoExpiracion);
+}
+/*
+if (isset($_POST['cerrar'])) {
+    session_unset();
+    session_destroy();
+    $nombreCookie = "mi_cookie_visitas";
+    $tiempoExpiracion = time() - 1;
+    setcookie($nombreCookie, "", $tiempoExpiracion);
+    header('Location: https://nomadappme.yonomad.app/login.php');
+    exit;
+}
+    */
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+        integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"
+        integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
+        crossorigin="anonymous"></script>
+    <link rel="icon" href="favicon-color.png">
+
+    <link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
+
+    <link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
+    <title>Explorar espacios</title>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f4f6f9;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .contenedorAnfitriones {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header img {
+            height: 45px;
+            margin-right: 15px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        /* Estilos para los filtros */
+        .filters-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background-color: white;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .filter-checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-checkbox-group:hover {
+            border-color: #28a745;
+        }
+
+        .filter-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #28a745;
+        }
+
+        .filter-checkbox-label {
+            margin: 0;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .clear-filters-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .clear-filters-btn:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .results-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #contenedor {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .anfitrion {
+            background-color: white !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+            position: relative;
+            height: auto !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: calc(20% - 20px);
+            min-width: 220px;
+            margin-bottom: 0 !important;
+            flex-grow: 0;
+        }
+
+        @media (max-width: 1400px) {
+            .anfitrion {
+                width: calc(25% - 20px);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .anfitrion {
+                width: calc(33.333% - 20px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .anfitrion {
+                width: calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .anfitrion {
+                width: 100%;
+            }
+
+            .filters-container {
+                padding: 15px;
+            }
+        }
+
+        .anfitrion:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .gradient {
+            background: white;
+            padding: 20px;
+            position: relative;
+        }
+
+        .nombre-anfitrion {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .direccion-anfitrion {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .icons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            color: #28a745;
+        }
+
+        .icons i {
+            font-size: 1.1rem;
+        }
+
+        .star {
+            display: flex;
+            align-items: center;
+            color: #ffc107;
+            font-weight: 600;
+            font-size: 1rem;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .star i {
+            margin-right: 5px;
+        }
+
+        .enlace {
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .azul {
+            display: inline-block;
+            color: white !important;
+            background-color: #28a745;
+            text-decoration: none !important;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .azul:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        #loading-spinner {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #28a745;
+        }
+
+        .footer {
+            width: 100%;
+            left: 0;
+            right: 0;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            bottom: 0;
+            color: #333;
+            font-size: 15px;
+            background: white;
+            text-align: center;
+            position: fixed;
+            padding: 15px 0 10px;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            margin: 0;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .footer i {
+            font-size: 1.5em;
+        }
+
+        .footer input[type="radio"] {
+            display: none;
+        }
+
+        .footer-item {
+            height: 60px;
+        }
+
+        .footer-label {
+            display: block;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+
+        .footer-link {
+            display: block;
+            text-decoration: none;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            padding: 5px 0;
+        }
+
+        .footer-link:hover {
+            transform: translateY(-5px);
+        }
+
+        .footer-icon {
+            margin-bottom: 5px;
+        }
+
+        #marcado {
+            color: #28a745;
+        }
+
+        .footer .row {
+            margin: 0;
+            width: 100%;
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .modal-header {
+            border-bottom: none;
+            padding: 20px 20px 10px;
+        }
+
+        .btn-google {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-google:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .anfitrion-img {
+            height: 120px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .anfitrion-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5));
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .image-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #dee2e6;
+        }
+    </style>
+</head>
+
+<body>
+    <!--
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <span class="fw-bold">¡Descarga nuestra app móvil!</span>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p><a class="btn btn-google"
+                            href="https://play.google.com/store/apps/details?id=com.TheNomadApp.movil"
+                            title="Google Play">Google Play</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    -->
+    <div class="contenedorAnfitriones">
+        <div class="header hr my-3">
+            <img src="img/logoNomada.png" alt="">
+            <span class="logo">Encuentra tu espacio</span>
+        </div>
+
+        <!-- Contenedor de filtros -->
+        <div class="filters-container">
+            <div class="filters-title">
+                <i class="fas fa-filter"></i>
+                Filtrar espacios
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="filter-group">
+                        <label class="filter-label">Localidad</label>
+                        <select id="filter-localidad" class="filter-select">
+                            <option value="">Todas las localidades</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="filter-group">
+                        <label class="filter-label">Provincia</label>
+                        <select id="filter-provincia" class="filter-select">
+                            <option value="">Todas las provincias</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="filter-group">
+                        <label class="filter-label">Servicios</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="filter-checkbox-group">
+                                    <input type="checkbox" id="filter-wifi" class="filter-checkbox">
+                                    <label for="filter-wifi" class="filter-checkbox-label">
+                                        <i class="fas fa-wifi"></i> WiFi
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="filter-checkbox-group">
+                                    <input type="checkbox" id="filter-parking" class="filter-checkbox">
+                                    <label for="filter-parking" class="filter-checkbox-label">
+                                        <i class="fas fa-car"></i> Parking
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end mt-3">
+                <button class="clear-filters-btn" onclick="clearAllFilters()">
+                    <i class="fas fa-times"></i> Limpiar filtros
+                </button>
+            </div>
+        </div>
+
+        <div class="results-count" id="results-count" style="display: none;"></div>
+
+        <div id="loading-spinner" class="text-center my-4">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3 fw-bold text-secondary">Cargando espacios...</p>
+        </div>
+
+        <div id="contenedor"></div>
+
+        <div class="footer">
+            <div class="row g-0">
+                <input type="radio" name="footer" id="exp">
+                <input type="radio" name="footer" id="res">
+                <input type="radio" name="footer" id="per">
+                <div class="col-4 text-center footer-item">
+                    <label for="exp" id="lbl_exp" class="w-100 h-100 footer-label">
+                        <a href="nomada_explorar.php" class="footer-link" id="marcado">
+                            <div class="footer-icon"><i class="fas fa-search-location"></i></div>
+                            <div class="fw-bold">Explorar</div>
+                        </a>
+                    </label>
+                </div>
+
+                <div class="col-4 text-center footer-item">
+                    <label for="res" id="lbl_res" class="w-100 h-100 footer-label">
+                        <a href="nomada_reservas.php" class="footer-link">
+                            <div class="footer-icon"><i class="fas fa-book"></i></div>
+                            <div class="fw-bold">Reservas</div>
+                        </a>
+                    </label>
+                </div>
+
+                <div class="col-4 text-center footer-item">
+                    <label for="per" id="lbl_per" class="w-100 h-100 footer-label">
+                        <a href="nomada_perfil.php" class="footer-link">
+                            <div class="footer-icon"><i class="fas fa-user-tie"></i></div>
+                            <div class="fw-bold">Perfil</div>
+                        </a>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allAnfitriones = []; // Almacenar todos los datos originales
+        let filteredAnfitriones = []; // Datos filtrados
+
+        let details = navigator.userAgent;
+        let regexp = /android/i;
+        let isMobileDevice = regexp.test(details);
+
+        if (isMobileDevice) {
+            $(document).ready(function () {
+                $("#myModal").modal('show');
+            });
+        }
+
+        window.onload = notifyMe();
+
+        function notifyMe() {
+            if (!("Notification" in window)) {
+                alert("Este navegador no es compatible con las notificaciones de escritorio");
+            } else if (Notification.permission === "granted") {
+                var notification = new Notification("¡Hola!");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        var notification = new Notification("¡Hola!");
+                    }
+                });
+            }
+        }
+
+        const url = "./mapaLerrApi.php";
+
+        document.getElementById("loading-spinner").style.display = "block";
+        document.getElementById("contenedor").style.display = "none";
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                allAnfitriones = data;
+                filteredAnfitriones = [...data];
+
+                populateFilters(data);
+                appendData(filteredAnfitriones);
+                updateResultsCount();
+
+                document.getElementById("loading-spinner").style.display = "none";
+                document.getElementById("contenedor").style.display = "flex";
+                document.getElementById("results-count").style.display = "block";
+            })
+            .catch(err => {
+                console.log(err);
+                document.getElementById("loading-spinner").style.display = "none";
+                document.getElementById("contenedor").innerHTML = '<div class="alert alert-danger">Error al cargar los datos. Por favor, inténtalo de nuevo más tarde.</div>';
+                document.getElementById("contenedor").style.display = "block";
+            });
+
+        // Función para poblar los filtros con datos únicos
+        function populateFilters(data) {
+            const localidades = [...new Set(data.map(item => item.localidad))].sort();
+            const provincias = [...new Set(data.map(item => item.provincia || 'Sin provincia'))].sort();
+
+            const localidadSelect = document.getElementById('filter-localidad');
+            const provinciaSelect = document.getElementById('filter-provincia');
+
+            localidades.forEach(localidad => {
+                if (localidad) {
+                    const option = document.createElement('option');
+                    option.value = localidad;
+                    option.textContent = localidad;
+                    localidadSelect.appendChild(option);
+                }
+            });
+
+            provincias.forEach(provincia => {
+                if (provincia) {
+                    const option = document.createElement('option');
+                    option.value = provincia;
+                    option.textContent = provincia;
+                    provinciaSelect.appendChild(option);
+                }
+            });
+        }
+
+        // Event listeners para los filtros
+        document.getElementById('filter-localidad').addEventListener('change', applyFilters);
+        document.getElementById('filter-provincia').addEventListener('change', applyFilters);
+        document.getElementById('filter-wifi').addEventListener('change', applyFilters);
+        document.getElementById('filter-parking').addEventListener('change', applyFilters);
+
+        function applyFilters() {
+            const localidadFilter = document.getElementById('filter-localidad').value;
+            const provinciaFilter = document.getElementById('filter-provincia').value;
+            const wifiFilter = document.getElementById('filter-wifi').checked;
+            const parkingFilter = document.getElementById('filter-parking').checked;
+
+            filteredAnfitriones = allAnfitriones.filter(anfitrion => {
+                let matches = true;
+
+                // Filtro por localidad
+                if (localidadFilter && anfitrion.localidad !== localidadFilter) {
+                    matches = false;
+                }
+
+                // Filtro por provincia
+                if (provinciaFilter && (anfitrion.provincia || 'Sin provincia') !== provinciaFilter) {
+                    matches = false;
+                }
+
+                // Filtro por WiFi
+                if (wifiFilter && !anfitrion.has_wifi) {
+                    matches = false;
+                }
+                if (parkingFilter && !anfitrion.has_parking) {
+                    matches = false;
+                }
+
+                return matches;
+            });
+
+            // Limpiar contenedor y mostrar resultados filtrados
+            document.getElementById("contenedor").innerHTML = '';
+
+            if (filteredAnfitriones.length === 0) {
+                showNoResults();
+            } else {
+                appendData(filteredAnfitriones);
+            }
+
+            updateResultsCount();
+        }
+
+        function clearAllFilters() {
+            document.getElementById('filter-localidad').value = '';
+            document.getElementById('filter-provincia').value = '';
+            document.getElementById('filter-wifi').checked = false;
+            document.getElementById('filter-parking').checked = false;
+
+            filteredAnfitriones = [...allAnfitriones];
+            document.getElementById("contenedor").innerHTML = '';
+            appendData(filteredAnfitriones);
+            updateResultsCount();
+        }
+
+        function updateResultsCount() {
+            const count = filteredAnfitriones.length;
+            const total = allAnfitriones.length;
+            const resultsElement = document.getElementById('results-count');
+
+            if (count === total) {
+                resultsElement.textContent = `Mostrando ${total} espacios`;
+            } else {
+                resultsElement.textContent = `Mostrando ${count} de ${total} espacios`;
+            }
+        }
+
+        function showNoResults() {
+            const contenedor = document.getElementById("contenedor");
+            contenedor.innerHTML = `
+                <div class="no-results w-100">
+                    <i class="fas fa-search"></i>
+                    <h4>No se encontraron espacios</h4>
+                    <p>Intenta ajustar los filtros para encontrar más opciones</p>
+                </div>
+            `;
+            contenedor.style.display = 'block';
+        }
+
+        function appendData(data) {
+            var contenedor = document.getElementById("contenedor");
+            contenedor.style.display = 'flex';
+
+            data.forEach(anfitrion => {
+                var card = document.createElement("div");
+                card.className = "anfitrion";
+
+                var imgContainer = document.createElement("div");
+                imgContainer.className = "anfitrion-img";
+
+                if (anfitrion.imagen) {
+                    imgContainer.style.backgroundImage = `url('${"http://" + anfitrion.imagen}')`;
+                } else {
+                    imgContainer.style.backgroundImage = "url('img/bricks0.jpg')";
+                    imgContainer.classList.add('image-placeholder');
+                }
+
+                var overlay = document.createElement("div");
+                overlay.className = "anfitrion-overlay";
+
+                var content = document.createElement("div");
+                content.className = "gradient";
+
+                var nombre = document.createElement("div");
+                nombre.className = "nombre-anfitrion";
+                nombre.textContent = anfitrion.nombre;
+
+                var direccion = document.createElement("div");
+                direccion.className = "direccion-anfitrion";
+                direccion.textContent = anfitrion.direccion + ", " + anfitrion.localidad;
+
+                var iconos = document.createElement("div");
+                iconos.className = "icons";
+
+                var iconoEdificio = document.createElement("i");
+                iconoEdificio.className = "fas fa-building";
+                iconos.appendChild(iconoEdificio);
+
+                if (anfitrion.has_wifi) {
+                    var iconoWifi = document.createElement("i");
+                    iconoWifi.className = "fas fa-wifi";
+                    iconos.appendChild(iconoWifi);
+                }
+
+                if (anfitrion.has_parking) {
+                    var iconoParking = document.createElement("i");
+                    iconoParking.className = "fas fa-car";
+                    iconos.appendChild(iconoParking);
+                }
+
+                var puntuacion = document.createElement("div");
+                puntuacion.className = "star";
+                var estrella = document.createElement("i");
+                estrella.className = "fas fa-star";
+                puntuacion.appendChild(estrella);
+                puntuacion.appendChild(document.createTextNode(" 4.5"));
+
+                var enlace = document.createElement("div");
+                enlace.className = "enlace";
+                enlace.innerHTML = '<a href="anfitrion.php?nombre=' + anfitrion.nombre + '&id=' + anfitrion.id + '&direccion=' + anfitrion.direccion + ", " + anfitrion.localidad + '&coordinates0=' + anfitrion.longitude + '&coordinates1=' + anfitrion.latitude + '&fromIndex=false' + '"><span class="azul">Ver detalles</span></a>';
+
+                card.appendChild(imgContainer);
+                imgContainer.appendChild(overlay);
+                card.appendChild(content);
+                content.appendChild(nombre);
+                content.appendChild(direccion);
+                content.appendChild(iconos);
+                content.appendChild(puntuacion);
+                content.appendChild(enlace);
+
+                contenedor.appendChild(card);
+            });
+        }
+    </script>
+</body>
