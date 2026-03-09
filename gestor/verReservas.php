@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,24 +8,26 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+        crossorigin="anonymous"></script>
     <link href="style.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
     <link rel="icon" href="favicon-color.png">
 
     <link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
 
     <link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Tus reservas</title>
-    <?php
-    session_start();
-    ?>
+
 
     <script>
-        window.onload = function() {
+        window.onload = function () {
             const today = new Date().toISOString().split('T')[0];
             const container = document.getElementById('container');
 
@@ -54,7 +59,7 @@
                 `;
             }
 
-            function hideLoadingIndicator() {}
+            function hideLoadingIndicator() { }
 
             function showErrorMessage() {
                 container.innerHTML = `
@@ -136,11 +141,11 @@
                             botonDetalles.style.boxShadow = '0 2px 5px rgba(33, 150, 243, 0.3)';
                             botonDetalles.innerHTML = '<i class="fas fa-info-circle me-1"></i>Mostrar detalles';
 
-                            botonDetalles.onmouseover = function() {
+                            botonDetalles.onmouseover = function () {
                                 this.style.backgroundColor = '#0d47a1';
                                 this.style.transition = 'background-color 0.3s';
                             };
-                            botonDetalles.onmouseout = function() {
+                            botonDetalles.onmouseout = function () {
                                 this.style.backgroundColor = '#1976d2';
                             };
 
