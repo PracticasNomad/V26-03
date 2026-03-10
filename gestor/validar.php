@@ -209,9 +209,17 @@ if (!$establecimiento) {
         }
 
         @keyframes dots {
-            0% { content: " ."; }
-            33% { content: " .."; }
-            66% { content: " ..."; }
+            0% {
+                content: " .";
+            }
+
+            33% {
+                content: " ..";
+            }
+
+            66% {
+                content: " ...";
+            }
         }
 
         .establecimiento-card.validado {
@@ -237,6 +245,7 @@ if (!$establecimiento) {
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -504,15 +513,15 @@ if (!$establecimiento) {
             const btnActions = document.getElementById('btn-actions');
 
             function performValidation(action) {
-                if (!confirm(action === 'aprobar' 
-                    ? '¿Aprobar y validar este establecimiento?' 
-                    : '¿Rechazar este establecimiento? No podrá ser publicado.')) {
+                if (!confirm(action === 'aprobar' ?
+                        '¿Aprobar y validar este establecimiento?' :
+                        '¿Rechazar este establecimiento? No podrá ser publicado.')) {
                     return;
                 }
 
                 const id = btnAprobar.dataset.id;
                 const button = action === 'aprobar' ? btnAprobar : btnRechazar;
-                
+
                 // Mostrar estado de procesamiento
                 button.classList.add('processing');
                 button.disabled = true;
@@ -525,7 +534,7 @@ if (!$establecimiento) {
                             // Éxito: mostrar mensaje y cambiar estilos
                             statusBadge.classList.add('show', 'success');
                             statusBadge.innerHTML = `<i class="fas fa-${action === 'aprobar' ? 'check' : 'times'}-circle me-2"></i>${data.message}`;
-                            
+
                             if (action === 'aprobar') {
                                 card.classList.add('validado');
                             } else {
