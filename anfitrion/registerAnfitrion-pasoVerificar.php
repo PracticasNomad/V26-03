@@ -168,6 +168,10 @@ function insertarDatos()
         return; // Detenemos la función aquí para no crear registros vacíos
     }
 
+    // --- INICIAMOS SESIÓN AUTOMÁTICAMENTE ---
+    $_SESSION['user_id'] = $user_id;
+    $_SESSION['token'] = $token;
+
     // insertar anfitrion
 
     // --- insertar anfitrion ---
@@ -180,7 +184,7 @@ function insertarDatos()
         'name' => $_SESSION['host']['nombre'],
         'phone' => $_SESSION['host']['telefono'],
         'empresa' => $_SESSION['host']['razonsocial'],
-        'plan' => isset($_SESSION['plan_seleccionado']) ? $_SESSION['plan_seleccionado'] : 'Basico',
+        'plan' => 'Basico'
     ];
 
     $payload = json_encode($data);
@@ -332,9 +336,20 @@ if (isset($_POST['verificar'])) {
 
         insertarDatos();
 
+       // Redirección inteligente según el plan que eligió en el Paso 6
+        $redirectUrl = 'registerAnfitrion-completo.php'; // Por defecto Básico
+        
+        if (isset($_SESSION['plan_seleccionado'])) {
+            if ($_SESSION['plan_seleccionado'] === 'Pro') {
+                $redirectUrl = 'mejoraPro.php';
+            } elseif ($_SESSION['plan_seleccionado'] === 'Premium') {
+                $redirectUrl = 'mejoraPremium.php';
+            }
+        }
+
         echo "<script>
         setTimeout(function() {
-            window.location.href = 'registerAnfitrion-completo.php';
+            window.location.href = '" . $redirectUrl . "';
         }, 1500);
         </script>";
     }

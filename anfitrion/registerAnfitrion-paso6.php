@@ -76,8 +76,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
         }
 
         @media (max-width: 768px) {
-            .hero-section h1 { font-size: 1.8rem; }
-            .hero-section p { font-size: 1rem; }
+            .hero-section h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero-section p {
+                font-size: 1rem;
+            }
         }
 
         .contenedorAlta {
@@ -120,7 +125,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             border: 2px solid #e9ecef;
             text-align: center;
             background-color: white;
-            cursor: pointer; /* Que parezca clicable */
+            cursor: pointer;
+            /* Que parezca clicable */
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         /* Clase añadida por JavaScript cuando se selecciona un plan */
@@ -130,20 +139,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             transform: translateY(-10px);
         }
 
-        .plan-card:hover { 
-            transform: translateY(-10px); 
-            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15); 
+        .plan-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15);
         }
 
-        .plan-card.popular { 
-            border-color: #28a745; 
-            transform: scale(1.05); 
-            z-index: 1; 
+        .plan-card.popular {
+            border-color: #28a74699;
+            transform: scale(1.05);
+            z-index: 1;
         }
 
-        .plan-card.popular:hover { 
-            transform: scale(1.08) translateY(-10px); 
-            box-shadow: 0 1.5rem 3rem rgba(40, 167, 69, 0.25); 
+        .plan-card.popular:hover {
+            transform: scale(1.08) translateY(-10px);
+            box-shadow: 0 1.5rem 3rem rgba(40, 167, 69, 0.25);
         }
 
         /* Al seleccionar el Pro, lo hacemos ligeramente más grande aún */
@@ -152,9 +161,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             border: 3px solid #28a745;
         }
 
-        .plan-price .currency { font-size: 1.2rem; vertical-align: super; }
-        .plan-period { color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem; }
-        
+        .plan-price .currency {
+            font-size: 1.2rem;
+            vertical-align: super;
+        }
+
+        .plan-period {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
         .plan-annual {
             background-color: #f0f9f2;
             border: 1px solid #28a745;
@@ -163,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             font-size: 0.85rem;
             color: #28a745;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .plan-features .highlight {
@@ -171,21 +188,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             color: #28a745;
         }
 
-        .plan-card.popular::before { 
-            content: "MÁS POPULAR"; 
-            position: absolute; 
-            top: -20px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%); 
-            color: white; 
-            padding: 0.3rem 1.5rem; 
-            border-radius: 25px; 
-            font-size: 0.8rem; 
-            font-weight: 700; 
+        .plan-card.popular::before {
+            content: "MÁS POPULAR";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 0.3rem 1.5rem;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 700;
             letter-spacing: 1px;
         }
-        
+
         .plan-name {
             font-size: 1.5rem;
             font-weight: 700;
@@ -202,23 +219,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
         }
 
         .commission-badge {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            º background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
             padding: 0.5rem;
             border-radius: 15px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             font-weight: 600;
         }
 
         .plan-features {
             list-style: none;
             padding: 0;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             text-align: left;
         }
 
-        .plan-features li { margin-bottom: 1rem; color: #2c3e50; }
-        .plan-features li i { color: #28a745; margin-right: 0.5rem; }
+        .plan-features li {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .plan-features li i {
+            color: #28a745;
+            margin-right: 0.5rem;
+        }
 
         .btn-plan {
             width: 100%;
@@ -228,22 +252,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             border: none;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            pointer-events: none; /* Para que el click lo recoja la tarjeta entera */
+            pointer-events: none;
+            /* Para que el click lo recoja la tarjeta entera */
+            margin-top: auto;
         }
 
-        .btn-basic { background-color: #28a745; color: white; }
-        .btn-pro { background-color: #0069d9; color: white; }
-        .btn-premium { background-color: #28a745; color: white; }
+        .btn-basic {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-pro {
+            background-color: #0069d9;
+            color: white;
+        }
+
+        .btn-premium {
+            background-color: #28a745;
+            color: white;
+        }
     </style>
 </head>
 
 <body>
     <div class="contenedorAlta">
-       <div class="hero-section">
+        <div class="hero-section">
             <h1><i class="fas fa-crown"></i> Planes de Suscripción</h1>
-            <p>Elige el plan perfecto para tu negocio de alojamiento. Más establecimientos, menos comisiones, mayores beneficios.</p>
+            <p>Elige el plan perfecto para tu negocio de alojamiento. Más establecimientos, menos comisiones, mayores
+                beneficios.</p>
         </div>
-        
+
         <div class="alert alert-success" id="success-message" <?php echo !empty($formSuccess) ? 'style="display:block"' : 'style="display:none"'; ?>>
             <i class="fas fa-check-circle me-2"></i> <span id="success-text"><?php echo $formSuccess; ?></span>
         </div>
@@ -282,7 +320,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
                     <ul class="plan-features">
                         <li><i class="fas fa-check"></i> <span class="highlight">2 establecimientos</span></li>
                         <li><i class="fas fa-check"></i> <span class="highlight">10 espacios máximo</span></li>
-                        <li><i class="fas fa-check"></i> Es un buen equilibrio para aquellos anfitriones que tienen más que ofrecer</li>
+                        <li><i class="fas fa-check"></i> Es un buen equilibrio para aquellos anfitriones que tienen más
+                            que ofrecer</li>
                     </ul>
                     <button type="button" class="btn btn-plan btn-pro">
                         <i class="fas fa-star"></i> Elegir Pro
@@ -342,7 +381,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
 
             // Quitar la clase 'selected' de todas las tarjetas
             var tarjetas = document.querySelectorAll('.plan-card');
-            tarjetas.forEach(function(tarjeta) {
+            tarjetas.forEach(function (tarjeta) {
                 tarjeta.classList.remove('selected');
             });
 
