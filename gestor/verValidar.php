@@ -19,7 +19,7 @@ $backgroundImages = [
 
 // consulta a la API para obtener los establecimientos pendientes
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
-    . '/rest/v1/establecimiento?estado=eq.pendiente';
+    . '/rest/v1/establecimiento?estaValidado=eq.false';
 $ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
@@ -69,27 +69,66 @@ function formatearDireccion($dir, $piso)
             padding-bottom: 50px;
         }
 
+        .contenedor-principal {
+            max-width: 1200px;
+            margin: 1.5rem auto;
+            padding: 0 20px;
+        }
+
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+            border: none;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .btn-add:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
         .establecimiento-card {
             background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
-            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0;
             overflow: hidden;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
         }
 
         .establecimiento-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 1rem 2rem rgba(0, 0, 0, .2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
         }
 
         .card-header {
             position: relative;
-            height: 180px;
+            height: 140px;
             background-size: cover;
             background-position: center;
             display: flex;
             align-items: flex-end;
+            background-color: #f8f9fa;
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .card-header-overlay {
@@ -103,9 +142,9 @@ function formatearDireccion($dir, $piso)
 
         .card-title {
             color: white;
-            padding: 20px;
-            font-weight: 700;
-            font-size: 1.5rem;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 1.3rem;
             position: relative;
             width: 100%;
             z-index: 1;
@@ -114,14 +153,71 @@ function formatearDireccion($dir, $piso)
             align-items: center;
         }
 
+        .service-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .service-icon {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .validation-badge {
+            color: white !important;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-size: 1rem;
+        }
+
+        .validation-badge.bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .validation-badge.bg-warning {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 8px;
+        }
+
+        .info-icon {
+            color: #28a745;
+            width: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
         .btn-validar {
             background-color: #007bff;
             border: none;
             color: white;
+            border-radius: 8px;
+            padding: 0.4rem 0.8rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
         }
 
         .btn-validar:hover {
             background-color: #0069d9;
+            transform: translateY(-1px);
         }
 
         .btn-validar:active {
@@ -135,10 +231,11 @@ function formatearDireccion($dir, $piso)
 
         .no-establecimientos {
             background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             padding: 2rem;
             text-align: center;
+            border: 1px solid #e9ecef;
         }
 
         /* Active state para el menú "Validar" */
@@ -170,6 +267,7 @@ function formatearDireccion($dir, $piso)
             padding-top: 1px !important;
             padding-bottom: 1px !important;
             height: auto;
+            z-index: 1001;
         }
 
         .footer-item {
@@ -201,6 +299,7 @@ function formatearDireccion($dir, $piso)
             text-decoration: none;
         }
     </style>
+    </style>
 </head>
 
 <body>
@@ -220,6 +319,7 @@ function formatearDireccion($dir, $piso)
                 <div class="no-establecimientos">
                     <img src="../img/establecimiento.png" width="80" alt="Sin pendientes" class="mb-3">
                     <h3 class="fw-bold mb-3">No hay establecimientos pendientes de validación</h3>
+                    <p class="text-muted">Todos los establecimientos han sido revisados. Los nuevos establecimientos aparecerán aquí cuando requieran validación.</p>
                 </div>
             <?php else: ?>
                 <?php foreach ($establecimientos as $index => $establecimiento):
@@ -238,9 +338,11 @@ function formatearDireccion($dir, $piso)
                             </div>
                             <div class="card-body">
                                 <div><strong>Dirección:</strong> <?php echo $direccionFormateada; ?></div>
+                                <div><strong>Localidad:</strong> <?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?></div>
+                                <div><strong>Estado:</strong> <span class="badge bg-warning text-dark">Pendiente de validación</span></div>
                                 <div class="btn-actions mt-3">
                                     <a href="validar.php?id=<?php echo $establecimiento['id']; ?>" class="btn btn-validar">
-                                        <i class="fas fa-check-circle"></i> Ver detalle
+                                        <i class="fas fa-check-circle"></i> Revisar y validar
                                     </a>
                                 </div>
                             </div>

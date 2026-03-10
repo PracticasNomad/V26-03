@@ -309,7 +309,7 @@ if (!$establecimiento) {
                     <div class="card-header-overlay"></div>
                     <div class="card-title">
                         <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
-                        <span class="badge bg-warning text-dark fs-6"><?php echo htmlspecialchars($establecimiento['estado'] ?? 'Pendiente'); ?></span>
+                        <span class="badge bg-warning text-dark fs-6"><?php echo isset($establecimiento['estaValidado']) && $establecimiento['estaValidado'] ? 'Validado' : 'Pendiente'; ?></span>
                     </div>
                 </div>
 

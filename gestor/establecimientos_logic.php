@@ -105,7 +105,7 @@ function formatearDireccion($direccion, $piso = null) {
  */
 function getImagenUrl($imageUrl) {
     if (empty($imageUrl)) {
-        return '../img/establecimiento.png'; // Imagen por defecto
+        return ''; // No mostrar imagen por defecto
     }
     return 'http://' . $imageUrl;
 }
