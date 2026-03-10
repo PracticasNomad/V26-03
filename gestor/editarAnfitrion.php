@@ -1,7 +1,8 @@
 <?php
-session_start();
+require_once 'verificar_sesion_gestor.php';
 
 require '../vendor/autoload.php';
+
 use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
@@ -27,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     $url_patch = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/host?id=eq." . urlencode($id_anfitrion);
-    
+
     $ch_patch = curl_init($url_patch);
     curl_setopt($ch_patch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch_patch, CURLOPT_CUSTOMREQUEST, 'PATCH');
@@ -36,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'Content-Type: application/json',
         'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
         'apikey: ' . $_ENV['SERVICE_APIKEY'],
-        'Prefer: return=representation' 
+        'Prefer: return=representation'
     ));
 
     $resultado_patch = curl_exec($ch_patch);
@@ -73,7 +74,7 @@ curl_close($ch_get);
 if ($codigoGet === 200) {
     $datos = json_decode($resultado_get, true);
     if (is_array($datos) && count($datos) > 0) {
-        $host_data = $datos[0]; 
+        $host_data = $datos[0];
     } else {
         $error_msg = "Anfitrión no encontrado.";
     }
@@ -84,6 +85,7 @@ if ($codigoGet === 200) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -130,6 +132,7 @@ if ($codigoGet === 200) {
             font-weight: bold;
             border-radius: 10px;
         }
+
         .btn-volver:hover {
             background-color: #5a6268;
             color: white;
@@ -141,6 +144,7 @@ if ($codigoGet === 200) {
             font-weight: bold;
             border-radius: 10px;
         }
+
         .btn-guardar:hover {
             background-color: #0098ab;
             color: white;
@@ -159,6 +163,7 @@ if ($codigoGet === 200) {
             position: fixed;
             z-index: 1000;
         }
+
         .footer-container {
             background-color: white;
             box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
@@ -166,16 +171,45 @@ if ($codigoGet === 200) {
             padding-bottom: 1px !important;
             height: auto;
         }
-        .footer-item { padding: 8px 0; }
-        .icon-container { transition: transform 0.3s ease; padding: 5px 0; }
-        .footer-item:hover .icon-container { transform: translateY(-7px); }
-        a, a:visited, a:active { color: black; text-decoration: none; }
-        #lbl_anf { color: #00B7CF !important; }
-        #lbl_anf .icon-container { color: #007bff; }
-        .footer-item:hover { color: #00B7CF !important; }
-        .footer-item:hover .icon-container { color: #007bff; }
+
+        .footer-item {
+            padding: 8px 0;
+        }
+
+        .icon-container {
+            transition: transform 0.3s ease;
+            padding: 5px 0;
+        }
+
+        .footer-item:hover .icon-container {
+            transform: translateY(-7px);
+        }
+
+        a,
+        a:visited,
+        a:active {
+            color: black;
+            text-decoration: none;
+        }
+
+        #lbl_anf {
+            color: #00B7CF !important;
+        }
+
+        #lbl_anf .icon-container {
+            color: #007bff;
+        }
+
+        .footer-item:hover {
+            color: #00B7CF !important;
+        }
+
+        .footer-item:hover .icon-container {
+            color: #007bff;
+        }
     </style>
 </head>
+
 <body>
     <header>
         <div class="container-fluid info text-center">
@@ -193,7 +227,7 @@ if ($codigoGet === 200) {
                 <i class="fas fa-exclamation-triangle me-2"></i> <?php echo htmlspecialchars($error_msg); ?>
             </div>
         <?php endif; ?>
-        
+
         <?php if ($success_msg): ?>
             <div class="alert alert-success text-center shadow-sm">
                 <i class="fas fa-check-circle me-2"></i> <?php echo htmlspecialchars($success_msg); ?>
@@ -208,7 +242,7 @@ if ($codigoGet === 200) {
 
             <?php if ($host_data): ?>
                 <form action="editarAnfitrion.php?id=<?php echo urlencode($id_anfitrion); ?>" method="POST">
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold"><i class="fas fa-user me-2"></i>Nombre / Apellidos</label>
@@ -256,24 +290,49 @@ if ($codigoGet === 200) {
     <div class="container-fluid footer p-3">
         <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
             <label for="anf" id="lbl_anf" class="col-2 text-center footer-item">
-                <div class="row"><a href="Anfitriones.php"><div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i><div>Anfitriones</div></div></a></div>
+                <div class="row"><a href="Anfitriones.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i>
+                            <div>Anfitriones</div>
+                        </div>
+                    </a></div>
             </label>
             <label for="val" id="lbl_val" class="col-2 text-center footer-item">
-                <div class="row"><a href="verValidar.php"><div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i><div>Validar</div></div></a></div>
+                <div class="row"><a href="verValidar.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
+                            <div>Validar</div>
+                        </div>
+                    </a></div>
             </label>
             <label for="res" id="lbl_res" class="col-2 text-center footer-item">
-                <div class="row"><a href="verReservas.php"><div class="col-12 icon-container"><i class="h2 fas fa-book-open p-1 m-0"></i><div>Reservas</div></div></a></div>
+                <div class="row"><a href="verReservas.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-book-open p-1 m-0"></i>
+                            <div>Reservas</div>
+                        </div>
+                    </a></div>
             </label>
             <label for="his" id="lbl_his" class="col-2 text-center footer-item">
-                <div class="row"><a href="verEstablecimientos.php"><div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i><div>Establecimientos</div></div></a></div>
+                <div class="row"><a href="verEstablecimientos.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i>
+                            <div>Establecimientos</div>
+                        </div>
+                    </a></div>
             </label>
             <label for="esp" id="lbl_esp" class="col-2 text-center footer-item">
-                <div class="row"><a href="verEspacios.php"><div class="col-12 icon-container"><i class="h2 fas fa-chair p-1 m-0"></i><div>Espacios</div></div></a></div>
+                <div class="row"><a href="verEspacios.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-chair p-1 m-0"></i>
+                            <div>Espacios</div>
+                        </div>
+                    </a></div>
             </label>
             <label for="per" id="lbl_per" class="col-2 text-center footer-item">
-                <div class="row"><a href="tuPerfil.php"><div class="col-12 icon-container"><i class="h2 fas fa-user-tie p-1 m-0"></i><div>Perfil</div></div></a></div>
+                <div class="row"><a href="tuPerfil.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-user-tie p-1 m-0"></i>
+                            <div>Perfil</div>
+                        </div>
+                    </a></div>
             </label>
         </div>
     </div>
 </body>
+
 </html>

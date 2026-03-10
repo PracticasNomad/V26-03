@@ -3,6 +3,7 @@ session_start();
 
 // este script carga la lista de establecimientos cuyo estado sea "pendiente"
 require '../vendor/autoload.php';
+
 use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
@@ -38,7 +39,8 @@ if ($httpCode === 200) {
     }
 }
 
-function formatearDireccion($dir, $piso) {
+function formatearDireccion($dir, $piso)
+{
     $result = htmlspecialchars($dir);
     if (!empty($piso)) {
         $result .= ' Piso ' . htmlspecialchars($piso);
@@ -49,6 +51,7 @@ function formatearDireccion($dir, $piso) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -60,32 +63,146 @@ function formatearDireccion($dir, $piso) {
     <link rel="icon" href="Nomadapp.ico" type="image/png">
     <title>Validaciones pendientes</title>
     <style>
-        body { font-family: 'Nunito', sans-serif; background-color: #f8f9fa; padding-bottom: 50px; }
-        .establecimiento-card { background-color: white; border-radius: 15px; box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); margin-bottom: 2rem; overflow: hidden; transition: all 0.3s; }
-        .establecimiento-card:hover { transform: translateY(-5px); box-shadow: 0 1rem 2rem rgba(0,0,0,.2); }
-        .card-header { position: relative; height: 180px; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
-        .card-header-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)); }
-        .card-title { color: white; padding: 20px; font-weight: 700; font-size: 1.5rem; position: relative; width: 100%; z-index: 1; display: flex; justify-content: space-between; align-items: center; }
-        .btn-validar { background-color: #007bff; border: none; color: white; }
-        .btn-validar:hover { background-color: #0069d9; }
-        .btn-validar:active { background-color: #0056b3; }
-        .btn-validar:focus { outline: none; box-shadow: none; }
-        .no-establecimientos { background-color: white; border-radius: 15px; box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); padding: 2rem; text-align: center; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f9fa;
+            padding-bottom: 50px;
+        }
+
+        .establecimiento-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .establecimiento-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, .2);
+        }
+
+        .card-header {
+            position: relative;
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .card-header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7));
+        }
+
+        .card-title {
+            color: white;
+            padding: 20px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            position: relative;
+            width: 100%;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-validar {
+            background-color: #007bff;
+            border: none;
+            color: white;
+        }
+
+        .btn-validar:hover {
+            background-color: #0069d9;
+        }
+
+        .btn-validar:active {
+            background-color: #0056b3;
+        }
+
+        .btn-validar:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .no-establecimientos {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            padding: 2rem;
+            text-align: center;
+        }
+
         /* Active state para el menú "Validar" */
-        #lbl_val .icon-container { color: #007bff; }
-        #lbl_val { color: #00B7CF !important; }
+        #lbl_val .icon-container {
+            color: #007bff;
+        }
+
+        #lbl_val {
+            color: #00B7CF !important;
+        }
 
         /* ESTILOS DEL FOOTER */
-        .footer { color: black; background-color: white; width: 100%; user-select: none; bottom: 0; font-size: 15px; background: #E3E1E1; text-align: center; position: fixed; z-index: 1000; }
-        .footer-container { background-color: white; box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1); padding-top: 1px !important; padding-bottom: 1px !important; height: auto; }
-        .footer-item { padding: 8px 0; -webkit-tap-highlight-color: transparent; }
-        .icon-container { transition: transform 0.3s ease; padding: 5px 0; }
-        .footer-item:hover .icon-container { transform: translateY(-7px); }
-        .footer-item:active .icon-container { transform: translateY(0); }
-        .footer-item:focus .icon-container { transform: translateY(0); }
-        a, a:visited, a:active { color: inherit; text-decoration: none; }
+        .footer {
+            color: black;
+            background-color: white;
+            width: 100%;
+            user-select: none;
+            bottom: 0;
+            font-size: 15px;
+            background: #E3E1E1;
+            text-align: center;
+            position: fixed;
+            z-index: 1000;
+        }
+
+        .footer-container {
+            background-color: white;
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+            padding-top: 1px !important;
+            padding-bottom: 1px !important;
+            height: auto;
+        }
+
+        .footer-item {
+            padding: 8px 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .icon-container {
+            transition: transform 0.3s ease;
+            padding: 5px 0;
+        }
+
+        .footer-item:hover .icon-container {
+            transform: translateY(-7px);
+        }
+
+        .footer-item:active .icon-container {
+            transform: translateY(0);
+        }
+
+        .footer-item:focus .icon-container {
+            transform: translateY(0);
+        }
+
+        a,
+        a:visited,
+        a:active {
+            color: inherit;
+            text-decoration: none;
+        }
     </style>
 </head>
+
 <body>
     <header>
         <div class="container-fluid info text-center">
@@ -105,9 +222,9 @@ function formatearDireccion($dir, $piso) {
                     <h3 class="fw-bold mb-3">No hay establecimientos pendientes de validación</h3>
                 </div>
             <?php else: ?>
-                <?php foreach ($establecimientos as $index => $establecimiento): 
+                <?php foreach ($establecimientos as $index => $establecimiento):
                     $direccionFormateada = formatearDireccion(
-                        $establecimiento['direccion'], 
+                        $establecimiento['direccion'],
                         $establecimiento['piso']
                     );
                 ?>
@@ -199,4 +316,5 @@ function formatearDireccion($dir, $piso) {
         </div>
     </div>
 </body>
+
 </html>
