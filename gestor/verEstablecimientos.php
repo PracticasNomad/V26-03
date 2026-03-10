@@ -417,6 +417,7 @@ $dotenv->load();
             background: #E3E1E1;
             text-align: center;
             position: fixed;
+            z-index: 1000;
         }
 
         .footer input[type="radio"] {
@@ -465,6 +466,7 @@ $dotenv->load();
             padding-top: 1px !important;
             padding-bottom: 1px !important;
             height: auto;
+            z-index: 1001;
         }
 
         .footer-item {
