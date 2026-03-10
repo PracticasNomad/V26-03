@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'verificar_sesion_gestor.php';
 
 require '../vendor/autoload.php';
 

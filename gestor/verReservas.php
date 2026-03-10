@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'verificar_sesion_gestor.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -27,7 +27,7 @@ session_start();
 
 
     <script>
-        window.onload = function () {
+        window.onload = function() {
             const today = new Date().toISOString().split('T')[0];
             const container = document.getElementById('container');
 
@@ -59,7 +59,7 @@ session_start();
                 `;
             }
 
-            function hideLoadingIndicator() { }
+            function hideLoadingIndicator() {}
 
             function showErrorMessage() {
                 container.innerHTML = `
@@ -141,11 +141,11 @@ session_start();
                             botonDetalles.style.boxShadow = '0 2px 5px rgba(33, 150, 243, 0.3)';
                             botonDetalles.innerHTML = '<i class="fas fa-info-circle me-1"></i>Mostrar detalles';
 
-                            botonDetalles.onmouseover = function () {
+                            botonDetalles.onmouseover = function() {
                                 this.style.backgroundColor = '#0d47a1';
                                 this.style.transition = 'background-color 0.3s';
                             };
-                            botonDetalles.onmouseout = function () {
+                            botonDetalles.onmouseout = function() {
                                 this.style.backgroundColor = '#1976d2';
                             };
 

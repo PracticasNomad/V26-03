@@ -1,3 +1,7 @@
+<?php
+require_once 'verificar_sesion_gestor.php';
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 

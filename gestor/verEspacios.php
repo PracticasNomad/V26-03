@@ -1,4 +1,5 @@
 <?php
+require_once 'verificar_sesion_gestor.php';
 $tieneError = false;
 ?>
 <!DOCTYPE html>
@@ -395,7 +396,7 @@ $tieneError = false;
             <div id="espacios-container">
                 <?php
                 foreach ($establecimientos as $establecimiento):
-                    ?>
+                ?>
                     <div class="establecimiento-header">
                         <i class="fas fa-building me-2"></i> <?php echo htmlspecialchars($establecimiento['nombre']); ?>
                     </div>
