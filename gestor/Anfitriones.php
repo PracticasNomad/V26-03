@@ -1,7 +1,8 @@
 <?php
-session_start();
+require_once 'verificar_sesion_gestor.php';
 
 require '../vendor/autoload.php';
+
 use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
@@ -368,11 +369,11 @@ if ($codigoRespuesta === 200) {
     </div>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let anfitrionIdActual = null;
             let anfitrionNombreActual = "";
 
-            $('#select-anfitrion').change(function () {
+            $('#select-anfitrion').change(function() {
                 var selectedOption = $(this).find('option:selected');
                 var id = $(this).val();
 
