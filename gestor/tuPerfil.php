@@ -299,12 +299,27 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             <div class="profile-image-container sombra mb-3">
                 <img id="fotoPerfilMovil" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
             </div>
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+                <i class="fas fa-camera"></i> Cambiar imágen
+            </button>
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                <i class="fas fa-edit"></i> Editar perfil
+            </button>
+            <button type="button" class="btn btn-plan rounded-pill mt-2 w-100" onclick="window.location.href='Suscripciones.php'">
+                <i class="fas fa-exchange-alt"></i> Cambiar plan
+            </button>
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+            </button>
         </div>
 
         <div class="perfilFotoBotones">
             <div class="profile-image-container sombra mb-3">
                 <img id="fotoPerfil" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
             </div>
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+                <i class="fas fa-camera"></i> Cambiar imágen
+            </button>
             <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
                 <i class="fas fa-edit"></i> Editar perfil
             </button>
@@ -426,17 +441,46 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             </div>
         </div>
     </div>
-
+    <div class="modal fade" id="cambiarImagenModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Cambiar imagen de perfil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCambiarImagen">
+                        <div class="text-center mb-4">
+                            <div class="profile-image-container mx-auto">
+                                <img id="previewImagen" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>" alt="Imagen de perfil">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputImagen" class="form-label fw-bold">Seleccionar nueva imagen:</label>
+                            <input type="file" class="form-control" id="inputImagen" name="imagen" accept="image/*">
+                            <input type="hidden" id="imagenGestorId" name="gestorId" value="<?= htmlspecialchars($gestora['id'] ?? '') ?>">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarImagen">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         // Cargar los datos en el modal cuando se abre
-        document.querySelector('.botonEditar').addEventListener('click', function() {
-            document.getElementById("editNombre").value = "<?= htmlspecialchars($gestora['name'] ?? '') ?>";
-            document.getElementById("editEmail").value = "<?= htmlspecialchars($gestora['email'] ?? '') ?>";
-            document.getElementById("editEmpresa").value = "<?= htmlspecialchars($gestora['empresa'] ?? '') ?>";
-            document.getElementById("editTelefono").value = "<?= htmlspecialchars($gestora['phone'] ?? '') ?>";
-            document.getElementById("editCIF").value = "<?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?>";
-            document.getElementById("editDomicilioSocial").value = "<?= htmlspecialchars($gestora['domicilio_social'] ?? '') ?>";
-            document.getElementById("editCodigoPostal").value = "<?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?>";
+        document.querySelectorAll('.botonEditar').forEach(boton => {
+            boton.addEventListener('click', function() {
+                document.getElementById("editNombre").value = "<?= htmlspecialchars($gestora['name'] ?? '') ?>";
+                document.getElementById("editEmail").value = "<?= htmlspecialchars($gestora['email'] ?? '') ?>";
+                document.getElementById("editEmpresa").value = "<?= htmlspecialchars($gestora['empresa'] ?? '') ?>";
+                document.getElementById("editTelefono").value = "<?= htmlspecialchars($gestora['phone'] ?? '') ?>";
+                document.getElementById("editCIF").value = "<?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?>";
+                document.getElementById("editDomicilioSocial").value = "<?= htmlspecialchars($gestora['domicilio_social'] ?? '') ?>";
+                document.getElementById("editCodigoPostal").value = "<?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?>";
+            });
         });
 
         // Guardar cambios apuntando al nuevo archivo
@@ -446,7 +490,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             btn.disabled = true;
             btn.textContent = "Guardando...";
 
-            // CAMBIO CLAVE: Llama a actualizarGestor.php en lugar de Anfitrion
             fetch("actualizarGestor.php", {
                     method: "POST",
                     body: formData
@@ -465,6 +508,60 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 .catch(error => {
                     console.error("Error:", error);
                     alert("Ha ocurrido un error de conexión.");
+                    btn.disabled = false;
+                    btn.textContent = "Guardar cambios";
+                });
+        });
+
+        // --- SCRIPT PARA CAMBIAR IMAGEN ---
+        document.getElementById('inputImagen').addEventListener('change', function(event) {
+            const archivo = event.target.files[0];
+            if (archivo) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImagen').src = e.target.result;
+                };
+                reader.readAsDataURL(archivo);
+            }
+        });
+
+        document.getElementById('btnGuardarImagen').addEventListener('click', function() {
+            const formData = new FormData();
+            const inputImagen = document.getElementById("inputImagen");
+
+            if (inputImagen.files.length === 0) {
+                alert("Debes seleccionar una imagen");
+                return;
+            }
+
+            formData.append('imagen', inputImagen.files[0]);
+            formData.append('gestorId', document.getElementById('imagenGestorId').value);
+
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = "Guardando...";
+
+            fetch("subir-imagen-perfil-gestor.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById("fotoPerfil").src = data.avatarUrl;
+                        document.getElementById("fotoPerfilMovil").src = data.avatarUrl;
+                        alert("Imagen de perfil actualizada correctamente");
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('cambiarImagenModal'));
+                        modal.hide();
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Ha ocurrido un error al guardar la imagen");
+                })
+                .finally(() => {
                     btn.disabled = false;
                     btn.textContent = "Guardar cambios";
                 });
