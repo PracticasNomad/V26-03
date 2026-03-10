@@ -131,6 +131,21 @@ $dotenv->load();
             font-size: 1.2rem;
         }
 
+        .validation-badge {
+            color: white !important;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-size: 1rem;
+        }
+
+        .validation-badge.bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .validation-badge.bg-warning {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+
         .card-body {
             padding: 20px;
         }
@@ -604,6 +619,16 @@ $dotenv->load();
                                 <div class="card-title">
                                     <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
                                     <div class="service-icons">
+                                        <?php
+                                        // Determinar el estado de validación
+                                        $estaValidado = isset($establecimiento['estaValidado']) ? $establecimiento['estaValidado'] : false;
+                                        $estadoClass = $estaValidado ? 'success' : 'warning';
+                                        $estadoText = $estaValidado ? 'Validado' : 'Pendiente';
+                                        $estadoIcon = $estaValidado ? 'check-circle' : 'clock';
+                                        ?>
+                                        <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>" title="<?php echo $estadoText; ?>">
+                                            <i class="fas fa-<?php echo $estadoIcon; ?>"></i>
+                                        </div>
                                         <?php if ($establecimiento['has_wifi']): ?>
                                             <div class="service-icon" title="WiFi disponible">
                                                 <i class="fas fa-wifi"></i>

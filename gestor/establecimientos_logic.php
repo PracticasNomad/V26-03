@@ -62,13 +62,23 @@ function getEstadisticasEstablecimientos() {
     $pendientes = 0;
 
     foreach ($establecimientos as $est) {
-        switch ($est['estado'] ?? '') {
-            case 'aprobado':
+        // Usar el campo estaValidado (boolean)
+        if (isset($est['estaValidado'])) {
+            if ($est['estaValidado']) {
                 $aprobados++;
-                break;
-            case 'pendiente':
+            } else {
                 $pendientes++;
-                break;
+            }
+        } else {
+            // Fallback al campo estado si estaValidado no existe
+            switch ($est['estado'] ?? '') {
+                case 'aprobado':
+                    $aprobados++;
+                    break;
+                case 'pendiente':
+                    $pendientes++;
+                    break;
+            }
         }
     }
 
