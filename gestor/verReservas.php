@@ -380,7 +380,7 @@ require_once 'verificar_sesion_gestor.php';
 
             <label for="res" id="lbl_res" class="col-2 text-center footer-item">
                 <div class="row">
-                    <a href="tusReservas.php">
+                    <a href="verReservas.php">
                         <div class="col-12 icon-container">
                             <i class="h2 fas fa-book-open p-1 m-0"></i>
                             <div>Reservas</div>
