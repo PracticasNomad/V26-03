@@ -35,9 +35,9 @@ $dotenv->load();
         }
 
         .contenedor-principal {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 15px;
+            max-width: 1200px;
+            margin: 1.5rem auto;
+            padding: 0 20px;
         }
 
         .header-container {
@@ -45,22 +45,23 @@ $dotenv->load();
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .btn-add {
             background-color: #28a745;
             border: none;
             font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px;
-            margin-bottom: 30px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            margin-bottom: 20px;
             transition: all 0.3s;
             display: flex;
             width: 100%;
-            max-width: 650px;
+            max-width: 600px;
             justify-content: center;
             align-items: center;
+            font-size: 0.95rem;
         }
 
         .btn-add:hover {
@@ -71,25 +72,28 @@ $dotenv->load();
 
         .establecimiento-card {
             background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 0;
             overflow: hidden;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
         }
 
         .establecimiento-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 1rem 2rem rgba(0, 0, 0, .2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
         }
 
         .card-header {
             position: relative;
-            height: 180px;
+            height: 140px;
             background-size: cover;
             background-position: center;
             display: flex;
             align-items: flex-end;
+            background-color: #f8f9fa;
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .card-header-overlay {
@@ -103,9 +107,9 @@ $dotenv->load();
 
         .card-title {
             color: white;
-            padding: 20px;
-            font-weight: 700;
-            font-size: 1.5rem;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 1.3rem;
             position: relative;
             width: 100%;
             z-index: 1;
@@ -122,13 +126,14 @@ $dotenv->load();
         .service-icon {
             background-color: rgba(255, 255, 255, 0.9);
             color: #333;
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .validation-badge {
@@ -147,66 +152,80 @@ $dotenv->load();
         }
 
         .card-body {
-            padding: 20px;
+            padding: 15px;
         }
 
         .info-row {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
+            margin-bottom: 6px;
+            gap: 8px;
         }
 
         .info-icon {
             color: #28a745;
-            width: 20px;
+            width: 18px;
             text-align: center;
+            font-size: 0.9rem;
         }
 
         .collapsed-content {
-            display: none;
-            padding-top: 15px;
+            max-height: 0;
+            overflow: hidden;
+            padding-top: 0;
             border-top: 1px solid #e9ecef;
-            margin-top: 15px;
+            margin-top: 0;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .collapsed-content.show {
+            max-height: 1500px; /* Suficiente para contener todo el contenido */
+            padding-top: 8px;
+            margin-top: 8px;
+            opacity: 1;
         }
 
         .btn-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 8px;
+            margin-top: 8px;
             flex-wrap: wrap;
         }
 
         .btn-action {
             flex: 1;
-            border-radius: 10px;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.4rem 0.8rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
-            transition: all 0.3s;
+            gap: 4px;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
         }
 
         .btn-toggle {
             background-color: #f8f9fa;
-            border: 1px solid #ced4da;
+            border: 1px solid #dee2e6;
             color: #6c757d;
             width: 100%;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            padding: 8px;
-            font-weight: 600;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 5px;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
         }
 
         .btn-toggle:hover {
             background-color: #e9ecef;
+            border-color: #adb5bd;
         }
 
         .btn-spaces {
@@ -239,10 +258,11 @@ $dotenv->load();
         }
 
         .map-container {
-            height: 400px;
-            border-radius: 10px;
+            height: 300px;
+            border-radius: 8px;
             overflow: hidden;
-            margin: 15px 0;
+            margin: 8px 0;
+            border: 1px solid #dee2e6;
         }
 
         .no-establecimientos {
@@ -256,14 +276,14 @@ $dotenv->load();
         .precio-tag {
             background-color: #28a745;
             color: white;
-            border-radius: 50px;
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            border-radius: 20px;
+            padding: 3px 8px;
+            font-size: 0.75rem;
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            margin-left: 10px;
+            gap: 3px;
+            margin-left: 8px;
         }
 
         .modal-confirm {
@@ -391,7 +411,7 @@ $dotenv->load();
 
         #establecimiento-main {
             width: 100%;
-            max-width: 650px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -553,6 +573,54 @@ $dotenv->load();
             /* For the icon */
         }
     </style>
+    <script>
+        // Almacenar mapas inicializados para evitar recrearlos
+        const mapasInicializados = {};
+
+        function toggleDetails(establecimientoId) {
+            const detailsElement = document.getElementById('details-' + establecimientoId);
+            const toggleText = document.getElementById('toggle-text-' + establecimientoId);
+            const toggleIcon = document.getElementById('toggle-icon-' + establecimientoId);
+
+            if (detailsElement.classList.contains('show')) {
+                // Ocultar detalles
+                detailsElement.classList.remove('show');
+                toggleText.textContent = 'Ver más detalles';
+                toggleIcon.className = 'fas fa-chevron-down';
+            } else {
+                // Mostrar detalles
+                detailsElement.classList.add('show');
+                toggleText.textContent = 'Ver menos detalles';
+                toggleIcon.className = 'fas fa-chevron-up';
+
+                // Inicializar mapa si no está inicializado aún
+                if (!mapasInicializados[establecimientoId]) {
+                    setTimeout(() => {
+                        inicializarMapa(establecimientoId);
+                    }, 300); // Esperar a que termine la transición
+                    mapasInicializados[establecimientoId] = true;
+                }
+            }
+        }
+
+        function inicializarMapa(establecimientoId) {
+            const mapContainer = document.getElementById('map-' + establecimientoId);
+            if (!mapContainer) return;
+
+            // Aquí puedes agregar la lógica para inicializar el mapa con Mapbox
+            // Por ahora, solo mostraremos un placeholder
+            mapContainer.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background-color: #f8f9fa; border-radius: 10px; color: #6c757d;">Mapa no disponible</div>';
+        }
+
+        // Función para confirmar eliminación
+        function confirmarEliminacion(id, nombre) {
+            document.getElementById('establecimiento-nombre').textContent = nombre;
+            document.getElementById('btn-confirmar-eliminar').onclick = function() {
+                window.location.href = 'eliminarEstablecimiento.php?id=' + id;
+            };
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
 </head>
 
 <body>
@@ -616,7 +684,7 @@ $dotenv->load();
                             <script>
                                 console.log("<?php echo $establecimiento['image_url'] ?>")
                             </script>
-                            <div class="card-header" style="background-image: url('<?php echo getImagenUrl($establecimiento['image_url']); ?>');">
+                            <div class="card-header"<?php if (!empty(getImagenUrl($establecimiento['image_url']))): ?> style="background-image: url('<?php echo getImagenUrl($establecimiento['image_url']); ?>');"<?php endif; ?>>
                                 <div class="card-header-overlay"></div>
                                 <div class="card-title">
                                     <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
