@@ -22,7 +22,7 @@ $backgroundImages = [
 ];
 
 /**
- * Obtiene todos los establecimientos
+ * Obtiene todos los establecimientos (excluyendo rechazados)
  */
 function getEstablecimientosAsignados() {
     global $apiUrl;
@@ -44,15 +44,24 @@ function getEstablecimientosAsignados() {
     curl_close($ch);
 
     if ($httpCode === 200) {
-        $establecimientos = json_decode($response, true);
-        return is_array($establecimientos) ? $establecimientos : [];
+        $data = json_decode($response, true);
+        $establecimientos = [];
+        if (is_array($data)) {
+            // Filtrar para excluir rechazados
+            foreach ($data as $est) {
+                if (($est['estado'] ?? '') !== 'rechazado') {
+                    $establecimientos[] = $est;
+                }
+            }
+        }
+        return $establecimientos;
     }
 
     return [];
 }
 
 /**
- * Obtiene estadísticas de los establecimientos del gestor
+ * Obtiene estadísticas de los establecimientos del gestor (excluyendo rechazados)
  */
 function getEstadisticasEstablecimientos() {
     $establecimientos = getEstablecimientosAsignados();
@@ -67,7 +76,10 @@ function getEstadisticasEstablecimientos() {
             if ($est['estaValidado']) {
                 $aprobados++;
             } else {
-                $pendientes++;
+                // Solo contar como pendiente si no está rechazado
+                if (($est['estado'] ?? '') !== 'rechazado') {
+                    $pendientes++;
+                }
             }
         } else {
             // Fallback al campo estado si estaValidado no existe

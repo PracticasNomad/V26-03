@@ -10,7 +10,7 @@ $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
 // obtener id de establecimiento
-$id = isset($_GET['id']) ? intval($_GET['id']) : null;
+$id = isset($_GET['id']) ? htmlspecialchars($_GET['id']) : null;
 if (!$id) {
     header('Location: verValidar.php');
     exit;
@@ -73,24 +73,31 @@ if (!$establecimiento) {
             color: #333;
         }
 
-        /* Ajuste para el header si el fondo es claro */
+        .contenedor-principal {
+            max-width: 900px;
+            margin: 1.5rem auto;
+            padding: 0 20px;
+        }
 
         .establecimiento-card {
             background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
             overflow: hidden;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
         }
 
         .card-header {
             position: relative;
-            height: 250px;
+            height: 180px;
             background-size: cover;
             background-position: center;
             display: flex;
             align-items: flex-end;
+            background-color: #f8f9fa;
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .card-header-overlay {
@@ -104,15 +111,12 @@ if (!$establecimiento) {
 
         .card-title {
             color: white;
-            padding: 20px;
-            font-weight: 700;
-            font-size: 1.8rem;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 1.4rem;
             position: relative;
             width: 100%;
             z-index: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .card-body {
@@ -121,37 +125,43 @@ if (!$establecimiento) {
 
         .info-row {
             display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            gap: 15px;
-            font-size: 1.1rem;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 12px;
+            font-size: 0.95rem;
         }
 
         .info-icon {
             color: #28a745;
-            width: 25px;
+            width: 20px;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
 
         .btn-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 25px;
+            gap: 8px;
+            margin-top: 20px;
             flex-wrap: wrap;
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
         }
 
         .btn-action {
             flex: 1;
-            border-radius: 10px;
-            padding: 0.8rem 1rem;
-            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: all 0.3s;
+            gap: 6px;
+            transition: all 0.2s ease;
             color: white !important;
+            font-size: 0.9rem;
+            min-width: 120px;
         }
 
         /* Colores específicos para validación */
@@ -162,17 +172,13 @@ if (!$establecimiento) {
 
         .btn-aprobar:hover {
             background-color: #218838;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
         }
 
         .btn-aprobar:active {
             background-color: #1e7e34;
             transform: translateY(0);
-        }
-
-        .btn-aprobar:focus {
-            outline: none;
-            box-shadow: none;
         }
 
         .btn-rechazar {
@@ -182,7 +188,8 @@ if (!$establecimiento) {
 
         .btn-rechazar:hover {
             background-color: #c82333;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
         }
 
         .btn-rechazar:active {
@@ -190,9 +197,66 @@ if (!$establecimiento) {
             transform: translateY(0);
         }
 
-        .btn-rechazar:focus {
-            outline: none;
-            box-shadow: none;
+        /* Estados después de validar/rechazar */
+        .btn-action.processing {
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .btn-action.processing .btn-text::after {
+            content: " ...";
+            animation: dots 1s infinite;
+        }
+
+        @keyframes dots {
+            0% { content: " ."; }
+            33% { content: " .."; }
+            66% { content: " ..."; }
+        }
+
+        .establecimiento-card.validado {
+            border-left: 4px solid #28a745;
+        }
+
+        .establecimiento-card.rechazado {
+            border-left: 4px solid #dc3545;
+            opacity: 0.8;
+        }
+
+        .validation-status-badge {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .validation-status-badge.show {
+            display: block;
+        }
+
+        .validation-status-badge.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .validation-status-badge.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .btn-volver {
@@ -202,29 +266,32 @@ if (!$establecimiento) {
 
         .btn-volver:hover {
             background-color: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(108, 117, 125, 0.3);
         }
 
         .btn-volver:active {
             background-color: #545b62;
-        }
-
-        .btn-volver:focus {
-            outline: none;
-            box-shadow: none;
+            transform: translateY(0);
         }
 
         #establecimiento-main {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .map-container {
             height: 300px;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
-            margin: 20px 0;
-            border: 1px solid #ddd;
+            margin: 12px 0;
+            border: 1px solid #dee2e6;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
         }
 
         /* ESTILOS DEL FOOTER COPIADOS DE TU CÓDIGO */
@@ -247,6 +314,7 @@ if (!$establecimiento) {
             padding-top: 1px !important;
             padding-bottom: 1px !important;
             height: auto;
+            z-index: 1001;
         }
 
         .footer-item {
@@ -313,6 +381,8 @@ if (!$establecimiento) {
                     </div>
                 </div>
 
+                <div id="validation-status-badge" class="validation-status-badge"></div>
+
                 <div class="card-body">
                     <div class="info-row">
                         <div class="info-icon"><i class="fas fa-align-left"></i></div>
@@ -339,18 +409,18 @@ if (!$establecimiento) {
                         </div>
                     </div>
 
-                    <div class="btn-actions border-top pt-4">
+                    <div class="btn-actions" id="btn-actions">
                         <a href="verValidar.php" class="btn btn-action btn-volver">
                             <i class="fas fa-arrow-left"></i> Volver
                         </a>
 
-                        <a href="procesar_validacion.php?accion=rechazar&id=<?php echo $establecimiento['id']; ?>" class="btn btn-action btn-rechazar" onclick="return confirm('¿Seguro que quieres rechazar este espacio?');">
-                            <i class="fas fa-times"></i> Rechazar
-                        </a>
+                        <button type="button" class="btn btn-action btn-aprobar" id="btn-aprobar" data-action="aprobar" data-id="<?php echo $establecimiento['id']; ?>">
+                            <i class="fas fa-check-circle"></i> <span class="btn-text">Validar</span>
+                        </button>
 
-                        <a href="procesar_validacion.php?accion=aprobar&id=<?php echo $establecimiento['id']; ?>" class="btn btn-action btn-aprobar" onclick="return confirm('¿Aprobar y publicar este espacio?');">
-                            <i class="fas fa-check"></i> Aprobar
-                        </a>
+                        <button type="button" class="btn btn-action btn-rechazar" id="btn-rechazar" data-action="rechazar" data-id="<?php echo $establecimiento['id']; ?>">
+                            <i class="fas fa-times-circle"></i> <span class="btn-text">Rechazar</span>
+                        </button>
                     </div>
                 </div>
 
@@ -424,6 +494,82 @@ if (!$establecimiento) {
             </label>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnAprobar = document.getElementById('btn-aprobar');
+            const btnRechazar = document.getElementById('btn-rechazar');
+            const card = document.querySelector('.establecimiento-card');
+            const statusBadge = document.getElementById('validation-status-badge');
+            const btnActions = document.getElementById('btn-actions');
+
+            function performValidation(action) {
+                if (!confirm(action === 'aprobar' 
+                    ? '¿Aprobar y validar este establecimiento?' 
+                    : '¿Rechazar este establecimiento? No podrá ser publicado.')) {
+                    return;
+                }
+
+                const id = btnAprobar.dataset.id;
+                const button = action === 'aprobar' ? btnAprobar : btnRechazar;
+                
+                // Mostrar estado de procesamiento
+                button.classList.add('processing');
+                button.disabled = true;
+
+                // Hacer petición AJAX
+                fetch(`procesar_validacion.php?id=${id}&accion=${action}&ajax=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Éxito: mostrar mensaje y cambiar estilos
+                            statusBadge.classList.add('show', 'success');
+                            statusBadge.innerHTML = `<i class="fas fa-${action === 'aprobar' ? 'check' : 'times'}-circle me-2"></i>${data.message}`;
+                            
+                            if (action === 'aprobar') {
+                                card.classList.add('validado');
+                            } else {
+                                card.classList.add('rechazado');
+                            }
+
+                            // Deshabilitar ambos botones después de validar
+                            btnAprobar.disabled = true;
+                            btnRechazar.disabled = true;
+                            btnAprobar.classList.remove('processing');
+                            btnRechazar.classList.remove('processing');
+                            btnAprobar.style.opacity = '0.5';
+                            btnRechazar.style.opacity = '0.5';
+
+                            // Redirigir después de 2 segundos
+                            setTimeout(() => {
+                                window.location.href = 'verValidar.php';
+                            }, 2000);
+                        } else {
+                            // Error
+                            statusBadge.classList.add('show', 'error');
+                            statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${data.error}`;
+                            button.classList.remove('processing');
+                            button.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        statusBadge.classList.add('show', 'error');
+                        statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>Error en la conexión`;
+                        button.classList.remove('processing');
+                        button.disabled = false;
+                    });
+            }
+
+            btnAprobar.addEventListener('click', function() {
+                performValidation('aprobar');
+            });
+
+            btnRechazar.addEventListener('click', function() {
+                performValidation('rechazar');
+            });
+        });
+    </script>
 
 </body>
 

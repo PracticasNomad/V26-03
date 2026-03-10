@@ -10,6 +10,8 @@ $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
 $establecimientos = [];
+$establecimientosRechazados = [];
+$data = [];
 $backgroundImages = [
     '../img/bg1.jpg',
     '../img/bg2.jpg',
@@ -17,9 +19,9 @@ $backgroundImages = [
     '../img/bg4.jpg',
 ];
 
-// consulta a la API para obtener los establecimientos pendientes
+// consulta a la API para obtener TODOS los establecimientos
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
-    . '/rest/v1/establecimiento?estaValidado=eq.false';
+    . '/rest/v1/establecimiento';
 $ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
@@ -30,12 +32,44 @@ curl_setopt_array($ch, [
 ]);
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curl_error = curl_error($ch);
 curl_close($ch);
 
 if ($httpCode === 200) {
-    $establecimientos = json_decode($response, true);
-    if (!is_array($establecimientos)) {
-        $establecimientos = [];
+    $data = json_decode($response, true);
+    if (is_array($data)) {
+        // Filtrar: pendientes = aquellos con estaValidado=false y estado != rechazado
+        foreach ($data as $est) {
+            $esValidado = isset($est['estaValidado']) ? $est['estaValidado'] : false;
+            $estado = $est['estado'] ?? '';
+            
+            // Si no está validado y no está rechazado, es pendiente
+            if (!$esValidado && $estado !== 'rechazado') {
+                $establecimientos[] = $est;
+            }
+        }
+    }
+}
+
+// consulta a la API para obtener los establecimientos rechazados
+// Reutilizamos los datos que ya obtuvimos
+if (is_array($data)) {
+    foreach ($data as $est) {
+        $estado = $est['estado'] ?? '';
+        if ($estado === 'rechazado') {
+            $establecimientosRechazados[] = $est;
+        }
+    }
+}
+
+// consulta a la API para obtener los establecimientos validados
+$establecimientosValidados = [];
+if (is_array($data)) {
+    foreach ($data as $est) {
+        $esValidado = isset($est['estaValidado']) ? $est['estaValidado'] : false;
+        if ($esValidado) {
+            $establecimientosValidados[] = $est;
+        }
     }
 }
 
@@ -47,6 +81,20 @@ function formatearDireccion($dir, $piso)
     }
     return $result;
 }
+
+// DEBUG - Verificar datos
+$debug_info = "<!-- DEBUG INFO:\n";
+$debug_info .= "Total Pendientes: " . count($establecimientos) . "\n";
+$debug_info .= "Total Rechazados: " . count($establecimientosRechazados) . "\n";
+$debug_info .= "Total Validados: " . count($establecimientosValidados) . "\n";
+$debug_info .= "Total Datos API: " . count($data) . "\n";
+$debug_info .= "HTTP Code: " . (isset($httpCode) ? $httpCode : 'NO DEFINIDO') . "\n";
+$debug_info .= "Token presente: " . (isset($_SESSION['token']) ? 'SÍ' : 'NO') . "\n";
+if (!empty($curl_error)) {
+    $debug_info .= "CURL Error: " . $curl_error . "\n";
+}
+$debug_info .= "-->";
+// Descomentar para debug: echo $debug_info;
 ?>
 
 <!DOCTYPE html>
@@ -300,7 +348,122 @@ function formatearDireccion($dir, $piso)
             color: inherit;
             text-decoration: none;
         }
-    </style>
+
+        .btn-toggle {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #333;
+            padding: 0.6rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            font-weight: 500;
+            margin-top: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .btn-toggle:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .btn-toggle i {
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .btn-toggle.show i {
+            transform: rotate(180deg);
+        }
+
+        .collapsed-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            border-top: 1px solid #e9ecef;
+            padding-top: 0;
+        }
+
+        .collapsed-content.show {
+            max-height: 1200px;
+            padding-top: 1rem;
+        }
+
+        .collapsed-content .info-row {
+            margin-bottom: 0.8rem;
+        }
+
+        .precio-tag {
+            background-color: #e7f3ff;
+            color: #0066cc;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+            display: inline-block;
+        }
+
+        .btn-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            background-color: #6c757d;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            flex: 1;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-validar {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .btn-validar:hover {
+            background-color: #0069d9;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-validar:active {
+            background-color: #0056b3;
+            transform: translateY(0);
+        }
     </style>
 </head>
 
@@ -316,42 +479,404 @@ function formatearDireccion($dir, $piso)
     </header>
 
     <div class="container-fluid pb-5">
-        <div class="row">
-            <?php if (empty($establecimientos)): ?>
-                <div class="no-establecimientos">
-                    <img src="../img/establecimiento.png" width="80" alt="Sin pendientes" class="mb-3">
-                    <h3 class="fw-bold mb-3">No hay establecimientos pendientes de validación</h3>
-                    <p class="text-muted">Todos los establecimientos han sido revisados. Los nuevos establecimientos aparecerán aquí cuando requieran validación.</p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($establecimientos as $index => $establecimiento):
-                    $direccionFormateada = formatearDireccion(
-                        $establecimiento['direccion'],
-                        $establecimiento['piso']
-                    );
-                ?>
-                    <div class="col-12">
-                        <div class="establecimiento-card">
-                            <div class="card-header" style="background-image: url('<?php echo isset($establecimiento['image_url']) ? 'http://' . $establecimiento['image_url'] : '../img/default.jpg'; ?>');">
-                                <div class="card-header-overlay"></div>
-                                <div class="card-title">
-                                    <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div><strong>Dirección:</strong> <?php echo $direccionFormateada; ?></div>
-                                <div><strong>Localidad:</strong> <?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?></div>
-                                <div><strong>Estado:</strong> <span class="badge bg-warning text-dark">Pendiente de validación</span></div>
-                                <div class="btn-actions mt-3">
-                                    <a href="validar.php?id=<?php echo $establecimiento['id']; ?>" class="btn btn-validar">
-                                        <i class="fas fa-check-circle"></i> Revisar y validar
-                                    </a>
-                                </div>
-                            </div>
+        <?php if (isset($_SESSION['validation_message'])): ?>
+            <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <?php echo htmlspecialchars($_SESSION['validation_message']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['validation_message']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['validation_error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <?php echo htmlspecialchars($_SESSION['validation_error']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['validation_error']); ?>
+        <?php endif; ?>
+
+        <ul class="nav nav-tabs" id="validationTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pendientes-tab" data-bs-toggle="tab" data-bs-target="#pendientes" type="button" role="tab" aria-controls="pendientes" aria-selected="true">
+                    <i class="fas fa-hourglass-half me-2"></i>Pendientes de validación
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rechazados-tab" data-bs-toggle="tab" data-bs-target="#rechazados" type="button" role="tab" aria-controls="rechazados" aria-selected="false">
+                    <i class="fas fa-times-circle me-2"></i>Rechazados
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="validados-tab" data-bs-toggle="tab" data-bs-target="#validados" type="button" role="tab" aria-controls="validados" aria-selected="false">
+                    <i class="fas fa-check-circle me-2"></i>Validados
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="validationTabsContent">
+            <div class="tab-pane fade show active" id="pendientes" role="tabpanel" aria-labelledby="pendientes-tab">
+                <div class="row mt-3">
+                    <?php if (empty($establecimientos)): ?>
+                        <div class="no-establecimientos col-12">
+                            <img src="../img/establecimiento.png" width="80" alt="Sin pendientes" class="mb-3">
+                            <h3 class="fw-bold mb-3">No hay establecimientos pendientes de validación</h3>
+                            <p class="text-muted">Todos los establecimientos han sido revisados. Los nuevos establecimientos aparecerán aquí cuando requieran validación.</p>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                    <?php else: ?>
+                        <?php foreach ($establecimientos as $index => $establecimiento):
+                            $direccionFormateada = formatearDireccion(
+                                $establecimiento['direccion'],
+                                $establecimiento['piso']
+                            );
+                        ?>
+                            <div class="col-12">
+                                <div class="establecimiento-card" id="establecimiento-<?php echo $establecimiento['id']; ?>">
+                                    <div class="card-header" style="background-image: url('<?php echo isset($establecimiento['image_url']) ? 'http://' . $establecimiento['image_url'] : '../img/default.jpg'; ?>');">
+                                        <div class="card-header-overlay"></div>
+                                        <div class="card-title">
+                                            <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
+                                            <div class="service-icons">
+                                                <?php if ($establecimiento['has_wifi']): ?>
+                                                    <div class="service-icon" title="WiFi disponible">
+                                                        <i class="fas fa-wifi"></i>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <?php if ($establecimiento['has_parking']): ?>
+                                                    <div class="service-icon" title="Parking disponible">
+                                                        <i class="fas fa-parking"></i>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="info-row">
+                                            <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                            <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-icon"><i class="fas fa-city"></i></div>
+                                            <div><?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?></div>
+                                        </div>
+
+                                        <button class="btn btn-toggle" onclick="toggleDetails('<?php echo $establecimiento['id']; ?>')">
+                                            <span id="toggle-text-<?php echo $establecimiento['id']; ?>">Ver más detalles</span>
+                                            <i class="fas fa-chevron-down" id="toggle-icon-<?php echo $establecimiento['id']; ?>"></i>
+                                        </button>
+
+                                        <div class="collapsed-content" id="details-<?php echo $establecimiento['id']; ?>">
+                                            <?php if (!empty($establecimiento['descripcion'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-align-left"></i></div>
+                                                    <div><strong>Descripción:</strong> <?php echo htmlspecialchars($establecimiento['descripcion']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['provincia'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-map"></i></div>
+                                                    <div><strong>Provincia:</strong> <?php echo htmlspecialchars($establecimiento['provincia']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['codigo_postal'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-map-pin"></i></div>
+                                                    <div><strong>Código Postal:</strong> <?php echo htmlspecialchars($establecimiento['codigo_postal']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if ($establecimiento['has_wifi']): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-wifi"></i></div>
+                                                    <div>
+                                                        <strong>WiFi disponible</strong>
+                                                        <span class="precio-tag">
+                                                            <i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['wifi_price'] ?? 0, 2); ?>/hora
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if ($establecimiento['has_parking']): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-parking"></i></div>
+                                                    <div>
+                                                        <strong>Parking disponible</strong>
+                                                        <span class="precio-tag">
+                                                            <i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['parking_price'] ?? 0, 2); ?>/día
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['piso'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-building"></i></div>
+                                                    <div><strong>Piso:</strong> <?php echo htmlspecialchars($establecimiento['piso']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <div class="btn-actions mt-3">
+                                            <a href="validar.php?id=<?php echo $establecimiento['id']; ?>" class="btn btn-validar">
+                                                <i class="fas fa-check-circle"></i> Revisar y validar
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="rechazados" role="tabpanel" aria-labelledby="rechazados-tab">
+                <div class="row mt-3">
+                    <?php if (empty($establecimientosRechazados)): ?>
+                        <div class="no-establecimientos col-12">
+                            <img src="../img/establecimiento.png" width="80" alt="Sin rechazados" class="mb-3">
+                            <h3 class="fw-bold mb-3">No hay establecimientos rechazados</h3>
+                            <p class="text-muted">Los establecimientos rechazados aparecerán en esta sección.</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($establecimientosRechazados as $index => $establecimiento):
+                            $direccionFormateada = formatearDireccion(
+                                $establecimiento['direccion'],
+                                $establecimiento['piso']
+                            );
+                        ?>
+                            <div class="col-12">
+                                <div class="establecimiento-card" id="establecimiento-<?php echo $establecimiento['id']; ?>" style="border-left: 4px solid #dc3545; opacity: 0.85;">
+                                    <div class="card-header" style="background-image: url('<?php echo isset($establecimiento['image_url']) ? 'http://' . $establecimiento['image_url'] : '../img/default.jpg'; ?>');">
+                                        <div class="card-header-overlay"></div>
+                                        <div class="card-title">
+                                            <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
+                                            <div class="service-icons">
+                                                <?php if ($establecimiento['has_wifi']): ?>
+                                                    <div class="service-icon" title="WiFi disponible">
+                                                        <i class="fas fa-wifi"></i>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <?php if ($establecimiento['has_parking']): ?>
+                                                    <div class="service-icon" title="Parking disponible">
+                                                        <i class="fas fa-parking"></i>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="info-row">
+                                            <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                            <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-icon"><i class="fas fa-city"></i></div>
+                                            <div><?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?></div>
+                                        </div>
+
+                                        <div class="info-row mt-2">
+                                            <div class="info-icon"><i class="fas fa-ban"></i></div>
+                                            <div><strong>Estado:</strong> <span class="badge bg-danger">Rechazado</span></div>
+                                        </div>
+
+                                        <button class="btn btn-toggle" onclick="toggleDetails('<?php echo $establecimiento['id']; ?>')">
+                                            <span id="toggle-text-<?php echo $establecimiento['id']; ?>">Ver más detalles</span>
+                                            <i class="fas fa-chevron-down" id="toggle-icon-<?php echo $establecimiento['id']; ?>"></i>
+                                        </button>
+
+                                        <div class="collapsed-content" id="details-<?php echo $establecimiento['id']; ?>">
+                                            <?php if (!empty($establecimiento['descripcion'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-align-left"></i></div>
+                                                    <div><strong>Descripción:</strong> <?php echo htmlspecialchars($establecimiento['descripcion']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['provincia'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-map"></i></div>
+                                                    <div><strong>Provincia:</strong> <?php echo htmlspecialchars($establecimiento['provincia']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['codigo_postal'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-map-pin"></i></div>
+                                                    <div><strong>Código Postal:</strong> <?php echo htmlspecialchars($establecimiento['codigo_postal']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if ($establecimiento['has_wifi']): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-wifi"></i></div>
+                                                    <div>
+                                                        <strong>WiFi disponible</strong>
+                                                        <span class="precio-tag">
+                                                            <i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['wifi_price'] ?? 0, 2); ?>/hora
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if ($establecimiento['has_parking']): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-parking"></i></div>
+                                                    <div>
+                                                        <strong>Parking disponible</strong>
+                                                        <span class="precio-tag">
+                                                            <i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['parking_price'] ?? 0, 2); ?>/día
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['piso'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-building"></i></div>
+                                                    <div><strong>Piso:</strong> <?php echo htmlspecialchars($establecimiento['piso']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <p class="text-muted small mt-2"><i class="fas fa-info-circle me-1"></i>Este establecimiento ha sido rechazado y no puede ser publicado.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="validados" role="tabpanel" aria-labelledby="validados-tab">
+                <div class="row mt-3">
+                    <?php if (empty($establecimientosValidados)): ?>
+                        <div class="no-establecimientos col-12">
+                            <img src="../img/establecimiento.png" width="80" alt="Sin validados" class="mb-3">
+                            <h3 class="fw-bold mb-3">No hay establecimientos validados</h3>
+                            <p class="text-muted">Los establecimientos validados aparecerán en esta sección.</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($establecimientosValidados as $index => $establecimiento):
+                            $direccionFormateada = formatearDireccion(
+                                $establecimiento['direccion'],
+                                $establecimiento['piso']
+                            );
+                        ?>
+                            <div class="col-12">
+                                <div class="establecimiento-card" id="establecimiento-<?php echo $establecimiento['id']; ?>" style="border-left: 4px solid #28a745;">
+                                    <div class="card-header" style="background-image: url('<?php echo isset($establecimiento['image_url']) ? 'http://' . $establecimiento['image_url'] : '../img/default.jpg'; ?>');">
+                                        <div class="card-header-overlay"></div>
+                                        <div class="card-title">
+                                            <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
+                                            <div class="service-icons">
+                                                <?php if ($establecimiento['has_wifi']): ?>
+                                                    <div class="service-icon" title="WiFi disponible">
+                                                        <i class="fas fa-wifi"></i>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <?php if ($establecimiento['has_parking']): ?>
+                                                    <div class="service-icon" title="Parking disponible">
+                                                        <i class="fas fa-parking"></i>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="info-row">
+                                            <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                            <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-icon"><i class="fas fa-city"></i></div>
+                                            <div><?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?></div>
+                                        </div>
+
+                                        <div class="info-row mt-2">
+                                            <div class="info-icon"><i class="fas fa-check-circle"></i></div>
+                                            <div><strong>Estado:</strong> <span class="badge bg-success">Validado</span></div>
+                                        </div>
+
+                                        <button class="btn btn-toggle" onclick="toggleDetails('<?php echo $establecimiento['id']; ?>')">
+                                            <span id="toggle-text-<?php echo $establecimiento['id']; ?>">Ver más detalles</span>
+                                            <i class="fas fa-chevron-down" id="toggle-icon-<?php echo $establecimiento['id']; ?>"></i>
+                                        </button>
+
+                                        <div class="collapsed-content" id="details-<?php echo $establecimiento['id']; ?>">
+                                            <?php if (!empty($establecimiento['descripcion'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-align-left"></i></div>
+                                                    <div><strong>Descripción:</strong> <?php echo htmlspecialchars($establecimiento['descripcion']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['provincia'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-map"></i></div>
+                                                    <div><strong>Provincia:</strong> <?php echo htmlspecialchars($establecimiento['provincia']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['codigo_postal'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-map-pin"></i></div>
+                                                    <div><strong>Código Postal:</strong> <?php echo htmlspecialchars($establecimiento['codigo_postal']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if ($establecimiento['has_wifi']): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-wifi"></i></div>
+                                                    <div>
+                                                        <strong>WiFi disponible</strong>
+                                                        <span class="precio-tag">
+                                                            <i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['wifi_price'] ?? 0, 2); ?>/hora
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if ($establecimiento['has_parking']): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-parking"></i></div>
+                                                    <div>
+                                                        <strong>Parking disponible</strong>
+                                                        <span class="precio-tag">
+                                                            <i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['parking_price'] ?? 0, 2); ?>/día
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($establecimiento['piso'])): ?>
+                                                <div class="info-row">
+                                                    <div class="info-icon"><i class="fas fa-building"></i></div>
+                                                    <div><strong>Piso:</strong> <?php echo htmlspecialchars($establecimiento['piso']); ?></div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <p class="text-muted small mt-2"><i class="fas fa-info-circle me-1"></i>Este establecimiento ha sido validado y está publicado.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -419,6 +944,24 @@ function formatearDireccion($dir, $piso)
             </label>
         </div>
     </div>
+
+    <script>
+        // Function to toggle establishment details
+        function toggleDetails(id) {
+            const detailsContent = document.getElementById('details-' + id);
+            const toggleBtn = document.querySelector('[onclick="toggleDetails(\'' + id + '\')"]');
+            const toggleIcon = document.getElementById('toggle-icon-' + id);
+            
+            if (detailsContent) {
+                detailsContent.classList.toggle('show');
+            }
+            
+            if (toggleBtn) {
+                toggleBtn.classList.toggle('show');
+            }
+        }
+    </script>
+
 </body>
 
 </html>
