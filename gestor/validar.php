@@ -78,10 +78,16 @@ if (!$establecimiento) {
         /* Colores específicos para validación */
         .btn-aprobar { background-color: #28a745; border: none; }
         .btn-aprobar:hover { background-color: #218838; transform: translateY(-2px); }
+        .btn-aprobar:active { background-color: #1e7e34; transform: translateY(0); }
+        .btn-aprobar:focus { outline: none; box-shadow: none; }
         .btn-rechazar { background-color: #dc3545; border: none; }
         .btn-rechazar:hover { background-color: #c82333; transform: translateY(-2px); }
+        .btn-rechazar:active { background-color: #bd2130; transform: translateY(0); }
+        .btn-rechazar:focus { outline: none; box-shadow: none; }
         .btn-volver { background-color: #6c757d; border: none; }
         .btn-volver:hover { background-color: #5a6268; }
+        .btn-volver:active { background-color: #545b62; }
+        .btn-volver:focus { outline: none; box-shadow: none; }
 
         #establecimiento-main { width: 100%; max-width: 800px; margin: 0 auto; }
         .map-container { height: 300px; border-radius: 10px; overflow: hidden; margin: 20px 0; border: 1px solid #ddd; }
@@ -89,9 +95,11 @@ if (!$establecimiento) {
         /* ESTILOS DEL FOOTER COPIADOS DE TU CÓDIGO */
         .footer { color: black; background-color: white; width: 100%; user-select: none; bottom: 0; font-size: 15px; background: #E3E1E1; text-align: center; position: fixed; z-index: 1000; }
         .footer-container { background-color: white; box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1); padding-top: 1px !important; padding-bottom: 1px !important; height: auto; }
-        .footer-item { padding: 8px 0; }
+        .footer-item { padding: 8px 0; -webkit-tap-highlight-color: transparent; }
         .icon-container { transition: transform 0.3s ease; padding: 5px 0; }
         .footer-item:hover .icon-container { transform: translateY(-7px); }
+        .footer-item:active .icon-container { transform: translateY(0); }
+        .footer-item:focus .icon-container { transform: translateY(0); }
         a, a:visited, a:active { color: inherit; text-decoration: none; }
         
         /* Active state para el menú "Validar" */
@@ -170,7 +178,7 @@ if (!$establecimiento) {
 
     <div class="container-fluid footer mt-5 p-3">
         <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-            <label for="anf" id="lbl_anf" class="col-2 text-center footer-item">
+            <label id="lbl_anf" class="col-2 text-center footer-item">
                 <div class="row">
                     <a href="Anfitriones.php">
                         <div class="col-12 icon-container">
@@ -181,7 +189,7 @@ if (!$establecimiento) {
                 </div>
             </label>
 
-            <label for="val" id="lbl_val" class="col-2 text-center footer-item">
+            <label id="lbl_val" class="col-2 text-center footer-item">
                 <div class="row">
                     <a href="verValidar.php">
                         <div class="col-12 icon-container">
@@ -192,7 +200,7 @@ if (!$establecimiento) {
                 </div>
             </label>
 
-            <label for="res" id="lbl_res" class="col-2 text-center footer-item">
+            <label id="lbl_res" class="col-2 text-center footer-item">
                 <div class="row">
                     <a href="verReservas.php">
                         <div class="col-12 icon-container">
@@ -202,7 +210,7 @@ if (!$establecimiento) {
                     </a>
                 </div>
             </label>
-            <label for="his" id="lbl_his" class="col-2 text-center footer-item">
+            <label id="lbl_his" class="col-2 text-center footer-item">
                 <div class="row">
                     <a href="verEstablecimientos.php">
                         <div class="col-12 icon-container">
@@ -212,7 +220,7 @@ if (!$establecimiento) {
                     </a>
                 </div>
             </label>
-            <label for="esp" id="lbl_esp" class="col-2 text-center footer-item">
+            <label id="lbl_esp" class="col-2 text-center footer-item">
                 <div class="row">
                     <a href="verEspacios.php">
                         <div class="col-12 icon-container">
@@ -222,7 +230,7 @@ if (!$establecimiento) {
                     </a>
                 </div>
             </label>
-            <label for="per" id="lbl_per" class="col-2 text-center footer-item">
+            <label id="lbl_per" class="col-2 text-center footer-item">
                 <div class="row">
                     <a href="tuPerfil.php">
                         <div class="col-12 icon-container">
