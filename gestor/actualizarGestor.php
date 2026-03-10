@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'empresa' => $_POST['empresa'] ?? '',
         'phone' => $_POST['telefono'] ?? '',
         'cif' => $_POST['cif'] ?? '', // Si tu base de datos usa 'nif', cambialo aquí a 'nif' => $_POST['cif']
-        //'domicilio_social' => $_POST['domicilio_social'] ?? '',
+        'domicilio_social' => $_POST['domicilio_social'] ?? '',
         'codigo_postal' => $_POST['codigo_postal'] ?? ''
     ];
 
