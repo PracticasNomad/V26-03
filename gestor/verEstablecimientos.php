@@ -1,5 +1,6 @@
 <?php
 require_once 'verificar_sesion_gestor.php';
+require_once 'establecimientos_logic.php';
 
 require '../vendor/autoload.php';
 
@@ -72,7 +73,7 @@ $dotenv->load();
             background-color: white;
             border-radius: 15px;
             box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
-            margin-bottom: 2rem;
+            margin-bottom: 0;
             overflow: hidden;
             transition: all 0.3s;
         }
@@ -549,10 +550,39 @@ $dotenv->load();
     </header>
 
     <body>
+        <!-- Estadísticas del gestor -->
+        <div class="row mb-4" style="max-width: 1400px; margin: 2rem auto; padding: 0 15px;">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary"><?php echo $totalEstablecimientos; ?></h5>
+                        <p class="card-text">Total Establecimientos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-success"><?php echo $establecimientosAprobados; ?></h5>
+                        <p class="card-text">Aprobados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning"><?php echo $establecimientosPendientes; ?></h5>
+                        <p class="card-text">Pendientes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <?php if (empty($establecimientos)): ?>
             <div class="no-establecimientos">
                 <img src="../img/establecimiento.png" width="80" alt="Logo Establecimiento" class="mb-3">
-                <h3 class="fw-bold mb-3">No hay establecimientos registrados en este codigo postal</h3>
+                <h3 class="fw-bold mb-3">No tienes establecimientos asignados</h3>
+                <p class="text-muted">Los establecimientos que te sean asignados aparecerán aquí para su gestión.</p>
 
             </div>
         <?php else: ?>
@@ -569,7 +599,7 @@ $dotenv->load();
                             <script>
                                 console.log("<?php echo $establecimiento['image_url'] ?>")
                             </script>
-                            <div class="card-header" style="background-image: url('<?php echo 'http://' . $establecimiento['image_url'] ?>');">
+                            <div class="card-header" style="background-image: url('<?php echo getImagenUrl($establecimiento['image_url']); ?>');">
                                 <div class="card-header-overlay"></div>
                                 <div class="card-title">
                                     <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
