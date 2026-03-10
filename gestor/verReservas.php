@@ -18,11 +18,9 @@ require_once 'verificar_sesion_gestor.php';
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.js"
         integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
-    <link rel="icon" href="favicon-color.png">
-
-    <link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
-
-    <link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Tus reservas</title>
 
 

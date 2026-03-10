@@ -36,7 +36,9 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
     <link href="../style.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap" rel="stylesheet">
-    <link rel="icon" href="../img/favicon-color.png">
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>TheNomadapp - Tu perfil Gestora</title>
     <style>
         /* Mismo CSS que tenías, intacto */

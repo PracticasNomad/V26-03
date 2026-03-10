@@ -25,7 +25,9 @@ $dotenv->load();
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet'>
-    <link rel="icon" href="Nomadapp.ico" type="image/png">
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Mis Establecimientos</title>
     <style>
         body {
@@ -180,7 +182,8 @@ $dotenv->load();
         }
 
         .collapsed-content.show {
-            max-height: 1500px; /* Suficiente para contener todo el contenido */
+            max-height: 1500px;
+            /* Suficiente para contener todo el contenido */
             padding-top: 8px;
             margin-top: 8px;
             opacity: 1;
@@ -684,7 +687,7 @@ $dotenv->load();
                             <script>
                                 console.log("<?php echo $establecimiento['image_url'] ?>")
                             </script>
-                            <div class="card-header"<?php if (!empty(getImagenUrl($establecimiento['image_url']))): ?> style="background-image: url('<?php echo getImagenUrl($establecimiento['image_url']); ?>');"<?php endif; ?>>
+                            <div class="card-header" <?php if (!empty(getImagenUrl($establecimiento['image_url']))): ?> style="background-image: url('<?php echo getImagenUrl($establecimiento['image_url']); ?>');" <?php endif; ?>>
                                 <div class="card-header-overlay"></div>
                                 <div class="card-title">
                                     <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
