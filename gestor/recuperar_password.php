@@ -37,6 +37,10 @@ if (isset($_POST['email'])) {
         if (count($datos) > 0) {
             $_SESSION['recovery_email'] = $email;
             $_SESSION['user_recover_id'] = $datos[0]['id'];
+
+            unset($_SESSION['recover_code']);
+            unset($_SESSION['code_generated_time']);
+
             header('Location: recuperar_password-Paso2.php');
             exit();
         } else {

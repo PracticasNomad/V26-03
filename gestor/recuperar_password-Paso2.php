@@ -23,7 +23,7 @@ if (!isset($_SESSION['recover_code']) || isset($_POST['regenerar_codigo'])) {
     $_SESSION['recover_code'] = sprintf("%06d", mt_rand(1, 999999));
     $_SESSION['code_generated_time'] = time();
 
-    // Obtener datos de la tabla gestor para el nombre usando SERVICE_APIKEY
+    // Obtener datos del gestor usando SERVICE_APIKEY
     $url = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/gestor?email=eq." . urlencode($email);
 
     $ch = curl_init($url);
@@ -42,14 +42,14 @@ if (!isset($_SESSION['recover_code']) || isset($_POST['regenerar_codigo'])) {
 
     $datos = json_decode($resultado, true);
     $nombre = '';
-    if (count($datos) > 0) {
+    if (is_array($datos) && count($datos) > 0) {
         $nombre = $datos[0]['name'] ?? '';
     }
 
     function sendVerificationEmail($email, $nombre)
     {
-        // Enviamos type=gestor por la URL
         header("Location: ../emails/recuperarContrasenaEmail.php?email=" . urlencode($email) . "&nombre=" . urlencode($nombre) . "&type=gestor");
+        exit();
     }
 
     sendVerificationEmail($email, $nombre);
@@ -70,6 +70,10 @@ $tiempoTranscurrido = 0;
 if (isset($_SESSION['code_generated_time'])) {
     $tiempoTranscurrido = time() - $_SESSION['code_generated_time'];
 }
+
+if (isset($_GET['status']) && $_GET['status'] == 'ok') {
+    $success = 'El código ha sido enviado correctamente a tu correo.';
+}
 ?>
 
 <!DOCTYPE html>
@@ -84,7 +88,9 @@ if (isset($_SESSION['code_generated_time'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="icon" href="../img/favicon-color.png">
+
     <link rel="icon" href="../img/favicon-negro.png" media="(prefers-color-scheme: light)">
+
     <link rel="icon" href="../img/favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Verificación de Código - Gestor</title>
     <style>
@@ -287,12 +293,14 @@ if (isset($_SESSION['code_generated_time'])) {
             e.target.value = value;
         });
 
-        // ---------------------------------------------------------
-        // LOG PARA PRUEBAS: Imprime el código en la consola (F12)
-        // ---------------------------------------------------------
+        document.getElementById('codigo_verificacion').addEventListener('input', function(e) {
+            if (e.target.value.length === 6) {}
+        });
+
+        // ECHO POR CONSOLA DEL CÓDIGO (PARA PRUEBAS)
         console.log("=========================================");
-        console.log("🛠️ MODO PRUEBAS - CÓDIGO DE VERIFICACIÓN:");
-        console.log("<?= isset($_SESSION['recover_code']) ? $_SESSION['recover_code'] : 'No hay código' ?>");
+        console.log("CÓDIGO DE VERIFICACIÓN:");
+        console.log("<?= isset($_SESSION['recover_code']) ? $_SESSION['recover_code'] : 'Ninguno' ?>");
         console.log("=========================================");
     </script>
 </body>

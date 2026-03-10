@@ -18,16 +18,17 @@ $success_message = '';
 
 function sendVerificationEmail(): void
 {
-
     $url = '../emails/codigoEmailGuest.php?email=' . urlencode($_SESSION['email_guest']);
     header('Location: ' . $url);
     exit;
 }
 
-function insertarDatos(): bool
+// CAMBIO: Ahora puede devolver true (éxito) o un string (con el error)
+function insertarDatos(): string|bool
 {
     $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/auth/v1/signup';
     $supabaseKey = $_ENV['DATABASE_APIKEY'];
+    $serviceKey = $_ENV['SERVICE_APIKEY']; // Clave maestra para la tabla user
 
     $data = [
         'email' => $_SESSION['email_guest'],
@@ -52,7 +53,7 @@ function insertarDatos(): bool
 
     if ($result === false && !isset($_SESSION['already_host'])) {
         curl_close($ch);
-        return false;
+        return "Error de conexión con el servidor de autenticación.";
     }
 
     $httpCode = 200;
@@ -60,6 +61,19 @@ function insertarDatos(): bool
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     }
     curl_close($ch);
+
+    // 👇 EL BLOQUE QUE ME HAS PEDIDO 👇
+    if ($httpCode >= 400 && !isset($_SESSION['already_host'])) {
+        // ✨ CONTROL PARA PRODUCCIÓN: Si el correo ya existe
+        if ($httpCode == 422 || (isset($responseData['msg']) && strpos($responseData['msg'], 'already registered') !== false)) {
+            return "Este correo electrónico ya está registrado. Por favor, vuelve atrás e inicia sesión.";
+        }
+
+        // Otros errores raros
+        $mensajeAuth = $responseData['msg'] ?? $responseData['message'] ?? 'Error desconocido al crear usuario';
+        return "Error al registrar: " . $mensajeAuth;
+    }
+    // 👆 ========================================= 👆
 
     if (
         $httpCode >= 200 && $httpCode < 300
@@ -85,21 +99,22 @@ function insertarDatos(): bool
         curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch2, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'apikey: ' . $supabaseKey,
+            'apikey: ' . $serviceKey,              // Usamos Service Key para evitar error RLS
+            'Authorization: Bearer ' . $serviceKey // Usamos Service Key para evitar error RLS
         ]);
 
         $result2 = curl_exec($ch2);
         $httpCode2 = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
         curl_close($ch2);
 
-        return ($httpCode2 >= 200 && $httpCode2 < 300);
+        if ($httpCode2 >= 200 && $httpCode2 < 300) {
+            return true;
+        } else {
+            return "Error en Base de Datos ($httpCode2): " . $result2;
+        }
     }
 
-    if ($httpCode == 422) {
-        return false;
-    }
-
-    return false;
+    return "No se ha podido completar el registro.";
 }
 
 if (isset($_GET['sent']) && $_GET['sent'] === '1') {
@@ -124,11 +139,15 @@ if (isset($_POST['verificar'])) {
     } elseif (strcmp((string) $codigo_ingresado, (string) $_SESSION['verification_code_guest']) !== 0) {
         $error_message = 'El código de verificación no es válido';
     } else {
-        if (insertarDatos()) {
+        // CAMBIO: Capturamos el resultado para mostrar el mensaje amigable
+        $resultadoInsert = insertarDatos();
+
+        if ($resultadoInsert === true) {
             header('Location: registerCompleto.php');
             exit;
+        } else {
+            $error_message = $resultadoInsert;
         }
-        $error_message = 'No se ha podido completar el registro. Por favor, inténtelo más tarde.';
     }
 }
 
