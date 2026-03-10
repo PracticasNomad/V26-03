@@ -16,7 +16,11 @@ if (!$id) {
     exit;
 }
 
-// traer datos desde la API
+
+
+
+
+//// traer datos desde la API
 $establecimiento = null;
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
     . '/rest/v1/establecimiento?id=eq.' . $id;
@@ -505,81 +509,85 @@ if (!$establecimiento) {
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const btnAprobar = document.getElementById('btn-aprobar');
-            const btnRechazar = document.getElementById('btn-rechazar');
-            const card = document.querySelector('.establecimiento-card');
-            const statusBadge = document.getElementById('validation-status-badge');
-            const btnActions = document.getElementById('btn-actions');
+    document.addEventListener('DOMContentLoaded', function () {
+        const btnAprobar = document.getElementById('btn-aprobar');
+        const btnRechazar = document.getElementById('btn-rechazar');
+        const card = document.querySelector('.establecimiento-card');
+        const statusBadge = document.getElementById('validation-status-badge');
+        const btnActions = document.getElementById('btn-actions');
 
-            function performValidation(action) {
-                if (!confirm(action === 'aprobar' ?
-                        '¿Aprobar y validar este establecimiento?' :
+        function performValidation(action) {
+            if (!confirm(action === 'aprobar' ? 
+                        '¿Aprobar y validar este establecimiento?' : 
                         '¿Rechazar este establecimiento? No podrá ser publicado.')) {
-                    return;
-                }
-
-                const id = btnAprobar.dataset.id;
-                const button = action === 'aprobar' ? btnAprobar : btnRechazar;
-
-                // Mostrar estado de procesamiento
-                button.classList.add('processing');
-                button.disabled = true;
-
-                // Hacer petición AJAX
-                fetch(`procesar_validacion.php?id=${id}&accion=${action}&ajax=1`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Éxito: mostrar mensaje y cambiar estilos
-                            statusBadge.classList.add('show', 'success');
-                            statusBadge.innerHTML = `<i class="fas fa-${action === 'aprobar' ? 'check' : 'times'}-circle me-2"></i>${data.message}`;
-
-                            if (action === 'aprobar') {
-                                card.classList.add('validado');
-                            } else {
-                                card.classList.add('rechazado');
-                            }
-
-                            // Deshabilitar ambos botones después de validar
-                            btnAprobar.disabled = true;
-                            btnRechazar.disabled = true;
-                            btnAprobar.classList.remove('processing');
-                            btnRechazar.classList.remove('processing');
-                            btnAprobar.style.opacity = '0.5';
-                            btnRechazar.style.opacity = '0.5';
-
-                            // Redirigir después de 2 segundos
-                            setTimeout(() => {
-                                window.location.href = 'verValidar.php';
-                            }, 2000);
-                        } else {
-                            // Error
-                            statusBadge.classList.add('show', 'error');
-                            statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${data.error}`;
-                            button.classList.remove('processing');
-                            button.disabled = false;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        statusBadge.classList.add('show', 'error');
-                        statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>Error en la conexión`;
-                        button.classList.remove('processing');
-                        button.disabled = false;
-                    });
+                return;
             }
 
-            btnAprobar.addEventListener('click', function() {
-                performValidation('aprobar');
-            });
+            const id = btnAprobar.dataset.id;
+            const button = action === 'aprobar' ? btnAprobar : btnRechazar;
 
-            btnRechazar.addEventListener('click', function() {
-                performValidation('rechazar');
-            });
+            // Mostrar estado de procesamiento
+            button.classList.add('processing');
+            button.disabled = true;
+
+            // Hacer la petición AJAX
+            fetch('procesar_validacion.php?id=' + id + '&accion=' + action + '&ajax=1', {
+                method: 'POST', // Asegúrate de que el método es POST
+                body: new FormData() // Aquí puedes enviar otros datos si es necesario
+            })
+                .then(response => response.json()) // Espera una respuesta JSON
+                .then(data => {
+                    if (data.success) {
+                        // Éxito: mostrar mensaje y cambiar estilos
+                        statusBadge.classList.add('show', 'success');
+                        statusBadge.innerHTML = `<i class="fas fa-${action === 'aprobar' ? 'check' : 'times'}-circle me-2"></i>${data.message}`;
+
+                        if (action === 'aprobar') {
+                            card.classList.add('validado');
+                        } else {
+                            card.classList.add('rechazado');
+                        }
+
+                        // Deshabilitar ambos botones después de validar
+                        btnAprobar.disabled = true;
+                        btnRechazar.disabled = true;
+                        btnAprobar.classList.remove('processing');
+                        btnRechazar.classList.remove('processing');
+                        btnAprobar.style.opacity = '0.5';
+                        btnRechazar.style.opacity = '0.5';
+
+                        // Redirigir después de 2 segundos
+                        setTimeout(() => {
+                            window.location.href = 'verValidar.php';
+                        }, 2000);
+                    } else {
+                        // Error
+                        statusBadge.classList.add('show', 'error');
+                        statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${data.error}`;
+                        button.classList.remove('processing');
+                        button.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusBadge.classList.add('show', 'error');
+                    statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>Error en la conexión`;
+                    button.classList.remove('processing');
+                    button.disabled = false;
+                });
+        }
+
+        btnAprobar.addEventListener('click', function () {
+            performValidation('aprobar');
         });
-    </script>
+
+        btnRechazar.addEventListener('click', function () {
+            performValidation('rechazar');
+        });
+    });
+</script>
 
 </body>
 
 </html>
+

@@ -1,46 +1,36 @@
 <?php
-session_start();
-require '../vendor/autoload.php';
+// Asegúrate de que estás recibiendo el valor correcto en 'ajax' y configurando el tipo de contenido
+$isAjax = isset($_GET['ajax']) && $_GET['ajax'] == '1';
 
-use Dotenv\Dotenv;
+$accion = $_POST['accion'] ?? null; // Asegúrate de que estás recibiendo la acción correctamente
 
-$dotenv = Dotenv::createImmutable(dirname(__DIR__));
-$dotenv->load();
-
-if (!isset($_GET['id'], $_GET['accion'])) {
-    header('Location: verValidar.php');
-    exit;
-}
-
-$id = intval($_GET['id']);
-$accion = $_GET['accion'];
-
-$update = [];
 if ($accion === 'aprobar') {
-    $update['estado'] = 'aprobado';
+    // Actualizar estado y validación
+    $update = [
+        'estado' => 'aprobado',
+        'estaValidado' => true, // Marca como validado al aprobar
+    ];
 } elseif ($accion === 'rechazar') {
-    $update['estado'] = 'rechazado';
-} else {
-    header('Location: verValidar.php');
+    // Si rechazas, actualiza estado y validación
+    $update = [
+        'estado' => 'rechazado',
+        'estaValidado' => false, // Marca como no validado
+    ];
+}
+
+//// Realiza la actualización (en tu base de datos o donde corresponda)
+
+// Si la petición es AJAX, devuelve una respuesta JSON
+if ($isAjax) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'success' => true,
+        'message' => 'Establecimiento validado correctamente.'
+    ]);
     exit;
 }
 
-$url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
-    . '/rest/v1/establecimiento?id=eq.' . $id;
-
-$ch = curl_init($url);
-curl_setopt_array($ch, [
-    CURLOPT_CUSTOMREQUEST => 'PATCH',
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => [
-        'Content-Type: application/json',
-        'apikey: ' . $_ENV['DATABASE_APIKEY'],
-        'Authorization: Bearer ' . ($_SESSION['token'] ?? ''),
-    ],
-    CURLOPT_POSTFIELDS => json_encode($update),
-]);
-$result = curl_exec($ch);
-curl_close($ch);
-
+//// Si no es AJAX, redirige al listado de validaciones
 header('Location: verValidar.php');
 exit;
+?>
