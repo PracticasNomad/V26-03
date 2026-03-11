@@ -85,7 +85,7 @@ function getEstablecimientosAsignados() {
                     return '"' . str_replace('"', '\\"', (string)$id) . '"';
                 }, $ids);
 
-                $urlGallery = $apiUrl . '/gallery?select=establecimiento_id,image_url&establecimiento_id=in.(' . implode(',', $idsFilter) . ')&order=establecimiento_id.asc';
+                $urlGallery = $apiUrl . '/gallery?select=id,establecimiento_id,image_url&establecimiento_id=in.(' . implode(',', $idsFilter) . ')&order=establecimiento_id.asc,id.desc';
 
                 $chGallery = curl_init($urlGallery);
                 curl_setopt($chGallery, CURLOPT_RETURNTRANSFER, true);

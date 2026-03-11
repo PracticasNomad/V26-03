@@ -20,6 +20,14 @@ function normalizarUrlImagen($url) {
         return $url;
     }
 
+    if (strpos($url, '../') === 0 || strpos($url, './') === 0 || strpos($url, '/') === 0) {
+        return $url;
+    }
+
+    if (strpos($url, 'uploads/') === 0) {
+        return '../' . $url;
+    }
+
     return 'http://' . ltrim($url, '/');
 }
 
@@ -56,7 +64,7 @@ if ($httpCode === 200) {
             }, $ids);
 
             $urlGallery = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
-                . '/rest/v1/gallery?select=establecimiento_id,image_url&establecimiento_id=in.(' . implode(',', $idsFilter) . ')&order=establecimiento_id.asc';
+                . '/rest/v1/gallery?select=id,establecimiento_id,image_url&establecimiento_id=in.(' . implode(',', $idsFilter) . ')&order=establecimiento_id.asc,id.desc';
 
             $chGallery = curl_init($urlGallery);
             curl_setopt_array($chGallery, [
@@ -78,6 +86,7 @@ if ($httpCode === 200) {
                         $estId = $img['establecimiento_id'] ?? null;
                         $imgUrl = $img['image_url'] ?? null;
 
+                        // Con order por id.desc, la primera fila de cada establecimiento es la mas reciente.
                         if ($estId !== null && !isset($galleryByEstablecimiento[$estId]) && !empty($imgUrl)) {
                             $galleryByEstablecimiento[$estId] = $imgUrl;
                         }
@@ -88,9 +97,15 @@ if ($httpCode === 200) {
 
         foreach ($data as $est) {
             $idEst = $est['id'] ?? null;
-            $banner = normalizarUrlImagen($est['image_url'] ?? '');
-            if (empty($banner) && $idEst !== null && isset($galleryByEstablecimiento[$idEst])) {
+            $banner = '';
+
+            // Priorizamos gallery porque es donde se estan guardando los cambios desde editar.
+            if ($idEst !== null && isset($galleryByEstablecimiento[$idEst])) {
                 $banner = normalizarUrlImagen($galleryByEstablecimiento[$idEst]);
+            }
+
+            if (empty($banner)) {
+                $banner = normalizarUrlImagen($est['image_url'] ?? '');
             }
 
             $est['banner_image_url'] = !empty($banner) ? $banner : '';
@@ -132,31 +147,100 @@ function formatearDireccion($dir, $piso) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <title>Gestión de Validaciones</title>
     <style>
-        body { font-family: 'Nunito', sans-serif; background-color: #f8f9fa; padding-bottom: 80px; }
+        :root {
+            --ink: #1f2933;
+            --muted: #66788a;
+            --surface: #ffffff;
+            --line: #d9e2ec;
+            --brand: #0f4c5c;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(15, 76, 92, 0.08), transparent 30%),
+                radial-gradient(circle at 88% 6%, rgba(31, 41, 51, 0.08), transparent 28%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
+            color: var(--ink);
+            padding-bottom: 80px;
+        }
+
+        .page-header {
+            max-width: 1320px;
+            margin: 16px auto 8px;
+            padding: 0 12px;
+        }
+
+        .page-header-inner {
+            border-radius: 16px;
+            background: linear-gradient(130deg, #123b49 0%, #0f4c5c 65%, #2a4b57 120%);
+            color: #ffffff;
+            padding: 14px 16px;
+            box-shadow: 0 14px 28px rgba(15, 76, 92, 0.22);
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 0.2px;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-hint-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.45);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            background: rgba(255,255,255,0.12);
+            cursor: pointer;
+            transition: 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .info-hint-btn:hover {
+            background: rgba(255,255,255,0.22);
+            transform: translateY(-1px);
+        }
+
+        .validation-shell {
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+
         .establecimiento-card {
-            background-color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-bottom: 1.5rem; overflow: hidden; transition: 0.3s; border: 1px solid #e9ecef;
+            background-color: var(--surface); border-radius: 16px; box-shadow: 0 10px 22px rgba(31,41,51,0.1);
+            margin-bottom: 1.5rem; overflow: hidden; transition: 0.3s; border: 1px solid var(--line);
             display: flex; flex-direction: column; height: 100%;
         }
-        .establecimiento-card:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.15); transform: translateY(-2px); }
-        .card-header { height: 140px; background-size: cover; background-position: center; display: flex; align-items: flex-end; position: relative; background-color: #f8f9fa; }
-        .card-header.default-image { background-image: none !important; background-color: #bfc5cc; }
-        .card-header-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)); }
-        .card-title { color: white; padding: 15px; font-weight: 600; font-size: 1.1rem; z-index: 1; width: 100%; }
-        .card-body { padding: 15px; display: flex; flex-direction: column; flex: 1; }
-        .info-row { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; font-size: 0.95rem; }
-        .info-icon { color: #28a745; width: 18px; text-align: center; }
-        .action-buttons-container { margin-top: auto; padding-top: 15px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 8px; }
+        .establecimiento-card:hover { box-shadow: 0 18px 34px rgba(31,41,51,0.16); transform: translateY(-2px); }
+        .card-header { height: 150px; background-size: cover; background-position: center; display: flex; align-items: flex-end; position: relative; background-color: #cad4de; }
+        .card-header.default-image { background-image: none !important; background-color: #c4ccd3; }
+        .card-header-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.68)); }
+        .card-title { color: white; padding: 15px; font-weight: 700; font-size: 1.08rem; z-index: 1; width: 100%; }
+        .card-body { padding: 16px; display: flex; flex-direction: column; flex: 1; }
+        .info-row { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; font-size: 0.94rem; color: #3b4b5a; }
+        .info-icon { color: var(--brand); width: 18px; text-align: center; }
+        .action-buttons-container { margin-top: auto; padding-top: 14px; border-top: 1px solid #e5ebf1; display: flex; flex-direction: column; gap: 8px; }
         .quick-actions { display: flex; gap: 8px; }
-        .btn-quick { flex: 1; border: none; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem; font-weight: 600; color: white; transition: 0.2s; }
-        .btn-quick.approve { background-color: #28a745; }
-        .btn-quick.approve:hover { background-color: #218838; }
-        .btn-quick.reject { background-color: #dc3545; }
-        .btn-quick.reject:hover { background-color: #c82333; }
+        .btn-quick { flex: 1; border: none; border-radius: 8px; padding: 0.52rem; font-size: 0.84rem; font-weight: 700; color: white; transition: 0.2s; }
+        .btn-quick.approve { background-color: #1f8f5d; }
+        .btn-quick.approve:hover { background-color: #187448; }
+        .btn-quick.reject { background-color: #b54857; }
+        .btn-quick.reject:hover { background-color: #983a47; }
         .btn-quick:disabled { opacity: 0.7; cursor: not-allowed; }
-        .btn-validar { background-color: #007bff; border: none; color: white; border-radius: 6px; padding: 0.5rem; font-weight: 600; font-size: 0.85rem; text-align: center; text-decoration: none; display: block; transition: 0.2s; }
-        .btn-validar:hover { background-color: #0056b3; color: white; }
-        .no-establecimientos { background-color: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 3rem 1rem; text-align: center; border: 1px solid #e9ecef; width: 100%; margin-top: 1rem; }
+        .btn-validar { background-color: #295b83; border: none; color: white; border-radius: 8px; padding: 0.52rem; font-weight: 700; font-size: 0.84rem; text-align: center; text-decoration: none; display: block; transition: 0.2s; }
+        .btn-validar:hover { background-color: #214969; color: white; }
+        .no-establecimientos { background-color: var(--surface); border-radius: 16px; box-shadow: 0 10px 22px rgba(31,41,51,0.08); padding: 3rem 1rem; text-align: center; border: 1px solid var(--line); width: 100%; margin-top: 1rem; }
         
         /* Footer */
         .footer { background-color: #E3E1E1; position: fixed; bottom: 0; width: 100%; z-index: 1000; font-size: 15px; }
@@ -171,15 +255,16 @@ function formatearDireccion($dir, $piso) {
 </head>
 
 <body>
-    <header>
-        <div class="container-fluid info text-center">
-            <div class="row">
-                <div class="col h2 fw-bold pt-3 pb-2 text-dark">Gestión de Validaciones</div>
+    <header class="page-header">
+        <div class="page-header-inner">
+            <div class="title-row">
+                <h1 class="page-title">Gestión de Validaciones</h1>
+                <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right" title="Revisa y clasifica establecimientos con una vista clara y ordenada."><i class="fas fa-info"></i></span>
             </div>
         </div>
     </header>
 
-    <div class="container-fluid pb-5 px-3 px-md-5">
+    <div class="container-fluid pb-5 px-3 px-md-4 validation-shell">
         <ul class="nav nav-tabs" id="validationTabs" role="tablist">
             <li class="nav-item" role="presentation"><button class="nav-link active" id="pendientes-tab" data-bs-toggle="tab" data-bs-target="#pendientes" type="button" role="tab"><i class="fas fa-hourglass-half me-2"></i>Pendientes</button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" id="rechazados-tab" data-bs-toggle="tab" data-bs-target="#rechazados" type="button" role="tab"><i class="fas fa-times-circle me-2"></i>Rechazados</button></li>
@@ -302,6 +387,13 @@ function formatearDireccion($dir, $piso) {
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function(el) {
+                new bootstrap.Tooltip(el);
+            });
+        });
+
         function procesarValidacionRapida(id, accion, btnElement) {
             if (!confirm(accion === 'aprobar' ? '¿Aprobar y publicar?' : '¿Rechazar establecimiento?')) return;
 

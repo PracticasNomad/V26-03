@@ -209,10 +209,19 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
     <link rel="icon" href="Nomadapp.ico" type="image/png">
     <title>Mis Establecimientos</title>
     <style>
+        :root {
+            --brand-ink: #1f2933;
+            --brand-deep: #0f4c5c;
+            --brand-accent: #e9724c;
+            --brand-soft: #f3f5f7;
+            --card-radius: 16px;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f8f9fa;
+            background: #eef2f5;
             padding-bottom: 50px;
+            color: var(--brand-ink);
         }
 
         .contenedor-principal {
@@ -253,17 +262,17 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
 
         .establecimiento-card {
             background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: var(--card-radius);
+            box-shadow: 0 10px 25px rgba(31, 41, 51, 0.09);
             margin-bottom: 0;
             overflow: hidden;
             transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
+            border: 1px solid rgba(15, 76, 92, 0.08);
         }
 
         .establecimiento-card:hover {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(31, 41, 51, 0.15);
+            transform: translateY(-3px);
         }
 
         .card-header {
@@ -274,12 +283,12 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             display: flex;
             align-items: flex-end;
             background-color: #f8f9fa;
-            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: none;
         }
 
         .card-header.default-image {
             background-image: none !important;
-            background-color: #bfc5cc;
+            background-color: #c4ccd3;
         }
 
         .card-header-overlay {
@@ -288,13 +297,13 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7));
+            background: rgba(0, 0, 0, 0.45);
         }
 
         .card-title {
             color: white;
             padding: 15px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1.3rem;
             position: relative;
             width: 100%;
@@ -329,16 +338,16 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         }
 
         .validation-badge.bg-success {
-            background-color: #28a745 !important;
+            background-color: #6f8f79 !important;
         }
 
         .validation-badge.bg-warning {
-            background-color: #ffc107 !important;
-            color: #212529 !important;
+            background-color: #c3b37a !important;
+            color: #2e2a18 !important;
         }
 
         .card-body {
-            padding: 15px;
+            padding: 16px;
         }
 
         .info-row {
@@ -393,9 +402,9 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         }
 
         .btn-toggle {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            color: #6c757d;
+            background-color: #f3f6f8;
+            border: 1px solid #d8e0e6;
+            color: #4b5a66;
             width: 100%;
             margin-bottom: 8px;
             border-radius: 8px;
@@ -410,18 +419,18 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         }
 
         .btn-toggle:hover {
-            background-color: #e9ecef;
-            border-color: #adb5bd;
+            background-color: #e7edf2;
+            border-color: #b5c1ca;
         }
 
         .btn-spaces {
-            background-color: #a4a4a4;
+            background-color: #6b7280;
             border: none;
-            color: black;
+            color: white;
         }
 
         .btn-spaces:hover {
-            background-color: #8f8f8f;
+            background-color: #4b5563;
         }
 
         .btn-edit {
@@ -436,7 +445,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         .btn-delete {
             background-color: #dc3545;
             border: none;
-            color: black;
+            color: white;
         }
 
         .btn-delete:hover {
@@ -462,10 +471,89 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
 
         .no-establecimientos {
             background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            border-radius: 18px;
+            box-shadow: 0 12px 28px rgba(31, 41, 51, 0.12);
             padding: 2rem;
             text-align: center;
+        }
+
+        .page-hero {
+            max-width: 1400px;
+            margin: 1.2rem auto 0.5rem;
+            padding: 0 15px;
+        }
+
+        .page-hero-inner {
+            border-radius: 20px;
+            background: #254654;
+            color: #ffffff;
+            padding: 1.1rem 1.2rem;
+            box-shadow: 0 14px 30px rgba(15, 76, 92, 0.25);
+        }
+
+        .page-hero-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .hero-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-hint-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+            transition: 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .info-hint-btn:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
+        }
+
+        .stats-grid .card {
+            border: 1px solid rgba(15, 76, 92, 0.08);
+            border-radius: 14px;
+            box-shadow: 0 8px 18px rgba(31, 41, 51, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stats-grid .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(31, 41, 51, 0.12);
+        }
+
+        .stats-grid .card-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.15rem;
+            color: var(--brand-deep) !important;
+        }
+
+        .stats-grid .col-md-4:nth-child(2) .card-title {
+            color: #4f9c67 !important;
+        }
+
+        .stats-grid .col-md-4:nth-child(3) .card-title {
+            color: #c3a643 !important;
+        }
+
+        .stats-grid .card-text {
+            color: #5f6d79;
+            font-weight: 600;
+            margin-bottom: 0;
         }
 
         .precio-tag {
@@ -847,19 +935,25 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
 
             new bootstrap.Modal(document.getElementById('editModal')).show();
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function(el) {
+                new bootstrap.Tooltip(el);
+            });
+        });
     </script>
 </head>
 
 <body>
-    <header>
-        <div class="container-fluid info text-center">
-            <div class="row">
-                <div class="col color-white h2 fw-bold pt-3 pb-2">
-                    Establecimientos
-                </div>
+    <section class="page-hero">
+        <div class="page-hero-inner">
+            <div class="hero-title-row">
+                <div class="page-hero-title">Gestion de Establecimientos</div>
+                <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right" title="Controla imagen, estado, ubicacion y datos clave de tus negocios desde un solo panel."><i class="fas fa-info"></i></span>
             </div>
         </div>
-    </header>
+    </section>
 
         <?php if (!empty($flashMessage)): ?>
             <div class="container mt-3" style="max-width: 900px;">
@@ -871,7 +965,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         <?php endif; ?>
 
         <!-- Estadísticas del gestor -->
-        <div class="row mb-4" style="max-width: 1400px; margin: 2rem auto; padding: 0 15px;">
+        <div class="row mb-4 stats-grid" style="max-width: 1400px; margin: 1.2rem auto 1.5rem; padding: 0 15px;">
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-body">

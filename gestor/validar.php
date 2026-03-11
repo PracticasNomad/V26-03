@@ -57,6 +57,14 @@ function normalizarUrlImagen($url) {
         return $url;
     }
 
+    if (strpos($url, '../') === 0 || strpos($url, './') === 0 || strpos($url, '/') === 0) {
+        return $url;
+    }
+
+    if (strpos($url, 'uploads/') === 0) {
+        return '../' . $url;
+    }
+
     return 'http://' . ltrim($url, '/');
 }
 
@@ -91,6 +99,9 @@ if ($httpCodeGallery === 200) {
 $latitud = $establecimiento['latitude'] ?? $establecimiento['latitud'] ?? null;
 $longitud = $establecimiento['longitude'] ?? $establecimiento['longitud'] ?? null;
 $fotoPrincipal = normalizarUrlImagen($establecimiento['image_url'] ?? '');
+if (empty($fotoPrincipal) && !empty($galleryImages)) {
+    $fotoPrincipal = normalizarUrlImagen($galleryImages[0]);
+}
 
 $estadoValidacion = $establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null;
 
@@ -127,10 +138,21 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
     <title>Validar - <?php echo htmlspecialchars($establecimiento['nombre']); ?></title>
 
     <style>
+        :root {
+            --ink: #1f2933;
+            --surface: #ffffff;
+            --line: #d9e2ec;
+            --brand: #0f4c5c;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f8f9fa;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(15, 76, 92, 0.08), transparent 30%),
+                radial-gradient(circle at 88% 6%, rgba(31, 41, 51, 0.08), transparent 28%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
             padding-bottom: 15%;
+            color: var(--ink);
         }
 
         .color-white {
@@ -144,13 +166,13 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
         }
 
         .establecimiento-card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 10px 22px rgba(31, 41, 51, 0.1);
             margin-bottom: 2rem;
             overflow: hidden;
             transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
+            border: 1px solid var(--line);
         }
 
         .card-header {
@@ -160,8 +182,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
             background-position: center;
             display: flex;
             align-items: flex-end;
-            background-color: #f8f9fa;
-            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #c4ccd3;
         }
 
         .card-header.default-image {
@@ -175,7 +196,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.8));
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.68));
         }
 
         .card-title {
@@ -201,7 +222,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
         }
 
         .info-icon {
-            color: #28a745;
+            color: var(--brand);
             width: 20px;
             text-align: center;
             font-size: 1rem;
@@ -235,14 +256,14 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
 
         /* Colores específicos para validación */
         .btn-aprobar {
-            background-color: #28a745;
+            background-color: #1f8f5d;
             border: none;
         }
 
         .btn-aprobar:hover {
-            background-color: #218838;
+            background-color: #187448;
             transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+            box-shadow: 0 2px 6px rgba(24, 116, 72, 0.35);
         }
 
         .btn-aprobar:active {
@@ -251,14 +272,14 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
         }
 
         .btn-rechazar {
-            background-color: #dc3545;
+            background-color: #b54857;
             border: none;
         }
 
         .btn-rechazar:hover {
-            background-color: #c82333;
+            background-color: #983a47;
             transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 2px 6px rgba(152, 58, 71, 0.35);
         }
 
         .btn-rechazar:active {
@@ -338,14 +359,14 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
         }
 
         .btn-volver {
-            background-color: #6c757d;
+            background-color: #295b83;
             border: none;
         }
 
         .btn-volver:hover {
-            background-color: #5a6268;
+            background-color: #214969;
             transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(108, 117, 125, 0.3);
+            box-shadow: 0 2px 6px rgba(33, 73, 105, 0.35);
         }
 
         .btn-volver:active {
@@ -679,7 +700,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
                 zoom: 14
             });
 
-            new mapboxgl.Marker({ color: '#28a745' })
+            new mapboxgl.Marker({ color: '#1f8f5d' })
                 .setLngLat([lng, lat])
                 .setPopup(new mapboxgl.Popup().setHTML('<strong>' + nombreEstablecimiento + '</strong><br>' + direccionEstablecimiento))
                 .addTo(map);
