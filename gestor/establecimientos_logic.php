@@ -30,6 +30,16 @@ function normalizarUrlImagen($url) {
         return $url;
     }
 
+    // Rutas locales relativas (subidas desde el gestor)
+    if (strpos($url, '../') === 0 || strpos($url, './') === 0 || strpos($url, '/') === 0) {
+        return $url;
+    }
+
+    // Rutas locales sin prefijo (ej: uploads/establecimientos/archivo.jpg)
+    if (strpos($url, 'uploads/') === 0) {
+        return '../' . $url;
+    }
+
     return 'http://' . ltrim($url, '/');
 }
 

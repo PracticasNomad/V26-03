@@ -16,6 +16,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     $id = $_POST['id'] ?? '';
 
     if (!empty($id)) {
+        $nuevaImageUrl = null;
+        if (isset($_FILES['imagen_establecimiento']) && $_FILES['imagen_establecimiento']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $archivo = $_FILES['imagen_establecimiento'];
+
+            if ($archivo['error'] !== UPLOAD_ERR_OK) {
+                $mensajesError = [
+                    UPLOAD_ERR_INI_SIZE   => 'La imagen pesa demasiado (supera el limite configurado en PHP).',
+                    UPLOAD_ERR_FORM_SIZE  => 'La imagen supera el limite permitido por el formulario.',
+                    UPLOAD_ERR_PARTIAL    => 'El archivo se subio parcialmente.',
+                    UPLOAD_ERR_NO_FILE    => 'No se selecciono ninguna imagen.',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Falta la carpeta temporal del servidor.',
+                    UPLOAD_ERR_CANT_WRITE => 'No se pudo escribir el archivo en disco.',
+                    UPLOAD_ERR_EXTENSION  => 'Una extension de PHP detuvo la subida.'
+                ];
+                $flashMessage = $mensajesError[$archivo['error']] ?? 'Error desconocido al subir la imagen.';
+                $flashType = 'danger';
+            } else {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mimeReal = finfo_file($finfo, $archivo['tmp_name']);
+                finfo_close($finfo);
+
+                $permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+                if (!in_array($mimeReal, $permitidos, true)) {
+                    $flashMessage = 'Formato no compatible (' . htmlspecialchars((string)$mimeReal) . '). Usa JPG, PNG, WEBP o GIF.';
+                    $flashType = 'danger';
+                } else {
+                    $directorioDestino = dirname(__DIR__) . '/uploads/establecimientos/';
+                    if (!file_exists($directorioDestino)) {
+                        mkdir($directorioDestino, 0777, true);
+                        chmod($directorioDestino, 0777);
+                    }
+
+                    $mimeToExt = [
+                        'image/jpeg' => 'jpg',
+                        'image/png' => 'png',
+                        'image/webp' => 'webp',
+                        'image/gif' => 'gif'
+                    ];
+                    $extension = $mimeToExt[$mimeReal] ?? 'jpg';
+
+                    $nombreArchivo = 'establecimiento_' . $id . '_' . time() . '.' . $extension;
+                    $rutaFinal = $directorioDestino . $nombreArchivo;
+                    $rutaParaBD = 'uploads/establecimientos/' . $nombreArchivo;
+
+                    if (is_uploaded_file($archivo['tmp_name']) && move_uploaded_file($archivo['tmp_name'], $rutaFinal)) {
+                        $nuevaImageUrl = '../' . $rutaParaBD;
+                    } else {
+                        $flashMessage = 'No se pudo guardar la imagen en el servidor.';
+                        $flashType = 'danger';
+                    }
+                }
+            }
+        }
+
         $payload = [
             'nombre' => trim($_POST['nombre'] ?? ''),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
@@ -28,38 +82,112 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
             'longitude' => ($_POST['longitude'] ?? '') !== '' ? (float)$_POST['longitude'] : null,
         ];
 
-        $urlUpdate = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/establecimiento?id=eq.' . rawurlencode($id);
-        $chUpdate = curl_init($urlUpdate);
-        curl_setopt_array($chUpdate, [
-            CURLOPT_CUSTOMREQUEST => 'PATCH',
-            CURLOPT_POSTFIELDS => json_encode($payload),
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'apikey: ' . $_ENV['DATABASE_APIKEY'],
-                'Authorization: Bearer ' . ($_SESSION['access_token'] ?? $_SESSION['token'] ?? ''),
-                'Prefer: return=representation'
-            ],
-        ]);
-
-        $responseUpdate = curl_exec($chUpdate);
-        $httpCodeUpdate = curl_getinfo($chUpdate, CURLINFO_HTTP_CODE);
-        curl_close($chUpdate);
-
-        if ($httpCodeUpdate >= 200 && $httpCodeUpdate < 300) {
-            header('Location: verEstablecimientos.php?msg=updated');
-            exit;
+        if ($flashType === 'danger') {
+            $payload = null;
         }
 
-        $errorUpdate = json_decode($responseUpdate, true);
-        $flashMessage = 'No se pudo actualizar el establecimiento. ' . htmlspecialchars($errorUpdate['message'] ?? 'Intenta de nuevo.');
-        $flashType = 'danger';
+        if ($payload !== null) {
+            $urlUpdate = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/establecimiento?id=eq.' . rawurlencode($id);
+            $chUpdate = curl_init($urlUpdate);
+            curl_setopt_array($chUpdate, [
+                CURLOPT_CUSTOMREQUEST => 'PATCH',
+                CURLOPT_POSTFIELDS => json_encode($payload),
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'apikey: ' . $_ENV['SERVICE_APIKEY'],
+                    'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+                    'Prefer: return=representation'
+                ],
+            ]);
+
+            $responseUpdate = curl_exec($chUpdate);
+            $httpCodeUpdate = curl_getinfo($chUpdate, CURLINFO_HTTP_CODE);
+            curl_close($chUpdate);
+
+            if ($httpCodeUpdate >= 200 && $httpCodeUpdate < 300) {
+                if (!empty($nuevaImageUrl)) {
+                    $urlGalleryPatch = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gallery?establecimiento_id=eq.' . rawurlencode((string)$id);
+                    $chGalleryPatch = curl_init($urlGalleryPatch);
+                    curl_setopt_array($chGalleryPatch, [
+                        CURLOPT_CUSTOMREQUEST => 'PATCH',
+                        CURLOPT_POSTFIELDS => json_encode(['image_url' => $nuevaImageUrl]),
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_HTTPHEADER => [
+                            'Content-Type: application/json',
+                            'apikey: ' . $_ENV['SERVICE_APIKEY'],
+                            'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+                            'Prefer: return=representation'
+                        ],
+                    ]);
+
+                    $responseGalleryPatch = curl_exec($chGalleryPatch);
+                    $httpCodeGalleryPatch = curl_getinfo($chGalleryPatch, CURLINFO_HTTP_CODE);
+                    curl_close($chGalleryPatch);
+
+                    $patchedRows = json_decode($responseGalleryPatch, true);
+                    $patchedCount = is_array($patchedRows) ? count($patchedRows) : 0;
+
+                    if ($httpCodeGalleryPatch < 200 || $httpCodeGalleryPatch >= 300) {
+                        $errorGallery = json_decode($responseGalleryPatch, true);
+                        $flashMessage = 'No se pudo actualizar la imagen en galeria. ' . htmlspecialchars($errorGallery['message'] ?? 'Intenta de nuevo.');
+                        $flashType = 'danger';
+                    } elseif ($patchedCount === 0) {
+                        $urlGalleryPost = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gallery';
+                        $chGalleryPost = curl_init($urlGalleryPost);
+                        curl_setopt_array($chGalleryPost, [
+                            CURLOPT_CUSTOMREQUEST => 'POST',
+                            CURLOPT_POSTFIELDS => json_encode([
+                                'establecimiento_id' => $id,
+                                'image_url' => $nuevaImageUrl
+                            ]),
+                            CURLOPT_RETURNTRANSFER => true,
+                            CURLOPT_HTTPHEADER => [
+                                'Content-Type: application/json',
+                                'apikey: ' . $_ENV['SERVICE_APIKEY'],
+                                'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+                                'Prefer: return=representation'
+                            ],
+                        ]);
+
+                        $responseGalleryPost = curl_exec($chGalleryPost);
+                        $httpCodeGalleryPost = curl_getinfo($chGalleryPost, CURLINFO_HTTP_CODE);
+                        curl_close($chGalleryPost);
+
+                        if ($httpCodeGalleryPost < 200 || $httpCodeGalleryPost >= 300) {
+                            $errorGallery = json_decode($responseGalleryPost, true);
+                            $flashMessage = 'No se pudo guardar la imagen en galeria. ' . htmlspecialchars($errorGallery['message'] ?? 'Intenta de nuevo.');
+                            $flashType = 'danger';
+                        }
+                    }
+                }
+
+                if ($flashType !== 'danger') {
+                    header('Location: verEstablecimientos.php?msg=updated');
+                    exit;
+                }
+            }
+
+            $errorUpdate = json_decode($responseUpdate, true);
+            $flashMessage = 'No se pudo actualizar el establecimiento. ' . htmlspecialchars($errorUpdate['message'] ?? 'Intenta de nuevo.');
+            $flashType = 'danger';
+        }
     }
 }
 
 if (isset($_GET['msg']) && $_GET['msg'] === 'updated') {
     $flashMessage = 'Establecimiento actualizado correctamente.';
     $flashType = 'success';
+}
+
+if (isset($_GET['msg']) && $_GET['msg'] === 'deleted') {
+    $flashMessage = 'Establecimiento eliminado correctamente.';
+    $flashType = 'success';
+}
+
+if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
+    $flashMessage = 'No se pudo eliminar el establecimiento.';
+    $flashType = 'danger';
 }
 
 ?>
@@ -713,6 +841,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'updated') {
             document.getElementById('edit-provincia').value = est.provincia || '';
             document.getElementById('edit-codigo-postal').value = est.codigo_postal || '';
             document.getElementById('edit-piso').value = est.piso || '';
+            document.getElementById('edit-image-file').value = '';
             document.getElementById('edit-latitude').value = est.latitude ?? '';
             document.getElementById('edit-longitude').value = est.longitude ?? '';
 
@@ -907,12 +1036,13 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'updated') {
                                         'provincia' => $establecimiento['provincia'] ?? '',
                                         'codigo_postal' => $establecimiento['codigo_postal'] ?? '',
                                         'piso' => $establecimiento['piso'] ?? '',
+                                        'image_url' => $establecimiento['image_url'] ?? '',
                                         'latitude' => $establecimiento['latitude'] ?? '',
                                         'longitude' => $establecimiento['longitude'] ?? ''
                                     ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
                                         <i class="fas fa-edit"></i> Editar
                                     </button>
-                                    <button class="btn btn-action btn-delete" onclick="confirmarEliminacion('<?php echo $establecimiento['id']; ?>', '<?php echo htmlspecialchars($establecimiento['nombre']); ?>')">
+                                    <button class="btn btn-action btn-delete" onclick='confirmarEliminacion(<?php echo json_encode((string)$establecimiento['id']); ?>, <?php echo json_encode((string)($establecimiento['nombre'] ?? '')); ?>)'>
                                         <i class="fas fa-trash-alt"></i> Eliminar
                                     </button>
                                 </div>
@@ -928,7 +1058,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'updated') {
         <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
-                    <form method="POST" action="verEstablecimientos.php">
+                    <form method="POST" action="verEstablecimientos.php" enctype="multipart/form-data">
                         <div class="modal-header">
                             <h5 class="modal-title">Editar establecimiento</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -965,6 +1095,10 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'updated') {
                                 <div class="col-md-4">
                                     <label class="form-label">Piso</label>
                                     <input type="text" class="form-control" id="edit-piso" name="piso">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Seleccionar nueva imagen</label>
+                                    <input type="file" class="form-control" id="edit-image-file" name="imagen_establecimiento" accept="image/jpeg,image/png,image/gif,image/webp">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Latitude</label>
