@@ -2,27 +2,21 @@
 require_once 'verificar_sesion_gestor.php';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
-        crossorigin="anonymous"></script>
-    <link href="style.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="../style.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.js"
-        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
-    <title>Tus reservas</title>
-
+    <title>TheNomadapp - Reservas Gestor</title>
 
     <script>
         window.onload = function() {
@@ -31,13 +25,13 @@ require_once 'verificar_sesion_gestor.php';
 
             showLoadingIndicator();
 
-            const url = "AllReservasAnfitrion.php";
+            // CAMBIO CLAVE: Apuntamos al archivo del Gestor
+            const url = "AllReservasGestor.php";
 
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     hideLoadingIndicator();
-                    console.log(data);
                     appendData(data);
                 })
                 .catch(err => {
@@ -52,7 +46,7 @@ require_once 'verificar_sesion_gestor.php';
                         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                             <span class="visually-hidden">Cargando...</span>
                         </div>
-                        <p class="mt-3 text-primary">Cargando tus reservas...</p>
+                        <p class="mt-3 text-primary">Cargando las reservas de tus establecimientos...</p>
                     </div>
                 `;
             }
@@ -73,7 +67,8 @@ require_once 'verificar_sesion_gestor.php';
                 let reservasEncontradas = false;
 
                 for (var i = 0; i < data.length; i++) {
-                    if (data[i].space.establecimiento) {
+                    // El filtro es igual: Supabase anula 'establecimiento' si no pertenece al gestor
+                    if (data[i].space && data[i].space.establecimiento) {
                         if (data[i].day >= today && data[i].cancelada == false) {
                             reservasEncontradas = true;
                             const fechaReserva = new Date(data[i].day);
@@ -108,7 +103,7 @@ require_once 'verificar_sesion_gestor.php';
 
                             var divEspacio = document.createElement("div");
                             divEspacio.className = "h6 mb-3";
-                            divEspacio.innerHTML = '<i class="fas fa-map-marker-alt me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Espacio:</strong> ' + data[i].space.name;
+                            divEspacio.innerHTML = '<i class="fas fa-map-marker-alt me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Espacio:</strong> ' + data[i].space.name + ' (' + data[i].space.establecimiento.name + ')';
                             divContenido.appendChild(divEspacio);
 
                             var divHorario = document.createElement("div");
@@ -119,7 +114,8 @@ require_once 'verificar_sesion_gestor.php';
 
                             var divUsuario = document.createElement("div");
                             divUsuario.className = "mb-3";
-                            divUsuario.innerHTML = '<i class="far fa-user me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Reservado por:</strong> ' + data[i].user.name;
+                            var nombreUsuario = data[i].user ? data[i].user.name : 'Usuario Desconocido';
+                            divUsuario.innerHTML = '<i class="far fa-user me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Reservado por:</strong> ' + nombreUsuario;
                             divContenido.appendChild(divUsuario);
 
                             var divider = document.createElement("hr");
@@ -149,16 +145,14 @@ require_once 'verificar_sesion_gestor.php';
 
                             divBoton.appendChild(botonDetalles);
                         }
-
                     }
-
                 }
 
                 if (!reservasEncontradas) {
                     container.innerHTML = `
                         <div class="alert alert-info mt-4" role="alert">
                             <i class="fas fa-info-circle me-2"></i>
-                            No tienes reservas próximas.
+                            No hay reservas próximas para tus establecimientos.
                         </div>
                     `;
                 }
@@ -241,20 +235,14 @@ require_once 'verificar_sesion_gestor.php';
         .icon-container {
             transition: transform 0.3s ease;
             padding: 5px 0;
+            color: #000000;
         }
 
         .footer-item:hover .icon-container {
             transform: translateY(-7px);
-        }
-
-        #per:checked~#lbl_per .icon-container,
-        #res:checked~#lbl_res .icon-container,
-        #his:checked~#lbl_his .icon-container,
-        #esp:checked~#lbl_esp .icon-container {
             color: #007bff;
         }
 
-        /* New hover styles for "Establecimientos" and "Perfil" */
         #lbl_his:hover,
         #lbl_per:hover,
         #lbl_anf:hover,
@@ -262,17 +250,6 @@ require_once 'verificar_sesion_gestor.php';
         #lbl_res:hover,
         #lbl_esp:hover {
             color: #00B7CF !important;
-            /* For the text */
-        }
-
-        #lbl_his:hover .icon-container,
-        #lbl_per:hover .icon-container,
-        #lbl_anf:hover .icon-container,
-        #lbl_val:hover .icon-container,
-        #lbl_res:hover .icon-container,
-        #lbl_esp:hover .icon-container {
-            color: #007bff;
-            /* For the icon */
         }
 
         .header-main {
@@ -324,11 +301,12 @@ require_once 'verificar_sesion_gestor.php';
         <div class="container-fluid info text-center">
             <div class="row">
                 <div class="col color-white h2 fw-bold pt-3 pb-2">
-                    Tus Reservas
+                    Reservas de tus Establecimientos
                 </div>
             </div>
         </div>
     </header>
+
     <div class="row py-3 mb-4 header-main">
         <div class="col-12">
             <div class="header-tabs shadow-sm">
@@ -349,72 +327,53 @@ require_once 'verificar_sesion_gestor.php';
             </div>
         </div>
     </div>
+
     <div class="container" id="container">
     </div>
 
     <div class="container-fluid footer mt-5 p-3">
         <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-            <label for="anf" id="lbl_anf" class="col-2 text-center footer-item">
-                <div class="row">
-                    <a href="Anfitriones.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-users p-1 m-0"></i>
+            <label for="anf" class="col-2 text-center footer-item">
+                <div class="row"><a href="Anfitriones.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i>
                             <div>Anfitriones</div>
                         </div>
-                    </a>
-                </div>
+                    </a></div>
             </label>
-
-            <label for="val" id="lbl_val" class="col-2 text-center footer-item">
-                <div class="row">
-                    <a href="verValidar.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-check-circle p-1 m-0"></i>
+            <label for="val" class="col-2 text-center footer-item">
+                <div class="row"><a href="verValidar.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
                             <div>Validar</div>
                         </div>
-                    </a>
-                </div>
+                    </a></div>
             </label>
-
-            <label for="res" id="lbl_res" class="col-2 text-center footer-item">
-                <div class="row">
-                    <a href="verReservas.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-book-open p-1 m-0"></i>
+            <label for="res" class="col-2 text-center footer-item">
+                <div class="row"><a href="verReservas.php">
+                        <div class="col-12 icon-container" style="color: #007bff;"><i class="h2 fas fa-book-open p-1 m-0"></i>
                             <div>Reservas</div>
                         </div>
-                    </a>
-                </div>
+                    </a></div>
             </label>
-            <label for="his" id="lbl_his" class="col-2 text-center footer-item">
-                <div class="row">
-                    <a href="verEstablecimientos.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-building p-1 m-0"></i>
+            <label for="his" class="col-2 text-center footer-item">
+                <div class="row"><a href="verEstablecimientos.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i>
                             <div>Establecimientos</div>
                         </div>
-                    </a>
-                </div>
+                    </a></div>
             </label>
-            <label for="esp" id="lbl_esp" class="col-2 text-center footer-item">
-                <div class="row">
-                    <a href="verEspacios.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-chair p-1 m-0"></i>
+            <label for="esp" class="col-2 text-center footer-item">
+                <div class="row"><a href="verEspacios.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-chair p-1 m-0"></i>
                             <div>Espacios</div>
                         </div>
-                    </a>
-                </div>
+                    </a></div>
             </label>
-            <label for="per" id="lbl_per" class="col-2 text-center footer-item">
-                <div class="row">
-                    <a href="tuPerfil.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-user-tie p-1 m-0"></i>
+            <label for="per" class="col-2 text-center footer-item">
+                <div class="row"><a href="tuPerfil.php">
+                        <div class="col-12 icon-container"><i class="h2 fas fa-user-tie p-1 m-0"></i>
                             <div>Perfil</div>
                         </div>
-                    </a>
-                </div>
+                    </a></div>
             </label>
         </div>
     </div>
