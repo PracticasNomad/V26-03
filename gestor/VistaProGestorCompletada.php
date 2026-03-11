@@ -1,7 +1,6 @@
 <?php
-require_once 'verificar_sesion_host.php';
+require_once 'verificar_sesion_gestor.php';
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -14,8 +13,6 @@ require_once 'verificar_sesion_host.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="icon" href="../favicon-color.png">
-    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
-    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <style>
         body {
             min-height: 100vh;
@@ -87,6 +84,7 @@ require_once 'verificar_sesion_host.php';
             background-color: #4CCBD4;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
         }
 
         /* CLASE NUEVA PARA QUITAR EL PUNTO NEGRO Y DEJAR SOLO EL CHECK VERDE */
@@ -109,8 +107,8 @@ require_once 'verificar_sesion_host.php';
                 alt="Header">
             <div class="header-overlay">
                 <div class="text-center">
-                    <h1 class="fw-bold mb-2">¡Gracias por mejorar tu suscripción!</h1>
-                    <h5 class="fw-normal">Tu plan ha sido actualizado correctamente</h5>
+                    <h1 class="fw-bold mb-2">¡Gracias por unirte al plan Pro Gestor!</h1>
+                    <h5 class="fw-normal">Tu suscripción ha sido activada correctamente</h5>
                 </div>
             </div>
         </div>
@@ -120,31 +118,31 @@ require_once 'verificar_sesion_host.php';
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card p-4">
-                    <h4 class="section-title"><i class="fas fa-info-circle me-2"></i>Detalles</h4>
-                    <p class="mb-2">Ahora dispones de:</p>
+                    <h4 class="section-title"><i class="fas fa-info-circle me-2"></i>Nuevos Límites Disponibles</h4>
+                    <p class="mb-3">A partir de ahora dispones de:</p>
+
                     <ul class="custom-list mb-4">
-                        <li><i class="fas fa-check text-success me-2"></i><strong>Anfitriones ilimitados</strong>en tu
+                        <li><i class="fas fa-check text-success me-2"></i> Hasta <strong>20 anfitriones</strong> en tu
                             cartera.</li>
-                        <li><i class="fas fa-check text-success me-2"></i><strong>Más de 50
-                                establecimientos</strong>gestionados.</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Ideal para grandes gestoras.</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Hasta <strong>50 establecimientos</strong>
+                            gestionados.</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Herramientas de gestión intermedias.</li>
                     </ul>
-                    <p>Disfruta de tu suscripccion hasta el <?= $_SESSION['fecha_fin'] ?></p>
+
+                    <p class="text-muted">Podrás disfrutar de tu suscripción hasta el
+                        <strong><?= isset($_SESSION['fecha_fin']) ? date('d/m/Y', strtotime($_SESSION['fecha_fin'])) : 'próximo ciclo' ?></strong>.
+                    </p>
 
                     <div class="text-center mt-4">
                         <a href="tuPerfil.php" class="btn btn-nomad">
-                            <i class="fas fa-user-circle me-2"></i>Volver al perfil
+                            <i class="fas fa-user-circle me-2"></i>Ir a mi panel de control
                         </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 </body>
 
 </html>
-
-<?php
-unset($_SESSION['fecha_fin']);
-?>
+<?php unset($_SESSION['fecha_fin']); ?>
