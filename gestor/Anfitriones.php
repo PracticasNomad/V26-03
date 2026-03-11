@@ -10,29 +10,65 @@ $dotenv->load();
 
 $anfitriones = [];
 $error_db = null;
+$gestorId = $_SESSION["user_id"];
 
-$url = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/host?select=id,name,email,phone,empresa&order=name.asc";
-$ch = curl_init($url);
-curl_setopt_array($ch, array(
-    CURLOPT_CUSTOMREQUEST => "GET",
-    CURLOPT_HTTPHEADER => array(
-        'Content-Type: application/json',
-        'apikey: ' . $_ENV['DATABASE_APIKEY'],
-    ),
-    CURLOPT_RETURNTRANSFER => true,
-));
+// 1. OBTENER EL CÓDIGO POSTAL DEL GESTOR
+$urlGestor = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/gestor?select=codigo_postal&id=eq." . $gestorId;
+$chGestor = curl_init($urlGestor);
+curl_setopt_array($chGestor, [
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+        'apikey: ' . $_ENV['SERVICE_APIKEY']
+    ],
+    CURLOPT_RETURNTRANSFER => true
+]);
+$resGestor = curl_exec($chGestor);
+curl_close($chGestor);
 
-$resultado = curl_exec($ch);
-$codigoRespuesta = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
+$datosGestor = json_decode($resGestor, true);
+$cpGestor = $datosGestor[0]['codigo_postal'] ?? null;
 
-if ($codigoRespuesta === 200) {
-    $datos = json_decode($resultado, true);
-    if (is_array($datos)) {
-        $anfitriones = $datos;
+if ($cpGestor) {
+    // 2. BUSCAR ESTABLECIMIENTOS DE ESE CP Y EXTRAER SUS ANFITRIONES
+    $urlEstablecimientos = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=host_id,host(id,name,email,phone,empresa)&codigo_postal=eq." . urlencode($cpGestor);
+
+    $ch = curl_init($urlEstablecimientos);
+    curl_setopt_array($ch, [
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+            'apikey: ' . $_ENV['SERVICE_APIKEY'],
+        ],
+        CURLOPT_RETURNTRANSFER => true,
+    ]);
+
+    $resultado = curl_exec($ch);
+    $codigoRespuesta = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
+        $establecimientos = json_decode($resultado, true);
+
+        // Extraemos los anfitriones y eliminamos duplicados
+        $anfitrionesUnicos = [];
+        foreach ($establecimientos as $est) {
+            if (isset($est['host']) && $est['host']) {
+                $hostId = $est['host']['id'];
+                if (!isset($anfitrionesUnicos[$hostId])) {
+                    $anfitrionesUnicos[$hostId] = $est['host'];
+                }
+            }
+        }
+
+        // Convertimos el array asociativo a uno indexado y ordenamos
+        $anfitriones = array_values($anfitrionesUnicos);
+        usort($anfitriones, function ($a, $b) {
+            return strcmp($a['name'] ?? '', $b['name'] ?? '');
+        });
+    } else {
+        $error_db = "Error al obtener los datos de la zona (Código: $codigoRespuesta).";
     }
 } else {
-    $error_db = "Error al conectar con la API de la base de datos (Código: $codigoRespuesta).";
+    $error_db = "Tu perfil de gestor no tiene un código postal asignado. Actualiza tu perfil primero.";
 }
 ?>
 
@@ -48,9 +84,7 @@ if ($codigoRespuesta === 200) {
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="icon" href="../favicon-color.png">
-    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
-    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="../img/favicon-color.png">
     <title>Gestión de Anfitriones</title>
     <style>
         body {
@@ -248,7 +282,7 @@ if ($codigoRespuesta === 200) {
         <div class="container-fluid info text-center">
             <div class="row">
                 <div class="col color-white h2 fw-bold pt-3 pb-2">
-                    Anfitriones
+                    Anfitriones de tu zona
                 </div>
             </div>
         </div>
@@ -256,8 +290,14 @@ if ($codigoRespuesta === 200) {
 
     <div class="contenedor-principal">
         <?php if (isset($error_db)): ?>
-            <div class="alert alert-danger text-center">
-                <?php echo $error_db; ?>
+            <div class="alert alert-danger text-center shadow-sm rounded-pill mb-4">
+                <i class="fas fa-exclamation-triangle me-2"></i> <?php echo $error_db; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!isset($error_db) && empty($anfitriones)): ?>
+            <div class="alert alert-info text-center shadow-sm rounded-pill mb-4">
+                <i class="fas fa-info-circle me-2"></i> No hay establecimientos registrados en tu código postal (<?php echo htmlspecialchars($cpGestor); ?>).
             </div>
         <?php endif; ?>
 
@@ -265,7 +305,7 @@ if ($codigoRespuesta === 200) {
             <label for="select-anfitrion" class="form-label fw-bold mb-3 h5">
                 <i class="fas fa-search me-2"></i>Buscar y seleccionar anfitrión:
             </label>
-            <select id="select-anfitrion" class="form-select form-select-lg">
+            <select id="select-anfitrion" class="form-select form-select-lg" <?php echo empty($anfitriones) ? 'disabled' : ''; ?>>
                 <option value="">-- Selecciona un anfitrión de la lista --</option>
                 <?php foreach ($anfitriones as $anf): ?>
                     <option value="<?php echo htmlspecialchars($anf['id']); ?>"
@@ -314,58 +354,11 @@ if ($codigoRespuesta === 200) {
 
                     <div class="btn-actions mt-4">
                         <a href="#" id="btn-edit-anfitrion" class="btn btn-action btn-edit">
-                            <i class="fas fa-user-edit"></i> Editar Perfil
+                            <i class="fas fa-user-edit"></i> Ver Establecimientos
                         </a>
 
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade modal-confirm" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center pt-0">
-                    <div class="icon-box mb-3">
-                        <i class="fas fa-user-slash"></i>
-                    </div>
-                    <h5 class="modal-title mb-2 fw-bold" id="confirmModalLabel">Confirmar Suspensión</h5>
-                    <p class="text-muted mb-0">¿Estás seguro de que deseas suspender al anfitrión <strong
-                            id="anfitrionNombreModal"></strong>?</p>
-                </div>
-                <div class="modal-footer border-0 d-flex justify-content-center">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger px-4" id="btnConfirmarSuspender">Suspender
-                        Anfitrión</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="toast-container">
-        <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive"
-            aria-atomic="true" id="toastExito">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="fas fa-check-circle me-2"></i> Anfitrión suspendido correctamente.
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
-            </div>
-        </div>
-        <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive"
-            aria-atomic="true" id="toastError">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="fas fa-exclamation-circle me-2"></i> Error al intentar suspender al anfitrión.
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
             </div>
         </div>
     </div>
@@ -391,8 +384,8 @@ if ($codigoRespuesta === 200) {
                     $('#card-telefono').text(telefono);
                     $('#card-id').text('#' + id);
 
-                    // Enlace de edición real (si lo creas luego)
-                    $('#btn-edit-anfitrion').attr('href', 'editarAnfitrion.php?id=' + id);
+                    // Redirigir a los establecimientos de ESE anfitrión
+                    $('#btn-edit-anfitrion').attr('href', 'verEstablecimientos.php?host_id=' + id);
 
                     $('#detalles-anfitrion').fadeIn();
                 } else {
