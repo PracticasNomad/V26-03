@@ -48,6 +48,22 @@ if (!$establecimiento) {
     exit;
 }
 
+$estadoValidacion = $establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null;
+
+if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidacion === 't' || $estadoValidacion === 1 || $estadoValidacion === '1') {
+    $badgeClass = 'bg-success';
+    $badgeTextClass = '';
+    $badgeLabel = 'Aprobado';
+} elseif ($estadoValidacion === false || $estadoValidacion === 'false' || $estadoValidacion === 'f' || $estadoValidacion === 0 || $estadoValidacion === '0') {
+    $badgeClass = 'bg-danger';
+    $badgeTextClass = '';
+    $badgeLabel = 'Rechazado';
+} else {
+    $badgeClass = 'bg-warning';
+    $badgeTextClass = ' text-dark';
+    $badgeLabel = 'Pendiente';
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -390,7 +406,7 @@ if (!$establecimiento) {
                     <div class="card-header-overlay"></div>
                     <div class="card-title">
                         <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
-                        <span class="badge bg-warning text-dark fs-6"><?php echo isset($establecimiento['estaValidado']) && $establecimiento['estaValidado'] ? 'Validado' : 'Pendiente'; ?></span>
+                        <span class="badge <?php echo $badgeClass . $badgeTextClass; ?> fs-6"><?php echo $badgeLabel; ?></span>
                     </div>
                 </div>
 
@@ -428,7 +444,7 @@ if (!$establecimiento) {
                         </a>
 
                         <button type="button" class="btn btn-action btn-aprobar" id="btn-aprobar" data-action="aprobar" data-id="<?php echo $establecimiento['id']; ?>">
-                            <i class="fas fa-check-circle"></i> <span class="btn-text">Validar</span>
+                            <i class="fas fa-check-circle"></i> <span class="btn-text">Aprobar</span>
                         </button>
 
                         <button type="button" class="btn btn-action btn-rechazar" id="btn-rechazar" data-action="rechazar" data-id="<?php echo $establecimiento['id']; ?>">
@@ -531,15 +547,19 @@ if (!$establecimiento) {
             button.disabled = true;
 
             // Hacer la petición AJAX
-            fetch('procesar_validacion.php?id=' + id + '&accion=' + action + '&ajax=1', {
-                method: 'POST', // Asegúrate de que el método es POST
-                body: new FormData() // Aquí puedes enviar otros datos si es necesario
+            const formData = new FormData();
+            formData.append('accion', action);
+
+            fetch('procesar_validacion.php?id=' + id + '&ajax=1', {
+                method: 'POST',
+                body: formData
             })
                 .then(response => response.json()) // Espera una respuesta JSON
                 .then(data => {
                     if (data.success) {
                         // Éxito: mostrar mensaje y cambiar estilos
-                        statusBadge.classList.add('show', 'success');
+                        statusBadge.classList.remove('error', 'success');
+                        statusBadge.classList.add('show', action === 'aprobar' ? 'success' : 'error');
                         statusBadge.innerHTML = `<i class="fas fa-${action === 'aprobar' ? 'check' : 'times'}-circle me-2"></i>${data.message}`;
 
                         if (action === 'aprobar') {
