@@ -507,7 +507,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
                     <div class="info-row">
                         <div class="info-icon"><i class="fas fa-image"></i></div>
                         <div>
-                            <strong>Foto principal (image_url):</strong>
+                            <strong>Foto principal:</strong>
                             <div class="field-value"><?php echo !empty($establecimiento['image_url']) ? htmlspecialchars($establecimiento['image_url']) : 'Sin imagen principal'; ?></div>
                         </div>
                     </div>
@@ -515,7 +515,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
                     <div class="info-row">
                         <div class="info-icon"><i class="fas fa-images"></i></div>
                         <div>
-                            <strong>Fotos de galeria (gallery.image_url):</strong>
+                            <strong>Fotos de galeria:</strong>
                             <?php if (!empty($galleryImages)): ?>
                                 <div class="gallery-grid">
                                     <?php foreach ($galleryImages as $imgUrl): ?>
