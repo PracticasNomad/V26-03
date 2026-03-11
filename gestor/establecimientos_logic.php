@@ -71,16 +71,12 @@ function getEstadisticasEstablecimientos() {
     $pendientes = 0;
 
     foreach ($establecimientos as $est) {
-        // Usar el campo estaValidado (boolean)
-        if (isset($est['estaValidado'])) {
-            if ($est['estaValidado']) {
-                $aprobados++;
-            } else {
-                // Solo contar como pendiente si no está rechazado
-                if (($est['estado'] ?? '') !== 'rechazado') {
-                    $pendientes++;
-                }
-            }
+        $estadoValidacion = $est['estaValidado'] ?? $est['estavalidado'] ?? null;
+
+        if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidacion === 't' || $estadoValidacion === 1 || $estadoValidacion === '1') {
+            $aprobados++;
+        } elseif ($estadoValidacion === null || $estadoValidacion === '') {
+            $pendientes++;
         } else {
             // Fallback al campo estado si estaValidado no existe
             switch ($est['estado'] ?? '') {

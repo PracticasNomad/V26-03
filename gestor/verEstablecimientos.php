@@ -691,10 +691,20 @@ $dotenv->load();
                                     <div class="service-icons">
                                         <?php
                                         // Determinar el estado de validación
-                                        $estaValidado = isset($establecimiento['estaValidado']) ? $establecimiento['estaValidado'] : false;
-                                        $estadoClass = $estaValidado ? 'success' : 'warning';
-                                        $estadoText = $estaValidado ? 'Validado' : 'Pendiente';
-                                        $estadoIcon = $estaValidado ? 'check-circle' : 'clock';
+                                        $estadoValidacion = $establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null;
+                                        if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidacion === 't' || $estadoValidacion === 1 || $estadoValidacion === '1') {
+                                            $estadoClass = 'success';
+                                            $estadoText = 'Aprobado';
+                                            $estadoIcon = 'check-circle';
+                                        } elseif ($estadoValidacion === false || $estadoValidacion === 'false' || $estadoValidacion === 'f' || $estadoValidacion === 0 || $estadoValidacion === '0') {
+                                            $estadoClass = 'danger';
+                                            $estadoText = 'Rechazado';
+                                            $estadoIcon = 'ban';
+                                        } else {
+                                            $estadoClass = 'warning';
+                                            $estadoText = 'Pendiente';
+                                            $estadoIcon = 'clock';
+                                        }
                                         ?>
                                         <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>" title="<?php echo $estadoText; ?>">
                                             <i class="fas fa-<?php echo $estadoIcon; ?>"></i>
