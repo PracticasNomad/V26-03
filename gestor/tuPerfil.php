@@ -328,7 +328,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             <button type="button" class="btn btn-plan rounded-pill mt-2 w-100" onclick="window.location.href='Suscripciones.php'">
                 <i class="fas fa-exchange-alt"></i> Cambiar plan
             </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
