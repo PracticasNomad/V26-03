@@ -206,7 +206,9 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet'>
-    <link rel="icon" href="Nomadapp.ico" type="image/png">
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Mis Establecimientos</title>
     <style>
         :root {
