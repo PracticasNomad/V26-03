@@ -11,6 +11,18 @@ $establecimientos = [];
 $establecimientosRechazados = [];
 $establecimientosValidados = [];
 
+function normalizarUrlImagen($url) {
+    if (empty($url)) {
+        return '';
+    }
+
+    if (strpos($url, 'http://') === 0 || strpos($url, 'https://') === 0) {
+        return $url;
+    }
+
+    return 'http://' . ltrim($url, '/');
+}
+
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/establecimiento';
 $ch = curl_init($url);
 curl_setopt_array($ch, [
@@ -27,7 +39,61 @@ curl_close($ch);
 if ($httpCode === 200) {
     $data = json_decode($response, true);
     if (is_array($data)) {
+        $ids = [];
+        foreach ($data as $estTmp) {
+            if (isset($estTmp['id'])) {
+                $ids[] = $estTmp['id'];
+            }
+        }
+
+        $galleryByEstablecimiento = [];
+        if (!empty($ids)) {
+            $idsFilter = array_map(function ($id) {
+                if (is_numeric($id)) {
+                    return $id;
+                }
+                return '"' . str_replace('"', '\\"', (string)$id) . '"';
+            }, $ids);
+
+            $urlGallery = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
+                . '/rest/v1/gallery?select=establecimiento_id,image_url&establecimiento_id=in.(' . implode(',', $idsFilter) . ')&order=establecimiento_id.asc';
+
+            $chGallery = curl_init($urlGallery);
+            curl_setopt_array($chGallery, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'apikey: ' . $_ENV['DATABASE_APIKEY'],
+                    'Authorization: Bearer ' . ($_SESSION['token'] ?? ''),
+                ],
+            ]);
+
+            $responseGallery = curl_exec($chGallery);
+            $httpCodeGallery = curl_getinfo($chGallery, CURLINFO_HTTP_CODE);
+            curl_close($chGallery);
+
+            if ($httpCodeGallery === 200) {
+                $galleryData = json_decode($responseGallery, true);
+                if (is_array($galleryData)) {
+                    foreach ($galleryData as $img) {
+                        $estId = $img['establecimiento_id'] ?? null;
+                        $imgUrl = $img['image_url'] ?? null;
+
+                        if ($estId !== null && !isset($galleryByEstablecimiento[$estId]) && !empty($imgUrl)) {
+                            $galleryByEstablecimiento[$estId] = $imgUrl;
+                        }
+                    }
+                }
+            }
+        }
+
         foreach ($data as $est) {
+            $idEst = $est['id'] ?? null;
+            $banner = normalizarUrlImagen($est['image_url'] ?? '');
+            if (empty($banner) && $idEst !== null && isset($galleryByEstablecimiento[$idEst])) {
+                $banner = normalizarUrlImagen($galleryByEstablecimiento[$idEst]);
+            }
+
+            $est['banner_image_url'] = !empty($banner) ? $banner : '';
             
             // 1. Buscamos el valor independientemente de mayúsculas/minúsculas
             $val = $est['estaValidado'] ?? $est['estavalidado'] ?? null;
@@ -74,6 +140,7 @@ function formatearDireccion($dir, $piso) {
         }
         .establecimiento-card:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.15); transform: translateY(-2px); }
         .card-header { height: 140px; background-size: cover; background-position: center; display: flex; align-items: flex-end; position: relative; background-color: #f8f9fa; }
+        .card-header.default-image { background-image: none !important; background-color: #bfc5cc; }
         .card-header-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)); }
         .card-title { color: white; padding: 15px; font-weight: 600; font-size: 1.1rem; z-index: 1; width: 100%; }
         .card-body { padding: 15px; display: flex; flex-direction: column; flex: 1; }
@@ -133,7 +200,7 @@ function formatearDireccion($dir, $piso) {
                     ?>
                         <div class="col-12 col-md-6 col-lg-4 mb-4 card-container" id="col-est-<?php echo $establecimiento['id']; ?>">
                             <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>">
-                                <div class="card-header" style="background-image: url('<?php echo isset($establecimiento['image_url']) ? 'http://' . $establecimiento['image_url'] : '../img/default.jpg'; ?>');">
+                                <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"<?php if (!empty($establecimiento['banner_image_url'])): ?> style="background-image: url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"<?php endif; ?>>
                                     <div class="card-header-overlay"></div>
                                     <div class="card-title"><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
                                 </div>
@@ -169,7 +236,7 @@ function formatearDireccion($dir, $piso) {
                     ?>
                         <div class="col-12 col-md-6 col-lg-4 mb-4 card-container" id="col-est-<?php echo $establecimiento['id']; ?>">
                             <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>" style="border-left: 4px solid #dc3545; opacity: 0.85;">
-                                <div class="card-header" style="background-image: url('<?php echo isset($establecimiento['image_url']) ? 'http://' . $establecimiento['image_url'] : '../img/default.jpg'; ?>');">
+                                <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"<?php if (!empty($establecimiento['banner_image_url'])): ?> style="background-image: url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"<?php endif; ?>>
                                     <div class="card-header-overlay"></div>
                                     <div class="card-title"><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
                                 </div>
@@ -200,7 +267,7 @@ function formatearDireccion($dir, $piso) {
                     ?>
                         <div class="col-12 col-md-6 col-lg-4 mb-4 card-container" id="col-est-<?php echo $establecimiento['id']; ?>">
                             <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>" style="border-left: 4px solid #28a745;">
-                                <div class="card-header" style="background-image: url('<?php echo isset($establecimiento['image_url']) ? 'http://' . $establecimiento['image_url'] : '../img/default.jpg'; ?>');">
+                                <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"<?php if (!empty($establecimiento['banner_image_url'])): ?> style="background-image: url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"<?php endif; ?>>
                                     <div class="card-header-overlay"></div>
                                     <div class="card-title"><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
                                 </div>

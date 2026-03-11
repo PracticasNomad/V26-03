@@ -48,6 +48,50 @@ if (!$establecimiento) {
     exit;
 }
 
+function normalizarUrlImagen($url) {
+    if (empty($url)) {
+        return '';
+    }
+
+    if (strpos($url, 'http://') === 0 || strpos($url, 'https://') === 0) {
+        return $url;
+    }
+
+    return 'http://' . ltrim($url, '/');
+}
+
+$galleryImages = [];
+$urlGallery = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
+    . '/rest/v1/gallery?establecimiento_id=eq.' . $id . '&select=image_url';
+
+$chGallery = curl_init($urlGallery);
+curl_setopt_array($chGallery, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'apikey: ' . $_ENV['DATABASE_APIKEY'],
+        'Authorization: Bearer ' . ($_SESSION['token'] ?? ''),
+    ],
+]);
+
+$responseGallery = curl_exec($chGallery);
+$httpCodeGallery = curl_getinfo($chGallery, CURLINFO_HTTP_CODE);
+curl_close($chGallery);
+
+if ($httpCodeGallery === 200) {
+    $galleryData = json_decode($responseGallery, true);
+    if (is_array($galleryData)) {
+        foreach ($galleryData as $img) {
+            if (!empty($img['image_url'])) {
+                $galleryImages[] = $img['image_url'];
+            }
+        }
+    }
+}
+
+$latitud = $establecimiento['latitude'] ?? $establecimiento['latitud'] ?? null;
+$longitud = $establecimiento['longitude'] ?? $establecimiento['longitud'] ?? null;
+$fotoPrincipal = normalizarUrlImagen($establecimiento['image_url'] ?? '');
+
 $estadoValidacion = $establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null;
 
 if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidacion === 't' || $estadoValidacion === 1 || $estadoValidacion === '1') {
@@ -118,6 +162,11 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
             align-items: flex-end;
             background-color: #f8f9fa;
             background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-header.default-image {
+            background-image: none !important;
+            background-color: #bfc5cc;
         }
 
         .card-header-overlay {
@@ -318,6 +367,33 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
             border: 1px solid #dee2e6;
         }
 
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .gallery-item {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            background: #f8f9fa;
+            height: 90px;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .field-value {
+            color: #495057;
+            word-break: break-word;
+        }
+
         .badge {
             font-size: 0.8rem;
             padding: 0.4rem 0.8rem;
@@ -402,7 +478,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
         <div id="establecimiento-main">
             <div class="establecimiento-card">
 
-                <div class="card-header" style="background-image: url('<?php echo isset($establecimiento['image_url']) ? 'http://' . $establecimiento['image_url'] : '../img/default.jpg'; ?>');">
+                <div class="card-header<?php echo empty($fotoPrincipal) ? ' default-image' : ''; ?>"<?php if (!empty($fotoPrincipal)): ?> style="background-image: url('<?php echo htmlspecialchars($fotoPrincipal); ?>');"<?php endif; ?>>
                     <div class="card-header-overlay"></div>
                     <div class="card-title">
                         <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
@@ -428,13 +504,53 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
                         <div><strong>Localidad:</strong> <?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?> (<?php echo htmlspecialchars($establecimiento['codigo_postal'] ?? ''); ?>)</div>
                     </div>
 
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-image"></i></div>
+                        <div>
+                            <strong>Foto principal (image_url):</strong>
+                            <div class="field-value"><?php echo !empty($establecimiento['image_url']) ? htmlspecialchars($establecimiento['image_url']) : 'Sin imagen principal'; ?></div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-images"></i></div>
+                        <div>
+                            <strong>Fotos de galeria (gallery.image_url):</strong>
+                            <?php if (!empty($galleryImages)): ?>
+                                <div class="gallery-grid">
+                                    <?php foreach ($galleryImages as $imgUrl): ?>
+                                        <div class="gallery-item">
+                                            <img src="<?php echo htmlspecialchars(normalizarUrlImagen($imgUrl)); ?>" alt="Foto de galeria">
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="field-value">Sin fotos en gallery</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-map-pin"></i></div>
+                        <div>
+                            <strong>Coordenadas (latitude / longitude):</strong>
+                            <div class="field-value">
+                                <?php if ($latitud !== null && $longitud !== null): ?>
+                                    <?php echo htmlspecialchars((string)$latitud); ?>, <?php echo htmlspecialchars((string)$longitud); ?>
+                                <?php else: ?>
+                                    Coordenadas no disponibles
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="info-row mt-4">
                         <div class="info-icon"><i class="fas fa-map"></i></div>
-                        <div><strong>Ubicación en el mapa:</strong></div>
+                        <div><strong>Mapa (latitude / longitude):</strong></div>
                     </div>
                     <div class="map-container" id="map-validacion">
                         <div class="d-flex justify-content-center align-items-center h-100 bg-light text-muted">
-                            Mapa de Mapbox (Requiere JS)
+                            Cargando mapa...
                         </div>
                     </div>
 
@@ -531,6 +647,45 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
         const card = document.querySelector('.establecimiento-card');
         const statusBadge = document.getElementById('validation-status-badge');
         const btnActions = document.getElementById('btn-actions');
+        const mapContainer = document.getElementById('map-validacion');
+
+        const latitude = <?php echo json_encode($latitud); ?>;
+        const longitude = <?php echo json_encode($longitud); ?>;
+        const nombreEstablecimiento = <?php echo json_encode($establecimiento['nombre'] ?? 'Establecimiento'); ?>;
+        const direccionEstablecimiento = <?php echo json_encode(($establecimiento['direccion'] ?? '') . ', ' . ($establecimiento['localidad'] ?? '')); ?>;
+
+        const MAPBOX_TOKEN = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
+
+        function initMap() {
+            const lat = Number(latitude);
+            const lng = Number(longitude);
+
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                mapContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light text-muted">No hay coordenadas validas (latitude / longitude) para mostrar el mapa.</div>';
+                return;
+            }
+
+            if (typeof mapboxgl === 'undefined') {
+                mapContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light text-muted">No se pudo cargar Mapbox.</div>';
+                return;
+            }
+
+            mapboxgl.accessToken = MAPBOX_TOKEN;
+
+            const map = new mapboxgl.Map({
+                container: 'map-validacion',
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: [lng, lat],
+                zoom: 14
+            });
+
+            new mapboxgl.Marker({ color: '#28a745' })
+                .setLngLat([lng, lat])
+                .setPopup(new mapboxgl.Popup().setHTML('<strong>' + nombreEstablecimiento + '</strong><br>' + direccionEstablecimiento))
+                .addTo(map);
+        }
+
+        initMap();
 
         function performValidation(action) {
             if (!confirm(action === 'aprobar' ? 

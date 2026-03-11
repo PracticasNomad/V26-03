@@ -21,6 +21,18 @@ $backgroundImages = [
     '../img/bg4.jpg',
 ];
 
+function normalizarUrlImagen($url) {
+    if (empty($url)) {
+        return '';
+    }
+
+    if (strpos($url, 'http://') === 0 || strpos($url, 'https://') === 0) {
+        return $url;
+    }
+
+    return 'http://' . ltrim($url, '/');
+}
+
 /**
  * Obtiene todos los establecimientos (excluyendo rechazados)
  */
@@ -47,9 +59,62 @@ function getEstablecimientosAsignados() {
         $data = json_decode($response, true);
         $establecimientos = [];
         if (is_array($data)) {
+            $ids = [];
+            foreach ($data as $estTmp) {
+                if (isset($estTmp['id'])) {
+                    $ids[] = $estTmp['id'];
+                }
+            }
+
+            $galleryByEstablecimiento = [];
+            if (!empty($ids)) {
+                $idsFilter = array_map(function ($id) {
+                    if (is_numeric($id)) {
+                        return $id;
+                    }
+                    return '"' . str_replace('"', '\\"', (string)$id) . '"';
+                }, $ids);
+
+                $urlGallery = $apiUrl . '/gallery?select=establecimiento_id,image_url&establecimiento_id=in.(' . implode(',', $idsFilter) . ')&order=establecimiento_id.asc';
+
+                $chGallery = curl_init($urlGallery);
+                curl_setopt($chGallery, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($chGallery, CURLOPT_HTTPHEADER, [
+                    'apikey: ' . $_ENV['DATABASE_APIKEY'],
+                    'Authorization: Bearer ' . ($_SESSION['access_token'] ?? $_SESSION['token'] ?? ''),
+                    'Content-Type: application/json'
+                ]);
+
+                $responseGallery = curl_exec($chGallery);
+                $httpCodeGallery = curl_getinfo($chGallery, CURLINFO_HTTP_CODE);
+                curl_close($chGallery);
+
+                if ($httpCodeGallery === 200) {
+                    $galleryData = json_decode($responseGallery, true);
+                    if (is_array($galleryData)) {
+                        foreach ($galleryData as $img) {
+                            $estId = $img['establecimiento_id'] ?? null;
+                            $imgUrl = $img['image_url'] ?? null;
+
+                            if ($estId !== null && !isset($galleryByEstablecimiento[$estId]) && !empty($imgUrl)) {
+                                $galleryByEstablecimiento[$estId] = $imgUrl;
+                            }
+                        }
+                    }
+                }
+            }
+
             // Filtrar para excluir rechazados
             foreach ($data as $est) {
                 if (($est['estado'] ?? '') !== 'rechazado') {
+                    $idEst = $est['id'] ?? null;
+                    $banner = normalizarUrlImagen($est['image_url'] ?? '');
+
+                    if (empty($banner) && $idEst !== null && isset($galleryByEstablecimiento[$idEst])) {
+                        $banner = normalizarUrlImagen($galleryByEstablecimiento[$idEst]);
+                    }
+
+                    $est['banner_image_url'] = !empty($banner) ? $banner : '';
                     $establecimientos[] = $est;
                 }
             }
@@ -115,7 +180,7 @@ function getImagenUrl($imageUrl) {
     if (empty($imageUrl)) {
         return ''; // No mostrar imagen por defecto
     }
-    return 'http://' . $imageUrl;
+    return normalizarUrlImagen($imageUrl);
 }
 
 // Obtener datos principales

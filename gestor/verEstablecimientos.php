@@ -9,6 +9,59 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
+$flashMessage = '';
+$flashType = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_establecimiento') {
+    $id = $_POST['id'] ?? '';
+
+    if (!empty($id)) {
+        $payload = [
+            'nombre' => trim($_POST['nombre'] ?? ''),
+            'descripcion' => trim($_POST['descripcion'] ?? ''),
+            'direccion' => trim($_POST['direccion'] ?? ''),
+            'localidad' => trim($_POST['localidad'] ?? ''),
+            'provincia' => trim($_POST['provincia'] ?? ''),
+            'codigo_postal' => trim($_POST['codigo_postal'] ?? ''),
+            'piso' => trim($_POST['piso'] ?? ''),
+            'latitude' => ($_POST['latitude'] ?? '') !== '' ? (float)$_POST['latitude'] : null,
+            'longitude' => ($_POST['longitude'] ?? '') !== '' ? (float)$_POST['longitude'] : null,
+        ];
+
+        $urlUpdate = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/establecimiento?id=eq.' . rawurlencode($id);
+        $chUpdate = curl_init($urlUpdate);
+        curl_setopt_array($chUpdate, [
+            CURLOPT_CUSTOMREQUEST => 'PATCH',
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'apikey: ' . $_ENV['DATABASE_APIKEY'],
+                'Authorization: Bearer ' . ($_SESSION['access_token'] ?? $_SESSION['token'] ?? ''),
+                'Prefer: return=representation'
+            ],
+        ]);
+
+        $responseUpdate = curl_exec($chUpdate);
+        $httpCodeUpdate = curl_getinfo($chUpdate, CURLINFO_HTTP_CODE);
+        curl_close($chUpdate);
+
+        if ($httpCodeUpdate >= 200 && $httpCodeUpdate < 300) {
+            header('Location: verEstablecimientos.php?msg=updated');
+            exit;
+        }
+
+        $errorUpdate = json_decode($responseUpdate, true);
+        $flashMessage = 'No se pudo actualizar el establecimiento. ' . htmlspecialchars($errorUpdate['message'] ?? 'Intenta de nuevo.');
+        $flashType = 'danger';
+    }
+}
+
+if (isset($_GET['msg']) && $_GET['msg'] === 'updated') {
+    $flashMessage = 'Establecimiento actualizado correctamente.';
+    $flashType = 'success';
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -35,7 +88,7 @@ $dotenv->load();
         }
 
         .contenedor-principal {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 1.5rem auto;
             padding: 0 20px;
         }
@@ -94,6 +147,11 @@ $dotenv->load();
             align-items: flex-end;
             background-color: #f8f9fa;
             background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-header.default-image {
+            background-image: none !important;
+            background-color: #bfc5cc;
         }
 
         .card-header-overlay {
@@ -258,11 +316,20 @@ $dotenv->load();
         }
 
         .map-container {
-            height: 300px;
+            height: 220px;
             border-radius: 8px;
             overflow: hidden;
             margin: 8px 0;
             border: 1px solid #dee2e6;
+        }
+
+        .est-card-col {
+            margin-bottom: 12px;
+        }
+
+        .establecimientos-grid {
+            --bs-gutter-x: 0.75rem;
+            row-gap: 0.2rem;
         }
 
         .no-establecimientos {
@@ -411,14 +478,7 @@ $dotenv->load();
 
         #establecimiento-main {
             width: 100%;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            margin: 0;
         }
 
         body {
@@ -607,18 +667,56 @@ $dotenv->load();
             const mapContainer = document.getElementById('map-' + establecimientoId);
             if (!mapContainer) return;
 
-            // Aquí puedes agregar la lógica para inicializar el mapa con Mapbox
-            // Por ahora, solo mostraremos un placeholder
-            mapContainer.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background-color: #f8f9fa; border-radius: 10px; color: #6c757d;">Mapa no disponible</div>';
+            const lat = parseFloat(mapContainer.dataset.lat || '');
+            const lng = parseFloat(mapContainer.dataset.lng || '');
+
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                mapContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background-color:#f8f9fa;border-radius:10px;color:#6c757d;">Coordenadas no disponibles</div>';
+                return;
+            }
+
+            if (typeof mapboxgl === 'undefined') {
+                mapContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background-color:#f8f9fa;border-radius:10px;color:#6c757d;">No se pudo cargar Mapbox</div>';
+                return;
+            }
+
+            mapboxgl.accessToken = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
+            const map = new mapboxgl.Map({
+                container: 'map-' + establecimientoId,
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: [lng, lat],
+                zoom: 14,
+            });
+
+            new mapboxgl.Marker({ color: '#28a745' })
+                .setLngLat([lng, lat])
+                .addTo(map);
+
+            setTimeout(() => map.resize(), 250);
         }
 
         // Función para confirmar eliminación
         function confirmarEliminacion(id, nombre) {
             document.getElementById('establecimiento-nombre').textContent = nombre;
             document.getElementById('btn-confirmar-eliminar').onclick = function() {
-                window.location.href = 'eliminarEstablecimiento.php?id=' + id;
+                window.location.href = 'establecimiento.php?id=' + id;
             };
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function abrirModalEditar(est) {
+            document.getElementById('edit-id').value = est.id || '';
+            document.getElementById('edit-nombre').value = est.nombre || '';
+            document.getElementById('edit-descripcion').value = est.descripcion || '';
+            document.getElementById('edit-direccion').value = est.direccion || '';
+            document.getElementById('edit-localidad').value = est.localidad || '';
+            document.getElementById('edit-provincia').value = est.provincia || '';
+            document.getElementById('edit-codigo-postal').value = est.codigo_postal || '';
+            document.getElementById('edit-piso').value = est.piso || '';
+            document.getElementById('edit-latitude').value = est.latitude ?? '';
+            document.getElementById('edit-longitude').value = est.longitude ?? '';
+
+            new bootstrap.Modal(document.getElementById('editModal')).show();
         }
     </script>
 </head>
@@ -634,7 +732,15 @@ $dotenv->load();
         </div>
     </header>
 
-    <body>
+        <?php if (!empty($flashMessage)): ?>
+            <div class="container mt-3" style="max-width: 900px;">
+                <div class="alert alert-<?php echo $flashType === 'danger' ? 'danger' : 'success'; ?> alert-dismissible fade show" role="alert">
+                    <?php echo $flashMessage; ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Estadísticas del gestor -->
         <div class="row mb-4" style="max-width: 1400px; margin: 2rem auto; padding: 0 15px;">
             <div class="col-md-4">
@@ -671,7 +777,7 @@ $dotenv->load();
 
             </div>
         <?php else: ?>
-            <div class="row">
+            <div class="row establecimientos-grid" style="max-width: 1400px; margin: 0 auto;">
                 <?php foreach ($establecimientos as $index => $establecimiento):
                     $randomImage = $backgroundImages[$index % count($backgroundImages)];
                     $direccionFormateada = formatearDireccion(
@@ -679,12 +785,10 @@ $dotenv->load();
                         $establecimiento['piso']
                     );
                 ?>
+                    <div class="col-12 col-md-6 col-xl-4 est-card-col">
                     <div id="establecimiento-main">
                         <div class="establecimiento-card" id="establecimiento-<?php echo $establecimiento['id']; ?>">
-                            <script>
-                                console.log("<?php echo $establecimiento['image_url'] ?>")
-                            </script>
-                            <div class="card-header"<?php if (!empty(getImagenUrl($establecimiento['image_url']))): ?> style="background-image: url('<?php echo getImagenUrl($establecimiento['image_url']); ?>');"<?php endif; ?>>
+                            <div class="card-header<?php echo empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? '')) ? ' default-image' : ''; ?>"<?php if (!empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''))): ?> style="background-image: url('<?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"<?php endif; ?>>
                                 <div class="card-header-overlay"></div>
                                 <div class="card-title">
                                     <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
@@ -787,16 +891,27 @@ $dotenv->load();
                                         </div>
                                     <?php endif; ?>
 
-                                    <div class="map-container" id="map-<?php echo $establecimiento['id']; ?>"></div>
+                                    <div class="map-container" id="map-<?php echo $establecimiento['id']; ?>" data-lat="<?php echo htmlspecialchars((string)($establecimiento['latitude'] ?? '')); ?>" data-lng="<?php echo htmlspecialchars((string)($establecimiento['longitude'] ?? '')); ?>"></div>
                                 </div>
 
                                 <div class="btn-actions">
-                                    <a href="espacios.php?establecimiento_id=<?php echo $establecimiento['id']; ?>" class="btn btn-action btn-spaces">
+                                    <a href="verEspacios.php" class="btn btn-action btn-spaces">
                                         <i class="fas fa-door-open"></i> Gestionar Espacios
                                     </a>
-                                    <a href="editarEstablecimiento.php?id=<?php echo $establecimiento['id']; ?>" class="btn btn-action btn-edit">
+                                    <button class="btn btn-action btn-edit" type="button" onclick='abrirModalEditar(<?php echo json_encode([
+                                        'id' => $establecimiento['id'],
+                                        'nombre' => $establecimiento['nombre'] ?? '',
+                                        'descripcion' => $establecimiento['descripcion'] ?? '',
+                                        'direccion' => $establecimiento['direccion'] ?? '',
+                                        'localidad' => $establecimiento['localidad'] ?? '',
+                                        'provincia' => $establecimiento['provincia'] ?? '',
+                                        'codigo_postal' => $establecimiento['codigo_postal'] ?? '',
+                                        'piso' => $establecimiento['piso'] ?? '',
+                                        'latitude' => $establecimiento['latitude'] ?? '',
+                                        'longitude' => $establecimiento['longitude'] ?? ''
+                                    ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
                                         <i class="fas fa-edit"></i> Editar
-                                    </a>
+                                    </button>
                                     <button class="btn btn-action btn-delete" onclick="confirmarEliminacion('<?php echo $establecimiento['id']; ?>', '<?php echo htmlspecialchars($establecimiento['nombre']); ?>')">
                                         <i class="fas fa-trash-alt"></i> Eliminar
                                     </button>
@@ -804,10 +919,72 @@ $dotenv->load();
                             </div>
                         </div>
                     </div>
+                    </div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
         </div>
+
+        <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="POST" action="verEstablecimientos.php">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar establecimiento</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="action" value="update_establecimiento">
+                            <input type="hidden" id="edit-id" name="id">
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" id="edit-nombre" name="nombre" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" id="edit-direccion" name="direccion" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Descripción</label>
+                                    <textarea class="form-control" id="edit-descripcion" name="descripcion" rows="2"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Localidad</label>
+                                    <input type="text" class="form-control" id="edit-localidad" name="localidad">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Provincia</label>
+                                    <input type="text" class="form-control" id="edit-provincia" name="provincia">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Código postal</label>
+                                    <input type="text" class="form-control" id="edit-codigo-postal" name="codigo_postal">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Piso</label>
+                                    <input type="text" class="form-control" id="edit-piso" name="piso">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Latitude</label>
+                                    <input type="number" step="any" class="form-control" id="edit-latitude" name="latitude">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Longitude</label>
+                                    <input type="number" step="any" class="form-control" id="edit-longitude" name="longitude">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-confirm">
                 <div class="modal-content">
