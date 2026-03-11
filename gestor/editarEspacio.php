@@ -12,6 +12,12 @@ $espacio = null;
 $mensaje = null;
 $tipoMensaje = null;
 
+// Comprobar si venimos de una actualización exitosa para mostrar el mensaje
+if (isset($_GET['updated']) && $_GET['updated'] == '1') {
+    $mensaje = "El espacio y sus horarios han sido actualizados correctamente.";
+    $tipoMensaje = "success";
+}
+
 // 1. SI SE ENVÍA EL FORMULARIO PRINCIPAL (Actualizar datos generales y horarios)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_space') {
     $espacioId = $_POST['id'];
@@ -76,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $dataSpace = array(
             "name" => trim($_POST['name']),
             "description" => trim($_POST['description'])
-            // Eliminados wifi, food, parking
         );
 
         $urlSpace = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/space?id=eq." . $espacioId;
@@ -98,8 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         curl_close($chSp);
 
         if ($codSpace >= 200 && $codSpace < 300) {
-            $mensaje = "El espacio y sus datos han sido actualizados correctamente.";
-            $tipoMensaje = "success";
+            // AQUÍ ESTÁ LA MAGIA: Forzamos al navegador a recargar pidiendo los datos nuevos, limpiando su caché.
+            header("Location: editarEspacio.php?id=" . urlencode($espacioId) . "&updated=1");
+            exit;
         } else {
             $errorDecoded = json_decode($resSpace, true);
             $msgBd = isset($errorDecoded['message']) ? $errorDecoded['message'] : $resSpace;
@@ -160,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } else {
         echo json_encode(['success' => false, 'error' => 'Error en base de datos.']);
     }
-    exit; // Stop execution for AJAX calls
+    exit;
 }
 
 // 3. OBTENER DATOS ACTUALES PARA MOSTRAR LA PÁGINA
@@ -174,7 +180,8 @@ if (isset($_GET['id']) || isset($_POST['id'])) {
         CURLOPT_CUSTOMREQUEST => "GET",
         CURLOPT_HTTPHEADER => array(
             'Content-Type: application/json',
-            'apikey: ' . $_ENV['DATABASE_APIKEY']
+            'apikey: ' . $_ENV['DATABASE_APIKEY'],
+            'Cache-Control: no-cache' // Forzar a que no nos devuelva datos antiguos
         ),
         CURLOPT_RETURNTRANSFER => true,
     ));
@@ -203,7 +210,7 @@ if (!$espacio) {
 $schedule = !empty($espacio['schedule']) ? $espacio['schedule'][0] : null;
 $servicios = $schedule && !empty($schedule['services']) ? $schedule['services'] : [];
 
-// Preparar horas por defecto
+// Preparar horas y precio por defecto
 $hEntrada = "09";
 $mEntrada = "00";
 $hSalida = "18";
@@ -379,7 +386,7 @@ if ($schedule) {
                             <label class="form-label fw-bold text-secondary"><i class="fas fa-euro-sign me-1"></i>
                                 Precio Base / Hora</label>
                             <input type="number" step="0.01" min="0" class="form-control text-success fw-bold"
-                                name="precio_hora" value="<?php echo $precioHora; ?>" required>
+                                name="precio_hora" value="<?php echo htmlspecialchars($precioHora); ?>" required>
                         </div>
                     </div>
 
@@ -432,10 +439,10 @@ if ($schedule) {
                                         class="fas fa-sign-in-alt text-success me-1"></i>Hora Apertura</label>
                                 <div class="d-flex justify-content-center align-items-center gap-1">
                                     <input type="number" class="form-control time-input" name="horaEntrada" min="0" max="23"
-                                        value="<?php echo $hEntrada; ?>" required>
+                                        value="<?php echo htmlspecialchars($hEntrada); ?>" required>
                                     <span>:</span>
                                     <input type="number" class="form-control time-input" name="minutoEntrada" min="0"
-                                        max="59" value="<?php echo $mEntrada; ?>" required>
+                                        max="59" value="<?php echo htmlspecialchars($mEntrada); ?>" required>
                                 </div>
                             </div>
                             <div class="col-6">
@@ -443,10 +450,10 @@ if ($schedule) {
                                         class="fas fa-sign-out-alt text-danger me-1"></i>Hora Cierre</label>
                                 <div class="d-flex justify-content-center align-items-center gap-1">
                                     <input type="number" class="form-control time-input" name="horaSalida" min="0" max="23"
-                                        value="<?php echo $hSalida; ?>" required>
+                                        value="<?php echo htmlspecialchars($hSalida); ?>" required>
                                     <span>:</span>
                                     <input type="number" class="form-control time-input" name="minutoSalida" min="0"
-                                        max="59" value="<?php echo $mSalida; ?>" required>
+                                        max="59" value="<?php echo htmlspecialchars($mSalida); ?>" required>
                                 </div>
                             </div>
                         </div>
@@ -661,7 +668,10 @@ if ($schedule) {
                     success: function (res) {
                         if (res.success) {
                             showToast(true, 'Servicio añadido. Recargando...');
-                            setTimeout(() => location.reload(), 1000);
+                            setTimeout(() => {
+                                // Forzar limpieza de caché al recargar la vista por js
+                                window.location.href = window.location.href.split('?')[0] + '?id=<?php echo $espacioId; ?>';
+                            }, 1000);
                         } else {
                             showToast(false, res.error);
                             $('#btnSaveNewService').prop('disabled', false).text('Añadir Servicio');
@@ -706,7 +716,9 @@ if ($schedule) {
                     success: function (res) {
                         if (res.success) {
                             showToast(true, 'Servicio actualizado. Recargando...');
-                            setTimeout(() => location.reload(), 1000);
+                            setTimeout(() => {
+                                window.location.href = window.location.href.split('?')[0] + '?id=<?php echo $espacioId; ?>';
+                            }, 1000);
                         } else {
                             showToast(false, res.error);
                             $('#btnUpdateService').prop('disabled', false).text('Guardar Cambios');
