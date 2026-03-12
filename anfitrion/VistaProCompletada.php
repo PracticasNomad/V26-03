@@ -88,13 +88,25 @@ require_once 'verificar_sesion_host.php';
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
+        /* CLASE NUEVA PARA QUITAR EL PUNTO NEGRO Y DEJAR SOLO EL CHECK VERDE */
+        .custom-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .custom-list li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
     </style>
 </head>
 
 <body>
     <div class="container p-0">
         <div class="header-container">
-            <img class="header-img" src="https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg" alt="Header">
+            <img class="header-img" src="https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg"
+                alt="Header">
             <div class="header-overlay">
                 <div class="text-center">
                     <h1 class="fw-bold mb-2">¡Gracias por mejorar tu suscripción!</h1>
@@ -110,10 +122,11 @@ require_once 'verificar_sesion_host.php';
                 <div class="card p-4">
                     <h4 class="section-title"><i class="fas fa-info-circle me-2"></i>Detalles</h4>
                     <p class="mb-2">Ahora dispones de:</p>
-                    <ul>
-                        <li>2 establecimientos</li>
-                        <li>10 espacios máximo</li>
-                        <li>12% de comisión</li>
+                    <ul class="custom-list mb-4">
+                        <li><i class="fas fa-check text-success me-2"></i><strong>2 establecimientos</strong></li>
+                        <li><i class="fas fa-check text-success me-2"></i><strong>10
+                                espacios</strong> máximos.</li>
+                        <li><i class="fas fa-check text-success me-2"></i>12% de comisión</li>
                     </ul>
                     <p>Disfruta de tu suscripccion hasta el <?= $_SESSION['fecha_fin'] ?></p>
 

@@ -123,11 +123,9 @@ require_once 'verificar_sesion_host.php';
                     <h4 class="section-title"><i class="fas fa-info-circle me-2"></i>Detalles</h4>
                     <p class="mb-2">Ahora dispones de:</p>
                     <ul class="custom-list mb-4">
-                        <li><i class="fas fa-check text-success me-2"></i><strong>Anfitriones ilimitados</strong>en tu
-                            cartera.</li>
-                        <li><i class="fas fa-check text-success me-2"></i><strong>Más de 50
-                                establecimientos</strong>gestionados.</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Ideal para grandes gestoras.</li>
+                        <li><i class="fas fa-check text-success me-2"></i><strong>Establecimientos ilimitados</strong></li>
+                        <li><i class="fas fa-check text-success me-2"></i><strong>Espacios ilimitados</strong></li>
+                        <li><i class="fas fa-check text-success me-2"></i>10% de comisión</li>
                     </ul>
                     <p>Disfruta de tu suscripccion hasta el <?= $_SESSION['fecha_fin'] ?></p>
 

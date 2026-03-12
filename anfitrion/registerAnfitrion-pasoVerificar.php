@@ -162,17 +162,25 @@ function insertarDatos()
         }
     }
 
-    // 2. Comprobación de seguridad VITAL
+    // Comprobación de seguridad VITAL
     if (empty($user_id)) {
         echo '<script>console.error("Error crítico: No se pudo obtener el ID del usuario. Cancelando inserción.");</script>';
         return; // Detenemos la función aquí para no crear registros vacíos
     }
 
-    // --- INICIAMOS SESIÓN AUTOMÁTICAMENTE ---
+   // --- INICIAMOS SESIÓN AUTOMÁTICAMENTE ---
     $_SESSION['user_id'] = $user_id;
-    $_SESSION['token'] = $token;
 
-    // insertar anfitrion
+    // 1. Guardamos el token solo si existe (para no borrar el de nómadas)
+    if (!empty($token)) {
+        $_SESSION['token'] = $token;
+    }
+
+    // 2. Damos el pase VIP (Asegúrate de que esté FUERA del if)
+    $_SESSION['auth_from_registration'] = true;
+
+    // 3. RECUPERAMOS EL PLAN ELEGIDO (Corregimos el error del plan Básico)
+    $planElegido = isset($_SESSION['plan_seleccionado']) ? $_SESSION['plan_seleccionado'] : 'Basico';
 
     // --- insertar anfitrion ---
     $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/host';
@@ -184,7 +192,7 @@ function insertarDatos()
         'name' => $_SESSION['host']['nombre'],
         'phone' => $_SESSION['host']['telefono'],
         'empresa' => $_SESSION['host']['razonsocial'],
-        'plan' => 'Basico'
+        'plan' => $planElegido // <--- Ahora sí guardará 'Pro' o 'Premium'
     ];
 
     $payload = json_encode($data);
