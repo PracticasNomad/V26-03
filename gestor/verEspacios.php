@@ -10,41 +10,65 @@ $dotenv->load();
 $tieneError = false;
 $espacios = [];
 $errorMsg = "";
+$gestorId = $_SESSION["user_id"];
 
-$url = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=*,space(*,schedule(*,services(*)))";
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'apikey: ' . $_ENV['DATABASE_APIKEY'],
-    'Content-Type: application/json'
+// 1. OBTENER EL CÓDIGO POSTAL DEL GESTOR
+$urlGestor = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/gestor?select=codigo_postal&id=eq." . $gestorId;
+$chGestor = curl_init($urlGestor);
+curl_setopt_array($chGestor, [
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+        'apikey: ' . $_ENV['SERVICE_APIKEY']
+    ],
+    CURLOPT_RETURNTRANSFER => true
 ]);
+$resGestor = curl_exec($chGestor);
+curl_close($chGestor);
 
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$err = curl_error($ch);
-curl_close($ch);
+$datosGestor = json_decode($resGestor, true);
+$cpGestor = $datosGestor[0]['codigo_postal'] ?? null;
 
-if ($err || $httpCode !== 200) {
-    $tieneError = true;
-    $errorMsg = $err ? $err : "Error HTTP: $httpCode";
-} else {
-    $establecimientos = json_decode($response, true);
+if ($cpGestor) {
+    // 2. BUSCAR ESTABLECIMIENTOS DE ESE CP Y SUS ESPACIOS
+    $url = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=*,space(*,schedule(*,services(*)))&codigo_postal=eq." . urlencode($cpGestor);
 
-    if (is_array($establecimientos)) {
-        foreach ($establecimientos as $est) {
-            if (!empty($est['space'])) {
-                foreach ($est['space'] as $esp) {
-                    $esp['establecimiento'] = [
-                        'nombre' => $est['nombre'] ?? 'Establecimiento desconocido',
-                        'image_url' => $est['image_url'] ?? null
-                    ];
-                    $espacios[] = $esp;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+        'apikey: ' . $_ENV['SERVICE_APIKEY'],
+        'Content-Type: application/json'
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err = curl_error($ch);
+    curl_close($ch);
+
+    if ($err || $httpCode !== 200) {
+        $tieneError = true;
+        $errorMsg = $err ? $err : "Error HTTP: $httpCode";
+    } else {
+        $establecimientos = json_decode($response, true);
+
+        if (is_array($establecimientos)) {
+            foreach ($establecimientos as $est) {
+                if (!empty($est['space'])) {
+                    foreach ($est['space'] as $esp) {
+                        $esp['establecimiento'] = [
+                            'nombre' => $est['nombre'] ?? 'Establecimiento desconocido',
+                            'image_url' => $est['image_url'] ?? null
+                        ];
+                        $espacios[] = $esp;
+                    }
                 }
             }
         }
     }
+} else {
+    $tieneError = true;
+    $errorMsg = "Tu perfil de gestor no tiene un código postal asignado. Actualiza tu perfil primero.";
 }
 ?>
 <!DOCTYPE html>
@@ -59,8 +83,8 @@ if ($err || $httpCode !== 200) {
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="icon" href="Nomadapp.ico" type="image/png">
-    <title>Todos los Espacios</title>
+    <link rel="icon" href="../img/favicon-color.png">
+    <title>Espacios de tu Zona</title>
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -268,7 +292,7 @@ if ($err || $httpCode !== 200) {
         <div class="container-fluid info text-center" style="background-color: #00B7CF; color: white;">
             <div class="row">
                 <div class="col h3 fw-bold pt-3 pb-2 m-0">
-                    Todos los Espacios
+                    Espacios de tu zona
                 </div>
             </div>
         </div>
@@ -276,16 +300,18 @@ if ($err || $httpCode !== 200) {
 
     <div class="contenedorLista mt-4">
 
-        <div class="header-container">
+        <div class="header-container flex-column">
             <h4 class="m-0 fw-bold text-center">
-                <i class="fas fa-chair me-2 text-primary"></i> Espacios Registrados en el Sistema
+                <i class="fas fa-chair me-2 text-primary"></i> Espacios Registrados
             </h4>
+            <?php if ($cpGestor && !$tieneError): ?>
+                <span class="badge bg-info text-dark mt-2">Código Postal: <?php echo htmlspecialchars($cpGestor); ?></span>
+            <?php endif; ?>
         </div>
 
         <?php if ($tieneError): ?>
-            <div class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                Ha ocurrido un error al cargar los datos: <?php echo $errorMsg; ?>
+            <div class="alert alert-danger shadow-sm rounded-pill" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i> <?php echo $errorMsg; ?>
             </div>
         <?php else: ?>
 
@@ -293,8 +319,8 @@ if ($err || $httpCode !== 200) {
                 <?php if (empty($espacios)): ?>
                     <div class="espacios-vacio">
                         <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
-                        <h4>Sin espacios</h4>
-                        <p class="mb-0">Aún no hay ningún espacio registrado en la plataforma.</p>
+                        <h4>Sin espacios en tu zona</h4>
+                        <p class="mb-0">Aún no hay ningún espacio registrado en los establecimientos de tu código postal.</p>
                     </div>
                 <?php else: ?>
                     <?php foreach ($espacios as $espacio): ?>
@@ -306,7 +332,7 @@ if ($err || $httpCode !== 200) {
                                 <div class="mb-2 mb-md-0">
                                     <div class="establecimiento-badge">
                                         <i class="fas fa-building me-1"></i>
-                                        <?php echo htmlspecialchars($espacio['establecimiento']['nombre'] ?? 'Establecimiento desconocido'); ?>
+                                        <?php echo htmlspecialchars($espacio['establecimiento']['nombre']); ?>
                                     </div>
                                     <h5 class="mb-1 fw-bold text-primary"><?php echo htmlspecialchars($espacio['name']); ?></h5>
                                     <p class="mb-0 text-muted small"><?php echo htmlspecialchars($espacio['description']); ?></p>
@@ -465,7 +491,7 @@ if ($err || $httpCode !== 200) {
                     </div>
                 </div>
             </a>
-            <a href="validar.php" class="col-2 text-center footer-item">
+            <a href="verValidar.php" class="col-2 text-center footer-item">
                 <div class="row">
                     <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
                         <div>Validar</div>
@@ -504,13 +530,10 @@ if ($err || $httpCode !== 200) {
     </div>
 
     <script>
-        $(document).ready(function () {
-
-            // 1. Mostrar/Ocultar detalles del horario
-            $('.toggle-horarios').click(function () {
+        $(document).ready(function() {
+            $('.toggle-horarios').click(function() {
                 const espacioId = $(this).data('espacio-id');
                 $(`#horarios-${espacioId}`).slideToggle();
-
                 const icon = $(this).find('i');
                 if (icon.hasClass('fa-clock')) {
                     icon.removeClass('fa-clock').addClass('fa-chevron-up');
@@ -523,20 +546,22 @@ if ($err || $httpCode !== 200) {
                 }
             });
 
-            $('.btn-toggle-visibilidad').click(function () {
+            $('.btn-toggle-visibilidad').click(function() {
                 const btn = $(this);
                 const espacioId = btn.data('espacio-id');
                 const esVisible = btn.data('visible') === true || btn.data('visible') === 'true';
                 const nuevaVisibilidad = !esVisible;
-
                 btn.prop('disabled', true);
 
                 $.ajax({
                     url: 'toggleVisibilidadEspacio.php',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ id: espacioId, visible: nuevaVisibilidad }),
-                    success: function (response) {
+                    data: JSON.stringify({
+                        id: espacioId,
+                        visible: nuevaVisibilidad
+                    }),
+                    success: function(response) {
                         if (response.success) {
                             if (nuevaVisibilidad) {
                                 btn.removeClass('btn-secondary').addClass('btn-warning');
@@ -554,7 +579,7 @@ if ($err || $httpCode !== 200) {
                         }
                         btn.prop('disabled', false);
                     },
-                    error: function () {
+                    error: function() {
                         $('#mensajeError').text('Error de conexión con el servidor.');
                         new bootstrap.Toast(document.getElementById('toastError')).show();
                         btn.prop('disabled', false);
@@ -563,43 +588,40 @@ if ($err || $httpCode !== 200) {
             });
 
             let espacioIdAEliminar = null;
-            $('.btn-eliminar').click(function () {
+            $('.btn-eliminar').click(function() {
                 espacioIdAEliminar = $(this).data('espacio-id');
-                const espacioNombre = $(this).data('espacio-nombre');
-
-                $('#espacioNombre').text(espacioNombre);
-                const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-                modal.show();
+                $('#espacioNombre').text($(this).data('espacio-nombre'));
+                new bootstrap.Modal(document.getElementById('confirmModal')).show();
             });
 
-            $('#btnConfirmarEliminar').click(function () {
+            $('#btnConfirmarEliminar').click(function() {
                 if (espacioIdAEliminar) {
-                    const modalEl = document.getElementById('confirmModal');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    modal.hide();
-
+                    bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
                     $.ajax({
                         url: 'eliminarEspacio.php',
                         type: 'POST',
-                        data: { id: espacioIdAEliminar },
-                        success: function (response) {
+                        data: {
+                            id: espacioIdAEliminar
+                        },
+                        success: function(response) {
                             if (response.success) {
                                 $('#mensajeExito').html('<i class="fas fa-check-circle me-2"></i> Espacio eliminado correctamente.');
                                 new bootstrap.Toast(document.getElementById('toastExito')).show();
-                                $(`#card-${espacioIdAEliminar}`).fadeOut(500, function () { $(this).remove(); });
+                                $(`#card-${espacioIdAEliminar}`).fadeOut(500, function() {
+                                    $(this).remove();
+                                });
                             } else {
                                 $('#mensajeError').text(response.error || 'Error al eliminar');
                                 new bootstrap.Toast(document.getElementById('toastError')).show();
                             }
                         },
-                        error: function () {
+                        error: function() {
                             $('#mensajeError').text('Error de conexión.');
                             new bootstrap.Toast(document.getElementById('toastError')).show();
                         }
                     });
                 }
             });
-
         });
     </script>
 </body>
