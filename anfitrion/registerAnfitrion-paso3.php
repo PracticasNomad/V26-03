@@ -14,6 +14,13 @@ if (isset($_POST['siguiente'])) {
     $codigo_postal = trim($_POST['codigo_postal']);
     $localidad = trim($_POST['localidad']);
     $provincia = trim($_POST['provincia']);
+    $domicilio_facturacion_mismo = isset($_POST['domicilio_facturacion_mismo']) ? 1 : 0;
+    $fact_calle = trim($_POST['fact_calle'] ?? '');
+    $fact_numero = trim($_POST['fact_numero'] ?? '');
+    $fact_piso = trim($_POST['fact_piso'] ?? '');
+    $fact_codigo_postal = trim($_POST['fact_codigo_postal'] ?? '');
+    $fact_localidad = trim($_POST['fact_localidad'] ?? '');
+    $fact_provincia = trim($_POST['fact_provincia'] ?? '');
 
     $errors = [];
 
@@ -30,7 +37,7 @@ if (isset($_POST['siguiente'])) {
     // Validación Calle
     if (empty($calle)) {
         $errors[] = 'La calle es obligatoria.';
-    } elseif (!preg_match('/^[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚüÜ.,-]{5,60}$/u', $calle)) {
+    } elseif (!preg_match('/^[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚüÜ.,\/-]{5,60}$/u', $calle)) {
         $errors[] = 'La calle debe tener entre 5 y 60 caracteres.';
     }
 
@@ -52,6 +59,34 @@ if (isset($_POST['siguiente'])) {
         $errors[] = 'La localidad es obligatoria.';
     if (empty($provincia))
         $errors[] = 'La provincia es obligatoria.';
+
+    if (!$domicilio_facturacion_mismo) {
+        if (empty($fact_calle)) {
+            $errors[] = 'La calle del domicilio de facturación es obligatoria.';
+        } elseif (!preg_match('/^[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚüÜ.,\/-]{5,60}$/u', $fact_calle)) {
+            $errors[] = 'La calle del domicilio de facturación debe tener entre 5 y 60 caracteres.';
+        }
+
+        if (empty($fact_numero)) {
+            $errors[] = 'El número del domicilio de facturación es obligatorio.';
+        } elseif (!preg_match('/^[0-9]{1,3}[a-zA-Z]?$/', $fact_numero)) {
+            $errors[] = 'El número del domicilio de facturación no es válido.';
+        }
+
+        if (empty($fact_codigo_postal)) {
+            $errors[] = 'El código postal del domicilio de facturación es obligatorio.';
+        } elseif (!preg_match('/^[0-9]{5}$/', $fact_codigo_postal)) {
+            $errors[] = 'El código postal del domicilio de facturación debe contener 5 dígitos.';
+        }
+
+        if (empty($fact_localidad)) {
+            $errors[] = 'La localidad del domicilio de facturación es obligatoria.';
+        }
+
+        if (empty($fact_provincia)) {
+            $errors[] = 'La provincia del domicilio de facturación es obligatoria.';
+        }
+    }
 
     if ($has_parking && ($precio_parking === '' || !is_numeric($precio_parking) || floatval($precio_parking) < 0))
         $errors[] = 'Si tiene parking, debe indicar un precio válido.';
@@ -87,9 +122,31 @@ if (isset($_POST['siguiente'])) {
         $_SESSION['establecimiento']['codigo_postal'] = $codigo_postal;
         $_SESSION['establecimiento']['localidad'] = $localidad;
         $_SESSION['establecimiento']['provincia'] = $provincia;
+
+        $_SESSION['host']['domicilio_facturacion_mismo'] = $domicilio_facturacion_mismo;
+        if ($domicilio_facturacion_mismo) {
+            $_SESSION['host']['fact_calle'] = $calle;
+            $_SESSION['host']['fact_numero'] = $numero;
+            $_SESSION['host']['fact_piso'] = $piso;
+            $_SESSION['host']['fact_codigo_postal'] = $codigo_postal;
+            $_SESSION['host']['fact_localidad'] = $localidad;
+            $_SESSION['host']['fact_provincia'] = $provincia;
+        } else {
+            $_SESSION['host']['fact_calle'] = $fact_calle;
+            $_SESSION['host']['fact_numero'] = $fact_numero;
+            $_SESSION['host']['fact_piso'] = $fact_piso;
+            $_SESSION['host']['fact_codigo_postal'] = $fact_codigo_postal;
+            $_SESSION['host']['fact_localidad'] = $fact_localidad;
+            $_SESSION['host']['fact_provincia'] = $fact_provincia;
+        }
         header("Location: registerAnfitrion-paso4.php");
         exit();
     }
+}
+
+$mismoDomicilioFacturacion = true;
+if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
+    $mismoDomicilioFacturacion = (bool)$_SESSION['host']['domicilio_facturacion_mismo'];
 }
 ?>
 <!DOCTYPE html>
@@ -380,7 +437,7 @@ if (isset($_POST['siguiente'])) {
                 <div class="col-md-8">
                     <label for="calle" class="form-label fw-bold">Calle *</label>
                     <input type="text" class="form-control" id="calle" name="calle" required minlength="5"
-                        maxlength="60" pattern="[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚüÜ.,-]{5,60}" placeholder="Nombre de la calle"
+                        maxlength="60" pattern="[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚüÜ.,\/-]{5,60}" placeholder="Nombre de la calle"
                         value="<?php echo isset($_SESSION['establecimiento']['calle']) ? htmlspecialchars($_SESSION['establecimiento']['calle']) : ''; ?>">
                 </div>
                 <div class="col-md-4">
@@ -425,6 +482,55 @@ if (isset($_POST['siguiente'])) {
                         }
                         ?>
                     </select>
+                </div>
+
+                <div class="col-12 mt-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="domicilio_facturacion_mismo" name="domicilio_facturacion_mismo" <?php echo $mismoDomicilioFacturacion ? 'checked' : ''; ?>>
+                        <label class="form-check-label fw-bold" for="domicilio_facturacion_mismo">Este es tu domicilio de facturación</label>
+                    </div>
+                </div>
+
+                <div class="col-12" id="billingAddressFields" style="<?php echo $mismoDomicilioFacturacion ? 'display:none;' : ''; ?>">
+                    <div class="row g-3">
+                        <div class="col-12 mt-2">
+                            <div class="alert alert-info" style="display:block; margin-bottom:0;">
+                                <i class="fas fa-info-circle me-2"></i>Indica tu domicilio de facturación porque no coincide con el del establecimiento.
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <label for="fact_calle" class="form-label fw-bold">Calle de facturación *</label>
+                            <input type="text" class="form-control" id="fact_calle" name="fact_calle" minlength="5" maxlength="60" pattern="[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚüÜ.,\/-]{5,60}" placeholder="Nombre de la calle" value="<?php echo isset($_SESSION['host']['fact_calle']) ? htmlspecialchars($_SESSION['host']['fact_calle']) : ''; ?>">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="fact_numero" class="form-label fw-bold">Número de facturación *</label>
+                            <input type="text" class="form-control" id="fact_numero" name="fact_numero" pattern="[0-9]{1,3}[a-zA-Z]?" maxlength="4" placeholder="Ej: 12A" value="<?php echo isset($_SESSION['host']['fact_numero']) ? htmlspecialchars($_SESSION['host']['fact_numero']) : ''; ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fact_piso" class="form-label fw-bold">Piso de facturación (opcional)</label>
+                            <input type="text" class="form-control" id="fact_piso" name="fact_piso" placeholder="Piso, puerta, escalera..." value="<?php echo isset($_SESSION['host']['fact_piso']) ? htmlspecialchars($_SESSION['host']['fact_piso']) : ''; ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fact_codigo_postal" class="form-label fw-bold">Código Postal de facturación *</label>
+                            <input type="text" class="form-control" id="fact_codigo_postal" name="fact_codigo_postal" maxlength="5" pattern="[0-9]{5}" placeholder="Código postal" value="<?php echo isset($_SESSION['host']['fact_codigo_postal']) ? htmlspecialchars($_SESSION['host']['fact_codigo_postal']) : ''; ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fact_localidad" class="form-label fw-bold">Localidad de facturación *</label>
+                            <input type="text" class="form-control" id="fact_localidad" name="fact_localidad" placeholder="Tu localidad" value="<?php echo isset($_SESSION['host']['fact_localidad']) ? htmlspecialchars($_SESSION['host']['fact_localidad']) : ''; ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fact_provincia" class="form-label fw-bold">Provincia de facturación *</label>
+                            <select class="form-select" id="fact_provincia" name="fact_provincia">
+                                <option value="" disabled <?php echo empty($_SESSION['host']['fact_provincia']) ? 'selected' : ''; ?>>Selecciona una provincia</option>
+                                <?php
+                                foreach ($provincias as $prov) {
+                                    $selected = (isset($_SESSION['host']['fact_provincia']) && $_SESSION['host']['fact_provincia'] == $prov) ? 'selected' : '';
+                                    echo "<option value=\"$prov\"$selected>$prov</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="progress-container mt-4">
@@ -473,6 +579,29 @@ if (isset($_POST['siguiente'])) {
                         $("#wifi_price_container").hide();
                         $("#precio_wifi").prop("required", false);
                         $("#precio_wifi").val("");
+                    }
+                }
+
+                function toggleBillingAddressFields() {
+                    const esMismo = $("#domicilio_facturacion_mismo").is(":checked");
+                    const billingFields = [
+                        "#fact_calle",
+                        "#fact_numero",
+                        "#fact_codigo_postal",
+                        "#fact_localidad",
+                        "#fact_provincia"
+                    ];
+
+                    if (esMismo) {
+                        $("#billingAddressFields").hide();
+                        billingFields.forEach(function(selector) {
+                            $(selector).prop("required", false);
+                        });
+                    } else {
+                        $("#billingAddressFields").show();
+                        billingFields.forEach(function(selector) {
+                            $(selector).prop("required", true);
+                        });
                     }
                 }
 
@@ -564,6 +693,7 @@ if (isset($_POST['siguiente'])) {
                 // Inicializar funciones al cargar la página
                 toggleParkingPrice();
                 toggleWifiPrice();
+                toggleBillingAddressFields();
 
                 // Event listeners
                 $("#has_parking").change(function() {
@@ -572,6 +702,10 @@ if (isset($_POST['siguiente'])) {
 
                 $("#has_wifi").change(function() {
                     toggleWifiPrice();
+                });
+
+                $("#domicilio_facturacion_mismo").change(function() {
+                    toggleBillingAddressFields();
                 });
 
                 setupPostalCodeLookup();
@@ -592,6 +726,12 @@ if (isset($_POST['siguiente'])) {
                     const codigoPostal = $("#codigo_postal").val().trim();
                     const localidad = $("#localidad").val().trim();
                     const provincia = $("#provincia").val();
+                    const esMismoDomicilioFacturacion = $("#domicilio_facturacion_mismo").is(":checked");
+                    const factCalle = $("#fact_calle").val().trim();
+                    const factNumero = $("#fact_numero").val().trim();
+                    const factCodigoPostal = $("#fact_codigo_postal").val().trim();
+                    const factLocalidad = $("#fact_localidad").val().trim();
+                    const factProvincia = $("#fact_provincia").val();
 
                     let hasErrors = false;
                     let errorMessages = [];
@@ -602,6 +742,7 @@ if (isset($_POST['siguiente'])) {
 
                     // Expresiones regulares
                     const regexTexto = /^[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚüÜ.,-]{5,60}$/;
+                    const regexTextoDireccion = /^[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚüÜ.,\/-]{5,60}$/;
                     const regexNumero = /^[0-9]{1,3}[a-zA-Z]?$/;
 
                     // Validaciones
@@ -622,7 +763,7 @@ if (isset($_POST['siguiente'])) {
                     if (!calle) {
                         hasErrors = true;
                         errorMessages.push("La calle es obligatoria.");
-                    } else if (!regexTexto.test(calle)) {
+                    } else if (!regexTextoDireccion.test(calle)) {
                         hasErrors = true;
                         errorMessages.push("La calle debe tener entre 5 y 60 caracteres válidos.");
                     }
@@ -652,6 +793,42 @@ if (isset($_POST['siguiente'])) {
                     if (!provincia) {
                         hasErrors = true;
                         errorMessages.push("La provincia es obligatoria.");
+                    }
+
+                    if (!esMismoDomicilioFacturacion) {
+                        if (!factCalle) {
+                            hasErrors = true;
+                            errorMessages.push("La calle del domicilio de facturación es obligatoria.");
+                        } else if (!regexTextoDireccion.test(factCalle)) {
+                            hasErrors = true;
+                            errorMessages.push("La calle del domicilio de facturación debe tener entre 5 y 60 caracteres válidos.");
+                        }
+
+                        if (!factNumero) {
+                            hasErrors = true;
+                            errorMessages.push("El número del domicilio de facturación es obligatorio.");
+                        } else if (!regexNumero.test(factNumero)) {
+                            hasErrors = true;
+                            errorMessages.push("El número del domicilio de facturación no es válido.");
+                        }
+
+                        if (!factCodigoPostal) {
+                            hasErrors = true;
+                            errorMessages.push("El código postal del domicilio de facturación es obligatorio.");
+                        } else if (!/^[0-9]{5}$/.test(factCodigoPostal)) {
+                            hasErrors = true;
+                            errorMessages.push("El código postal del domicilio de facturación debe contener 5 dígitos.");
+                        }
+
+                        if (!factLocalidad) {
+                            hasErrors = true;
+                            errorMessages.push("La localidad del domicilio de facturación es obligatoria.");
+                        }
+
+                        if (!factProvincia) {
+                            hasErrors = true;
+                            errorMessages.push("La provincia del domicilio de facturación es obligatoria.");
+                        }
                     }
 
                     // Validar precio de parking si está marcado
