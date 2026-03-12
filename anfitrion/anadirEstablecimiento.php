@@ -82,10 +82,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     function subirImagenAMinio($archivo, $nombreArchivo, $config)
     {
-        if (!$archivo || $archivo['error'] !== UPLOAD_ERR_OK) return ['success' => false, 'message' => 'Error en el archivo'];
+        if (!$archivo || $archivo['error'] !== UPLOAD_ERR_OK)
+            return ['success' => false, 'message' => 'Error en el archivo'];
 
         $extension = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
-        if (!isset($config['mimeTypes'][$extension])) return ['success' => false, 'message' => 'Tipo de archivo no permitido'];
+        if (!isset($config['mimeTypes'][$extension]))
+            return ['success' => false, 'message' => 'Tipo de archivo no permitido'];
 
         $minioUrl = $config['host'] . '/' . $config['bucket'] . '/' . $nombreArchivo;
         $fileContent = file_get_contents($archivo['tmp_name']);
@@ -191,6 +193,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$galleryResult['success']) {
             $erroresImagenes[] = "Error al insertar imágenes en gallery: HTTP " . $galleryResult['httpCode'];
         }
+
+        // --- ENVIAR CORREO: NUEVO ESTABLECIMIENTO CREADO ---
+        require_once '../emails/notificacionesAnfitrion.php';
+
+        $url_host_email = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/host?id=eq." . $_SESSION['user_id'] . "&select=email";
+        $ch_email = curl_init($url_host_email);
+        curl_setopt_array($ch_email, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['apikey: ' . $_ENV['DATABASE_APIKEY']]
+        ]);
+        $res_email = curl_exec($ch_email);
+        curl_close($ch_email);
+
+        $datos_host = json_decode($res_email, true);
+        if (!empty($datos_host) && isset($datos_host[0]['email'])) {
+            enviarCorreoEstablecimientoSinEspacio($datos_host[0]['email'], $_POST['nombre'], $establecimientoId);
+        }
+        // --- FIN ENVIAR CORREO ---
 
         $_SESSION[empty($erroresImagenes) ? 'success_message' : 'warning_message'] =
             empty($erroresImagenes) ? 'Establecimiento e imágenes creados exitosamente' :
@@ -504,7 +524,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h1 class="fw-bold mb-4">Añadir Establecimiento</h1>
         </div>
 
-        <form id="establecimiento-form" action="anadirEstablecimiento.php<?php echo isset($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : ''; ?>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+        <form id="establecimiento-form"
+            action="anadirEstablecimiento.php<?php echo isset($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : ''; ?>"
+            method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
             <div class="form-card">
                 <div class="form-section">
                     <h3 class="section-title">
@@ -532,17 +554,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="image-upload-container" id="uploadContainer">
                         <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
                         <p class="mb-3">Arrastra tus imágenes aquí o haz clic para seleccionar</p>
-                        <button type="button" class="upload-btn" onclick="document.getElementById('imageFiles').click()">
+                        <button type="button" class="upload-btn"
+                            onclick="document.getElementById('imageFiles').click()">
                             <i class="fas fa-plus"></i>
                             Seleccionar Imágenes
                         </button>
-                        <input type="file" id="imageFiles" class="file-input" multiple accept=".tiff,.jfif,.bmp,.pjp,.apng,.webp,.svgz,.heic,.gif,.svg,.heif,.ico,.xbm,.dib,.tif,.pjpeg,.avif,.jpg,.jpeg,.png">
+                        <input type="file" id="imageFiles" class="file-input" multiple
+                            accept=".tiff,.jfif,.bmp,.pjp,.apng,.webp,.svgz,.heic,.gif,.svg,.heif,.ico,.xbm,.dib,.tif,.pjpeg,.avif,.jpg,.jpeg,.png">
                         <div class="image-counter" id="imageCounter">0 de 5 imágenes seleccionadas</div>
                     </div>
 
                     <div class="image-preview" id="imagePreview"></div>
 
-                    <!-- Inputs ocultos para las imágenes -->
                     <input type="file" name="imagen" id="imagen" style="display: none;">
                     <input type="file" name="imagen2" id="imagen2" style="display: none;">
                     <input type="file" name="imagen3" id="imagen3" style="display: none;">
@@ -567,7 +590,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="wifi_price" class="form-label">Precio WiFi (€/hora)</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
-                                <input type="number" class="form-control" id="wifi_price" name="wifi_price" step="0.01" min="0">
+                                <input type="number" class="form-control" id="wifi_price" name="wifi_price" step="0.01"
+                                    min="0">
                             </div>
                         </div>
                     </div>
@@ -584,7 +608,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="parking_price" class="form-label">Precio Parking (€/día)</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
-                                <input type="number" class="form-control" id="parking_price" name="parking_price" step="0.01" min="0">
+                                <input type="number" class="form-control" id="parking_price" name="parking_price"
+                                    step="0.01" min="0">
                             </div>
                         </div>
                     </div>
@@ -914,7 +939,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Función global para remover imagen
-            window.removeImage = function(index) {
+            window.removeImage = function (index) {
                 selectedFiles.splice(index, 1);
                 preview.querySelectorAll('.preview-item').forEach((item, i) => {
                     if (i >= index) item.remove();

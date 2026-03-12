@@ -115,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// 2. LÓGICA DE SERVICIOS ADICIONALES (Añadir, Editar, Borrar) - POR AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] !== 'update_space') {
     header('Content-Type: application/json');
     $action = $_POST['action'];
@@ -181,7 +180,7 @@ if (isset($_GET['id']) || isset($_POST['id'])) {
         CURLOPT_HTTPHEADER => array(
             'Content-Type: application/json',
             'apikey: ' . $_ENV['DATABASE_APIKEY'],
-            'Cache-Control: no-cache' // Forzar a que no nos devuelva datos antiguos
+            'Cache-Control: no-cache'
         ),
         CURLOPT_RETURNTRANSFER => true,
     ));
@@ -505,7 +504,8 @@ if ($schedule) {
                                             <td class="fw-bold"><?php echo htmlspecialchars($srv['name']); ?></td>
                                             <td class="text-muted small"><?php echo htmlspecialchars($srv['description']); ?></td>
                                             <td class="text-center text-success fw-bold">
-                                                <?php echo number_format($srv['price'], 2); ?>€</td>
+                                                <?php echo number_format($srv['price'], 2); ?>€
+                                            </td>
                                             <td class="text-center">
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button" class="btn btn-primary btn-edit-service"
@@ -622,7 +622,6 @@ if ($schedule) {
     <script>
         $(document).ready(function () {
 
-            // Forzar formato dos dígitos al perder el foco (ej: 9 -> 09) en las horas
             $('.time-input').blur(function () {
                 let val = $(this).val();
                 if (val.length === 1) {
@@ -632,7 +631,7 @@ if ($schedule) {
                 }
             });
 
-            // --- LÓGICA AJAX PARA SERVICIOS ---
+
 
             function showToast(isSuccess, msg) {
                 if (isSuccess) {

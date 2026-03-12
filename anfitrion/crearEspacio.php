@@ -191,6 +191,24 @@ if (isset($_POST['insertar'])) {
                 }
             }
 
+            // --- ENVIAR CORREO ---
+            require_once '../emails/notificacionesAnfitrion.php'; // Requerimos el archivo de correos
+
+            // Obtenemos el correo del anfitrión
+            $url_host_email = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/host?id=eq." . $_SESSION['user_id'] . "&select=email";
+            $ch_email = curl_init($url_host_email);
+            curl_setopt_array($ch_email, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => ['apikey: ' . $_ENV['DATABASE_APIKEY']]
+            ]);
+            $res_email = curl_exec($ch_email);
+            curl_close($ch_email);
+            $datos_host = json_decode($res_email, true);
+
+            if (!empty($datos_host) && isset($datos_host[0]['email'])) {
+                enviarCorreoNuevoEspacio($datos_host[0]['email'], $_POST['nombre']);
+            }
+            // --- FIN ENVIAR CORREO ---
 
             $formSuccess = "Espacio creado correctamente. Redirigiendo...";
         } else if ($httpCode == 401) {
@@ -531,9 +549,9 @@ if (isset($_POST['insertar'])) {
     </template>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            tooltipTriggerList.map(function(tooltipTriggerEl) {
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
 
@@ -548,12 +566,12 @@ if (isset($_POST['insertar'])) {
             }
 
             function updateHorarioNumbers() {
-                $('.horario-container').each(function(index) {
+                $('.horario-container').each(function (index) {
                     $(this).find('.horario-num').text(index + 1);
                 });
             }
 
-            $('#add-horario').click(function() {
+            $('#add-horario').click(function () {
                 const template = document.getElementById('horario-template').content.cloneNode(true);
                 const horarioIndex = horarioCount++;
 
@@ -566,13 +584,13 @@ if (isset($_POST['insertar'])) {
                 updateNoHorariosMessage();
             });
 
-            $(document).on('click', '.remove-horario', function() {
+            $(document).on('click', '.remove-horario', function () {
                 $(this).closest('.horario-container').remove();
                 updateHorarioNumbers();
                 updateNoHorariosMessage();
             });
 
-            $(document).on('click', '.add-servicio', function() {
+            $(document).on('click', '.add-servicio', function () {
                 const horarioIndex = $(this).data('horario');
                 const serviciosContainer = $(this).closest('.servicios-container').find('.servicios-list');
                 const servicioIndex = serviciosContainer.children().length;
@@ -585,11 +603,11 @@ if (isset($_POST['insertar'])) {
                 serviciosContainer.append(templateHTML);
             });
 
-            $(document).on('click', '.remove-servicio', function() {
+            $(document).on('click', '.remove-servicio', function () {
                 $(this).closest('.servicio-item').remove();
             });
 
-            $('#espacioTrabajoForm').submit(function(e) {
+            $('#espacioTrabajoForm').submit(function (e) {
                 let valid = true;
                 let errorMessages = [];
 
@@ -602,7 +620,7 @@ if (isset($_POST['insertar'])) {
                     valid = false;
                     errorMessages.push('Debe agregar al menos un horario para el espacio de trabajo.');
                 } else {
-                    $('.horario-container').each(function(index) {
+                    $('.horario-container').each(function (index) {
                         const diasSeleccionados = $(this).find('input[type="checkbox"]:checked').length;
                         if (diasSeleccionados === 0) {
                             valid = false;
