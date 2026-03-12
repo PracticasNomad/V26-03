@@ -9,6 +9,36 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
+$cpGestor = null;
+$gestorId = $_SESSION['user_id'] ?? null;
+if ($gestorId) {
+    $urlGestor = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
+        . '/rest/v1/gestor?select=codigo_postal&id=eq.' . urlencode((string)$gestorId);
+    $chGestor = curl_init($urlGestor);
+    curl_setopt_array($chGestor, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+            'apikey: ' . $_ENV['SERVICE_APIKEY'],
+        ],
+    ]);
+    $resGestor = curl_exec($chGestor);
+    $httpCodeGestor = curl_getinfo($chGestor, CURLINFO_HTTP_CODE);
+    curl_close($chGestor);
+
+    if ($httpCodeGestor >= 200 && $httpCodeGestor < 300) {
+        $datosGestor = json_decode($resGestor, true);
+        if (is_array($datosGestor) && !empty($datosGestor)) {
+            $cpGestor = $datosGestor[0]['codigo_postal'] ?? null;
+        }
+    }
+}
+
+if (empty($cpGestor)) {
+    header('Location: verValidar.php');
+    exit;
+}
+
 // obtener id de establecimiento
 $id = isset($_GET['id']) ? htmlspecialchars($_GET['id']) : null;
 if (!$id) {
@@ -23,7 +53,8 @@ if (!$id) {
 //// traer datos desde la API
 $establecimiento = null;
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
-    . '/rest/v1/establecimiento?id=eq.' . $id;
+    . '/rest/v1/establecimiento?id=eq.' . urlencode((string)$id)
+    . '&codigo_postal=eq.' . urlencode((string)$cpGestor);
 $ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,

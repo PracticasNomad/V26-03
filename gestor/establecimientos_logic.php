@@ -12,6 +12,7 @@ $dotenv->load();
 
 // Configuración de API
 $apiUrl = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1';
+$errorEstablecimientos = '';
 
 // Imágenes de fondo para las tarjetas de establecimientos
 $backgroundImages = [
@@ -43,14 +44,54 @@ function normalizarUrlImagen($url) {
     return 'http://' . ltrim($url, '/');
 }
 
+function getCodigoPostalGestor() {
+    $gestorId = $_SESSION['user_id'] ?? null;
+    if (empty($gestorId)) {
+        return null;
+    }
+
+    $urlGestor = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
+        . '/rest/v1/gestor?select=codigo_postal&id=eq.' . urlencode((string)$gestorId);
+
+    $chGestor = curl_init($urlGestor);
+    curl_setopt_array($chGestor, [
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+            'apikey: ' . $_ENV['SERVICE_APIKEY']
+        ],
+        CURLOPT_RETURNTRANSFER => true
+    ]);
+
+    $resGestor = curl_exec($chGestor);
+    $httpCodeGestor = curl_getinfo($chGestor, CURLINFO_HTTP_CODE);
+    curl_close($chGestor);
+
+    if ($httpCodeGestor < 200 || $httpCodeGestor >= 300) {
+        return null;
+    }
+
+    $datosGestor = json_decode($resGestor, true);
+    if (!is_array($datosGestor) || empty($datosGestor)) {
+        return null;
+    }
+
+    return $datosGestor[0]['codigo_postal'] ?? null;
+}
+
 /**
  * Obtiene todos los establecimientos (excluyendo rechazados)
  */
 function getEstablecimientosAsignados() {
-    global $apiUrl;
+    global $apiUrl, $errorEstablecimientos;
+
+    $cpGestor = getCodigoPostalGestor();
+    if (empty($cpGestor)) {
+        $errorEstablecimientos = 'Tu perfil de gestor no tiene un código postal asignado. Actualiza tu perfil primero.';
+        return [];
+    }
 
     // Consulta para obtener todos los establecimientos
-    $url = $apiUrl . '/establecimiento';
+    $url = $apiUrl . '/establecimiento?codigo_postal=eq.' . urlencode((string)$cpGestor);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -131,6 +172,8 @@ function getEstablecimientosAsignados() {
         }
         return $establecimientos;
     }
+
+    $errorEstablecimientos = 'Error al obtener los establecimientos de tu código postal.';
 
     return [];
 }

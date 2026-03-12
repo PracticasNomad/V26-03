@@ -966,6 +966,14 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             </div>
         <?php endif; ?>
 
+        <?php if (!empty($errorEstablecimientos)): ?>
+            <div class="container mt-3" style="max-width: 900px;">
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($errorEstablecimientos); ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Estadísticas del gestor -->
         <div class="row mb-4 stats-grid" style="max-width: 1400px; margin: 1.2rem auto 1.5rem; padding: 0 15px;">
             <div class="col-md-4">

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'verificar_sesion_gestor.php';
 require '../vendor/autoload.php';
 
 use Dotenv\Dotenv;
@@ -10,6 +10,8 @@ $dotenv->load();
 $establecimientos = [];
 $establecimientosRechazados = [];
 $establecimientosValidados = [];
+$error_db = null;
+$cpGestor = null;
 
 function normalizarUrlImagen($url) {
     if (empty($url)) {
@@ -31,22 +33,50 @@ function normalizarUrlImagen($url) {
     return 'http://' . ltrim($url, '/');
 }
 
-$url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/establecimiento';
-$ch = curl_init($url);
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => [
-        'apikey: ' . $_ENV['DATABASE_APIKEY'],
-        'Authorization: Bearer ' . ($_SESSION['token'] ?? ''),
-    ],
-]);
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
+$gestorId = $_SESSION['user_id'] ?? null;
 
-if ($httpCode === 200) {
-    $data = json_decode($response, true);
-    if (is_array($data)) {
+if ($gestorId) {
+    $urlGestor = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
+        . '/rest/v1/gestor?select=codigo_postal&id=eq.' . urlencode((string)$gestorId);
+
+    $chGestor = curl_init($urlGestor);
+    curl_setopt_array($chGestor, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+            'apikey: ' . $_ENV['SERVICE_APIKEY'],
+        ],
+    ]);
+    $resGestor = curl_exec($chGestor);
+    $httpCodeGestor = curl_getinfo($chGestor, CURLINFO_HTTP_CODE);
+    curl_close($chGestor);
+
+    if ($httpCodeGestor >= 200 && $httpCodeGestor < 300) {
+        $datosGestor = json_decode($resGestor, true);
+        if (is_array($datosGestor) && !empty($datosGestor)) {
+            $cpGestor = $datosGestor[0]['codigo_postal'] ?? null;
+        }
+    }
+}
+
+if (!empty($cpGestor)) {
+    $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
+        . '/rest/v1/establecimiento?codigo_postal=eq.' . urlencode((string)$cpGestor);
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'apikey: ' . $_ENV['DATABASE_APIKEY'],
+            'Authorization: Bearer ' . ($_SESSION['token'] ?? ''),
+        ],
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200) {
+        $data = json_decode($response, true);
+        if (is_array($data)) {
         $ids = [];
         foreach ($data as $estTmp) {
             if (isset($estTmp['id'])) {
@@ -126,7 +156,12 @@ if ($httpCode === 200) {
                 $establecimientos[] = $est;
             }
         }
+        }
+    } else {
+        $error_db = 'Error al obtener los establecimientos de tu zona.';
     }
+} else {
+    $error_db = 'Tu perfil de gestor no tiene un código postal asignado. Actualiza tu perfil primero.';
 }
 
 function formatearDireccion($dir, $piso) {
@@ -268,6 +303,12 @@ function formatearDireccion($dir, $piso) {
     </header>
 
     <div class="container-fluid pb-5 px-3 px-md-4 validation-shell">
+        <?php if (!empty($error_db)): ?>
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error_db); ?>
+            </div>
+        <?php endif; ?>
+
         <ul class="nav nav-tabs" id="validationTabs" role="tablist">
             <li class="nav-item" role="presentation"><button class="nav-link active" id="pendientes-tab" data-bs-toggle="tab" data-bs-target="#pendientes" type="button" role="tab"><i class="fas fa-hourglass-half me-2"></i>Pendientes</button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" id="rechazados-tab" data-bs-toggle="tab" data-bs-target="#rechazados" type="button" role="tab"><i class="fas fa-times-circle me-2"></i>Rechazados</button></li>
