@@ -112,7 +112,7 @@ require_once 'verificar_sesion_gestor.php';
 
                             var divEspacio = document.createElement("div");
                             divEspacio.className = "h6 mb-3";
-                            divEspacio.innerHTML = '<i class="fas fa-map-marker-alt me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Espacio:</strong> ' + data[i].space.name + ' (' + data[i].space.establecimiento.name + ')';
+                            divEspacio.innerHTML = '<i class="fas fa-map-marker-alt me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Espacio:</strong> ' + data[i].space.name + ' (' + data[i].space.establecimiento.nombre + ')';
                             divContenido.appendChild(divEspacio);
 
                             var divHorario = document.createElement("div");
