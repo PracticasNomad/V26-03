@@ -244,6 +244,9 @@ if ($schedule) {
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -620,9 +623,9 @@ if ($schedule) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
 
-            $('.time-input').blur(function () {
+            $('.time-input').blur(function() {
                 let val = $(this).val();
                 if (val.length === 1) {
                     $(this).val('0' + val);
@@ -644,13 +647,16 @@ if ($schedule) {
             }
 
             // AÑADIR SERVICIO
-            $('#btnSaveNewService').click(function () {
+            $('#btnSaveNewService').click(function() {
                 const name = $('#add_srv_name').val().trim();
                 const desc = $('#add_srv_desc').val().trim();
                 const price = $('#add_srv_price').val();
                 const scheduleId = $('#main_schedule_id').val();
 
-                if (!name) { alert("El nombre es obligatorio"); return; }
+                if (!name) {
+                    alert("El nombre es obligatorio");
+                    return;
+                }
 
                 $(this).prop('disabled', true).text('Guardando...');
 
@@ -664,7 +670,7 @@ if ($schedule) {
                         description: desc,
                         price: price
                     },
-                    success: function (res) {
+                    success: function(res) {
                         if (res.success) {
                             showToast(true, 'Servicio añadido. Recargando...');
                             setTimeout(() => {
@@ -676,7 +682,7 @@ if ($schedule) {
                             $('#btnSaveNewService').prop('disabled', false).text('Añadir Servicio');
                         }
                     },
-                    error: function () {
+                    error: function() {
                         showToast(false, 'Error de conexión');
                         $('#btnSaveNewService').prop('disabled', false).text('Añadir Servicio');
                     }
@@ -684,7 +690,7 @@ if ($schedule) {
             });
 
             // ABRIR MODAL EDITAR SERVICIO
-            $('.btn-edit-service').click(function () {
+            $('.btn-edit-service').click(function() {
                 $('#edit_srv_id').val($(this).data('id'));
                 $('#edit_srv_name').val($(this).data('name'));
                 $('#edit_srv_desc').val($(this).data('desc'));
@@ -693,13 +699,16 @@ if ($schedule) {
             });
 
             // GUARDAR EDICIÓN DE SERVICIO
-            $('#btnUpdateService').click(function () {
+            $('#btnUpdateService').click(function() {
                 const id = $('#edit_srv_id').val();
                 const name = $('#edit_srv_name').val().trim();
                 const desc = $('#edit_srv_desc').val().trim();
                 const price = $('#edit_srv_price').val();
 
-                if (!name) { alert("El nombre es obligatorio"); return; }
+                if (!name) {
+                    alert("El nombre es obligatorio");
+                    return;
+                }
                 $(this).prop('disabled', true).text('Actualizando...');
 
                 $.ajax({
@@ -712,7 +721,7 @@ if ($schedule) {
                         description: desc,
                         price: price
                     },
-                    success: function (res) {
+                    success: function(res) {
                         if (res.success) {
                             showToast(true, 'Servicio actualizado. Recargando...');
                             setTimeout(() => {
@@ -723,7 +732,7 @@ if ($schedule) {
                             $('#btnUpdateService').prop('disabled', false).text('Guardar Cambios');
                         }
                     },
-                    error: function () {
+                    error: function() {
                         showToast(false, 'Error de conexión');
                         $('#btnUpdateService').prop('disabled', false).text('Guardar Cambios');
                     }
@@ -731,7 +740,7 @@ if ($schedule) {
             });
 
             // ELIMINAR SERVICIO
-            $('.btn-del-service').click(function () {
+            $('.btn-del-service').click(function() {
                 if (!confirm("¿Estás seguro de que deseas eliminar este servicio?")) return;
 
                 const id = $(this).data('id');
@@ -745,16 +754,18 @@ if ($schedule) {
                         action: 'delete_service',
                         service_id: id
                     },
-                    success: function (res) {
+                    success: function(res) {
                         if (res.success) {
                             showToast(true, 'Servicio eliminado.');
-                            $(`#row-service-${id}`).fadeOut(400, function () { $(this).remove(); });
+                            $(`#row-service-${id}`).fadeOut(400, function() {
+                                $(this).remove();
+                            });
                         } else {
                             showToast(false, res.error);
                             btn.prop('disabled', false);
                         }
                     },
-                    error: function () {
+                    error: function() {
                         showToast(false, 'Error de conexión');
                         btn.prop('disabled', false);
                     }

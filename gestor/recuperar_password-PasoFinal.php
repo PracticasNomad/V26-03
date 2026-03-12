@@ -37,8 +37,6 @@ if (isset($_POST['iniciar_sesion'])) {
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
-    <link rel="icon" href="../img/favicon-negro.png" media="(prefers-color-scheme: light)">
-    <link rel="icon" href="../img/favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Contraseña Actualizada - Gestor</title>
     <style>
         body {

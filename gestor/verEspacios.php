@@ -83,7 +83,9 @@ if ($cpGestor) {
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="icon" href="../img/favicon-color.png">
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Espacios de tu Zona</title>
     <style>
         body {

@@ -66,8 +66,6 @@ if (isset($_POST['email'])) {
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
-    <link rel="icon" href="../img/favicon-negro.png" media="(prefers-color-scheme: light)">
-    <link rel="icon" href="../img/favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Recuperar Contraseña - Gestor</title>
     <style>
         body {
