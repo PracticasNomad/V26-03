@@ -246,7 +246,6 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 <?php endif; ?>
 
                 <div class="d-flex justify-content-center mb-3">
-
                     <button class="btn btn-success btn-custom" type="submit">
                         Entrar
                     </button>
@@ -256,8 +255,13 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                     <a href="recuperar_password.php" class="forgot-password">He olvidado mi contraseña</a>
                 </div>
 
-
-
+                <div class="mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-2">Atajo de desarrollo:</p>
+                    <a href="../administrador/inicio_sesion_admin.php" class="btn btn-outline-danger btn-sm"
+                        style="border-radius: 20px; font-weight: 600;">
+                        🧪 Ir a Login de Administrador
+                    </a>
+                </div>
                 <div class="powered-by">
                     Powered by <img src="../../img/smartable.png" alt="Smartable">
                 </div>
