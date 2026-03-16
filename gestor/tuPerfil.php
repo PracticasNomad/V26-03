@@ -307,7 +307,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             <button type="button" class="btn btn-plan rounded-pill mt-2 w-100" onclick="window.location.href='Suscripciones.php'">
                 <i class="fas fa-exchange-alt"></i> Cambiar plan
             </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
@@ -325,7 +325,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             <button type="button" class="btn btn-plan rounded-pill mt-2 w-100" onclick="window.location.href='Suscripciones.php'">
                 <i class="fas fa-exchange-alt"></i> Cambiar plan
             </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
@@ -338,7 +338,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             <div id="telefono" class="info-item">Teléfono: <?= htmlspecialchars($gestora['phone'] ?? '') ?></div>
             <div id="empresa" class="info-item">Empresa: <?= htmlspecialchars($gestora['empresa'] ?? '') ?></div>
             <div id="cif" class="info-item">CIF/NIF: <?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?></div>
-            <div id="domicilioSocial" class="info-item">Domicilio social: <?= htmlspecialchars($gestora['domicilio_social'] ?? '') ?></div>
 
             <div id="direccion" class="info-item">Dirección: <?= htmlspecialchars($gestora['direccion'] ?? '') ?></div>
             <div id="localidad" class="info-item">Localidad: <?= htmlspecialchars($gestora['localidad'] ?? '') ?></div>
@@ -431,10 +430,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                             <label class="form-label fw-bold">CIF/NIF:</label>
                             <input type="text" class="form-control" id="editCIF" name="cif">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Domicilio social:</label>
-                            <input type="text" class="form-control" id="editDomicilioSocial" name="domicilio_social">
-                        </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Dirección:</label>
@@ -499,7 +494,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 document.getElementById("editEmpresa").value = "<?= htmlspecialchars($gestora['empresa'] ?? '') ?>";
                 document.getElementById("editTelefono").value = "<?= htmlspecialchars($gestora['phone'] ?? '') ?>";
                 document.getElementById("editCIF").value = "<?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?>";
-                document.getElementById("editDomicilioSocial").value = "<?= htmlspecialchars($gestora['domicilio_social'] ?? '') ?>";
                 document.getElementById("editCodigoPostal").value = "<?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?>";
 
                 // Cargar los 3 campos nuevos en el modal
