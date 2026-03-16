@@ -16,9 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'name' => $_POST['nombre'] ?? '',
         'empresa' => $_POST['empresa'] ?? '',
         'phone' => $_POST['telefono'] ?? '',
-        'cif' => $_POST['cif'] ?? '', // Si tu base de datos usa 'nif', cambialo aquí a 'nif' => $_POST['cif']
-        'domicilio_social' => $_POST['domicilio_social'] ?? '',
-        'codigo_postal' => $_POST['codigo_postal'] ?? ''
+        'cif' => $_POST['cif'] ?? '',
+        'codigo_postal' => $_POST['codigo_postal'] ?? '',
+        // 👇 AÑADIR ESTOS TRES 👇
+        'direccion' => $_POST['direccion'] ?? '',
+        'provincia' => $_POST['provincia'] ?? '',
+        'localidad' => $_POST['localidad'] ?? ''
     ];
 
     // Llamada PATCH a la tabla gestor

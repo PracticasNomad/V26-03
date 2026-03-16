@@ -12,8 +12,8 @@ $urlGestor = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/r
 $ch = curl_init($urlGestor);
 curl_setopt_array($ch, [
     CURLOPT_HTTPHEADER => [
-        'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'], // <-- CAMBIO CLAVE
-        'apikey: ' . $_ENV['SERVICE_APIKEY']                // <-- CAMBIO CLAVE
+        'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+        'apikey: ' . $_ENV['SERVICE_APIKEY']
     ],
     CURLOPT_RETURNTRANSFER => true
 ]);
@@ -41,7 +41,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>TheNomadapp - Tu perfil Gestora</title>
     <style>
-        /* Mismo CSS que tenías, intacto */
+        /* CSS Intacto */
         :root {
             --primary-color: #007bff;
             --secondary-color: #6c757d;
@@ -59,6 +59,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             font-family: 'Nunito', sans-serif;
             background-color: var(--light-bg);
             color: var(--dark-text);
+            padding-bottom: 100px;
         }
 
         .contenedorPerfil {
@@ -205,6 +206,8 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
 
         .footer-item {
             padding: 8px 0;
+            text-decoration: none;
+            color: black;
         }
 
         .icon-container {
@@ -218,40 +221,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             color: var(--primary-color);
         }
 
-        #anf:checked~#lbl_anf .icon-container,
-        #val:checked~#lbl_val .icon-container,
-        #res:checked~#lbl_res .icon-container,
-        #his:checked~#lbl_his .icon-container,
-        #esp:checked~#lbl_esp .icon-container,
-        #per:checked~#lbl_per .icon-container {
-            color: var(--primary-color);
-        }
-
-        #loadingContainer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .loading-content {
-            background-color: white;
-            padding: 20px 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .spinner-border {
-            margin-right: 10px;
-        }
-
         @media (max-width: 768px) {
             .contenedorPerfil {
                 flex-direction: column;
@@ -260,7 +229,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 min-height: auto;
             }
 
-            .perfilInfo+div.col-3 {
+            .perfilFotoBotones {
                 display: none;
             }
 
@@ -280,14 +249,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 height: auto;
             }
 
-            .botonesMovil {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                text-align: center;
-                margin-top: 25px;
-            }
-
             .perfilInfo .info-item {
                 font-size: 1em;
             }
@@ -297,6 +258,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
 
 <body>
     <div class="contenedorPerfil sombra fw-bold mt-5">
+
         <div class="fotoPerfilMovil centrar">
             <div class="profile-image-container sombra mb-3">
                 <img id="fotoPerfilMovil" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
@@ -306,9 +268,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             </button>
             <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
                 <i class="fas fa-edit"></i> Editar perfil
-            </button>
-            <button type="button" class="btn btn-plan rounded-pill mt-2 w-100" onclick="window.location.href='Suscripciones.php'">
-                <i class="fas fa-exchange-alt"></i> Cambiar plan
             </button>
             <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -325,10 +284,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
                 <i class="fas fa-edit"></i> Editar perfil
             </button>
-            <button type="button" class="btn btn-plan rounded-pill mt-2 w-100" onclick="window.location.href='Suscripciones.php'">
-                <i class="fas fa-exchange-alt"></i> Cambiar plan
-            </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
@@ -336,15 +292,16 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
         <div class="perfilInfo">
             <p class="h5 fw-bold mb-3"><u>Tu perfil de gestora:</u></p>
 
-            <div id="nombre" class="info-item">Nombre: <?= htmlspecialchars($gestora['name'] ?? '') ?></div>
-            <div id="email" class="info-item">E-mail: <?= htmlspecialchars($gestora['email'] ?? '') ?></div>
-            <div id="telefono" class="info-item">Teléfono: <?= htmlspecialchars($gestora['phone'] ?? '') ?></div>
-            <div id="empresa" class="info-item">Empresa: <?= htmlspecialchars($gestora['empresa'] ?? '') ?></div>
-            <div id="cif" class="info-item">CIF/NIF: <?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?></div>
-            <div id="domicilioSocial" class="info-item">Domicilio social: <?= htmlspecialchars($gestora['domicilio_social'] ?? '') ?></div>
-            <div id="codigoPostal" class="info-item">Código Postal: <?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?></div>
-            <div id="plan" class="info-item">Plan: <?= htmlspecialchars($gestora['plan'] ?? 'Básico') ?></div>
-            <div id="finPlan" class="info-item">Fin del plan: <?= htmlspecialchars($gestora['fin_plan'] ?? 'N/A') ?></div>
+            <div class="info-item"><i class="fas fa-user text-primary me-2"></i> <strong>Nombre:</strong> &nbsp;<?= htmlspecialchars($gestora['name'] ?? '') ?></div>
+            <div class="info-item"><i class="fas fa-envelope text-primary me-2"></i> <strong>E-mail:</strong> &nbsp;<?= htmlspecialchars($gestora['email'] ?? '') ?></div>
+            <div class="info-item"><i class="fas fa-phone text-primary me-2"></i> <strong>Teléfono:</strong> &nbsp;<?= htmlspecialchars($gestora['phone'] ?? '') ?></div>
+            <div class="info-item"><i class="fas fa-building text-primary me-2"></i> <strong>Empresa:</strong> &nbsp;<?= htmlspecialchars($gestora['empresa'] ?? '') ?></div>
+            <div class="info-item"><i class="fas fa-id-card text-primary me-2"></i> <strong>CIF/NIF:</strong> &nbsp;<?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?></div>
+
+            <div class="info-item"><i class="fas fa-map-marker-alt text-primary me-2"></i> <strong>Dirección:</strong> &nbsp;<?= htmlspecialchars($gestora['direccion'] ?? '') ?></div>
+            <div class="info-item"><i class="fas fa-city text-primary me-2"></i> <strong>Localidad:</strong> &nbsp;<?= htmlspecialchars($gestora['localidad'] ?? '') ?></div>
+            <div class="info-item"><i class="fas fa-map text-primary me-2"></i> <strong>Provincia:</strong> &nbsp;<?= htmlspecialchars($gestora['provincia'] ?? '') ?></div>
+            <div class="info-item"><i class="fas fa-mail-bulk text-primary me-2"></i> <strong>Código Postal:</strong> &nbsp;<?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?></div>
 
             <input type="hidden" id="gestorId" value="<?= htmlspecialchars($gestora['id'] ?? '') ?>">
         </div>
@@ -352,53 +309,53 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
 
     <div class="container-fluid footer mt-5 p-3">
         <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-            <label for="anf" class="col-2 text-center footer-item">
-                <div class="row"><a href="Anfitriones.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i>
-                            <div>Anfitriones</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="val" class="col-2 text-center footer-item">
-                <div class="row"><a href="verValidar.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
-                            <div>Validar</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="res" class="col-2 text-center footer-item">
-                <div class="row"><a href="verReservas.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-book-open p-1 m-0"></i>
-                            <div>Reservas</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="his" class="col-2 text-center footer-item">
-                <div class="row"><a href="verEstablecimientos.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i>
-                            <div>Establecimientos</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="esp" class="col-2 text-center footer-item">
-                <div class="row"><a href="verEspacios.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-chair p-1 m-0"></i>
-                            <div>Espacios</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="per" class="col-2 text-center footer-item">
-                <div class="row"><a href="tuPerfil.php">
-                        <div class="col-12 icon-container" style="color:var(--primary-color);"><i class="fas fa-user-tie p-1 m-0"></i>
-                            <div>Perfil</div>
-                        </div>
-                    </a></div>
-            </label>
+            <a href="Anfitriones.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i>
+                        <div>Anfitriones</div>
+                    </div>
+                </div>
+            </a>
+            <a href="verValidar.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
+                        <div>Validar</div>
+                    </div>
+                </div>
+            </a>
+            <a href="verReservas.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h2 fas fa-book-open p-1 m-0"></i>
+                        <div>Reservas</div>
+                    </div>
+                </div>
+            </a>
+            <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i>
+                        <div>Establecimientos</div>
+                    </div>
+                </div>
+            </a>
+            <a href="verEspacios.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h2 fas fa-chair p-1 m-0"></i>
+                        <div>Espacios</div>
+                    </div>
+                </div>
+            </a>
+            <a href="tuPerfil.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container" style="color:var(--primary-color);"><i class="h2 fas fa-user-tie p-1 m-0"></i>
+                        <div>Perfil</div>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
 
     <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Editar perfil</h5>
@@ -406,33 +363,53 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 </div>
                 <div class="modal-body">
                     <form id="formEditarPerfil">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nombre:</label>
-                            <input type="text" class="form-control" id="editNombre" name="nombre">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nombre:</label>
+                                <input type="text" class="form-control" id="editNombre" name="nombre">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">E-mail (No editable):</label>
+                                <input disabled type="email" class="form-control" id="editEmail">
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">E-mail (No editable):</label>
-                            <input disabled type="email" class="form-control" id="editEmail">
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Empresa:</label>
+                                <input type="text" class="form-control" id="editEmpresa" name="empresa">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">CIF/NIF:</label>
+                                <input type="text" class="form-control" id="editCIF" name="cif">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Teléfono:</label>
+                                <input type="text" class="form-control" id="editTelefono" name="telefono">
+                            </div>
                         </div>
+
+                        <hr>
+                        <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-map-marker-alt me-1"></i> Ubicación Asignada</h6>
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Empresa:</label>
-                            <input type="text" class="form-control" id="editEmpresa" name="empresa">
+                            <label class="form-label fw-bold">Dirección Completa:</label>
+                            <input type="text" class="form-control" id="editDireccion" name="direccion">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Teléfono:</label>
-                            <input type="text" class="form-control" id="editTelefono" name="telefono">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">CIF/NIF:</label>
-                            <input type="text" class="form-control" id="editCIF" name="cif">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Domicilio social:</label>
-                            <input type="text" class="form-control" id="editDomicilioSocial" name="domicilio_social">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Código Postal:</label>
-                            <input type="text" class="form-control" id="editCodigoPostal" name="codigo_postal">
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Provincia:</label>
+                                <input type="text" class="form-control" id="editProvincia" name="provincia">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Localidad:</label>
+                                <input type="text" class="form-control" id="editLocalidad" name="localidad">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Código Postal:</label>
+                                <input type="text" class="form-control" id="editCodigoPostal" name="codigo_postal">
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -443,6 +420,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="cambiarImagenModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -471,8 +449,9 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             </div>
         </div>
     </div>
+
     <script>
-        // Cargar los datos en el modal cuando se abre
+        // CARGAR DATOS EN EL MODAL DE EDICIÓN
         document.querySelectorAll('.botonEditar').forEach(boton => {
             boton.addEventListener('click', function() {
                 document.getElementById("editNombre").value = "<?= htmlspecialchars($gestora['name'] ?? '') ?>";
@@ -480,12 +459,16 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 document.getElementById("editEmpresa").value = "<?= htmlspecialchars($gestora['empresa'] ?? '') ?>";
                 document.getElementById("editTelefono").value = "<?= htmlspecialchars($gestora['phone'] ?? '') ?>";
                 document.getElementById("editCIF").value = "<?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?>";
-                document.getElementById("editDomicilioSocial").value = "<?= htmlspecialchars($gestora['domicilio_social'] ?? '') ?>";
+
+                // Nuevos campos
+                document.getElementById("editDireccion").value = "<?= htmlspecialchars($gestora['direccion'] ?? '') ?>";
+                document.getElementById("editProvincia").value = "<?= htmlspecialchars($gestora['provincia'] ?? '') ?>";
+                document.getElementById("editLocalidad").value = "<?= htmlspecialchars($gestora['localidad'] ?? '') ?>";
                 document.getElementById("editCodigoPostal").value = "<?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?>";
             });
         });
 
-        // Guardar cambios apuntando al nuevo archivo
+        // GUARDAR CAMBIOS DE TEXTO
         document.getElementById("btnGuardarCambios").addEventListener("click", function() {
             const formData = new FormData(document.getElementById("formEditarPerfil"));
             const btn = this;
@@ -515,7 +498,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 });
         });
 
-        // --- SCRIPT PARA CAMBIAR IMAGEN ---
+        // PREVISUALIZAR IMAGEN
         document.getElementById('inputImagen').addEventListener('change', function(event) {
             const archivo = event.target.files[0];
             if (archivo) {
@@ -527,6 +510,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             }
         });
 
+        // GUARDAR IMAGEN
         document.getElementById('btnGuardarImagen').addEventListener('click', function() {
             const formData = new FormData();
             const inputImagen = document.getElementById("inputImagen");
