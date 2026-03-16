@@ -1,5 +1,4 @@
 <?php
-// Nota: Si usas un verificador de sesión distinto para el admin, cámbialo aquí.
 
 
 require '../vendor/autoload.php';
@@ -12,7 +11,6 @@ $dotenv->load();
 $anfitriones = [];
 $error_db = null;
 
-// BUSCAR TODOS LOS ESTABLECIMIENTOS (SIN FILTRO DE ZONA) Y EXTRAER SUS ANFITRIONES
 $urlEstablecimientos = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=host_id,host(id,name,email,phone,empresa)";
 
 $ch = curl_init($urlEstablecimientos);
@@ -31,7 +29,6 @@ curl_close($ch);
 if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     $establecimientos = json_decode($resultado, true);
 
-    // Extraemos los anfitriones y eliminamos duplicados
     $anfitrionesUnicos = [];
     foreach ($establecimientos as $est) {
         if (isset($est['host']) && $est['host']) {
@@ -42,7 +39,6 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
         }
     }
 
-    // Convertimos el array asociativo a uno indexado y ordenamos alfabéticamente
     $anfitriones = array_values($anfitrionesUnicos);
     usort($anfitriones, function ($a, $b) {
         return strcmp($a['name'] ?? '', $b['name'] ?? '');
@@ -329,7 +325,6 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
 
     <script>
         $(document).ready(function () {
-            // INICIALIZAMOS EL BUSCADOR SELECT2
             $('#select-anfitrion').select2({
                 placeholder: "-- Busca o selecciona un anfitrión --",
                 allowClear: true,
@@ -341,7 +336,6 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                 }
             });
 
-            // LÓGICA AL CAMBIAR DE ANFITRIÓN
             $('#select-anfitrion').on('change', function () {
                 var selectedOption = $(this).find('option:selected');
                 var id = $(this).val();
