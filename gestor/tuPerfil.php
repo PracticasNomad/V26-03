@@ -346,19 +346,9 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
 
             <div id="codigoPostal" class="info-item">Código Postal: <?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?></div>
             <div id="plan" class="info-item">Plan: <?= htmlspecialchars($gestora['plan'] ?? 'Básico') ?></div>
-            <?php
-            // Lógica inteligente para la fecha del plan
-            $textoFinPlan = 'No definido';
-            if (!empty($gestora['fin_plan'])) {
-                // Si hay fecha en la BD, la ponemos bonita (ej: 25/10/2026)
-                $textoFinPlan = date('d/m/Y', strtotime($gestora['fin_plan']));
-            } elseif (($gestora['plan'] ?? 'Básico') === 'Básico') {
-                // Si no hay fecha y es el plan Básico
-                $textoFinPlan = 'Ilimitado (Sin caducidad)';
-            }
-            ?>
+
             <div id="finPlan" class="info-item">
-                <i class="fas fa-calendar-alt text-primary me-2"></i> <strong>Fin del plan:</strong> &nbsp;<?= $textoFinPlan ?>
+                <i class="fas fa-calendar-alt text-primary me-2"></i> <strong>Fin del plan:</strong> &nbsp;<?= !empty($gestora['fin_plan']) ? date('d/m/Y', strtotime($gestora['fin_plan'])) : 'Pendiente de asignar' ?>
             </div>
 
             <input type="hidden" id="gestorId" value="<?= htmlspecialchars($gestora['id'] ?? '') ?>">
