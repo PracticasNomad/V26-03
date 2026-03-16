@@ -448,10 +448,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                             <label class="form-label fw-bold">CIF/NIF:</label>
                             <input type="text" class="form-control" id="editCIF" name="cif">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Domicilio social:</label>
-                            <input type="text" class="form-control" id="editDomicilioSocial" name="domicilio_social">
-                        </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Dirección:</label>
@@ -523,7 +519,6 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 document.getElementById("editEmpresa").value = "<?= htmlspecialchars($gestora['empresa'] ?? '') ?>";
                 document.getElementById("editTelefono").value = "<?= htmlspecialchars($gestora['phone'] ?? '') ?>";
                 document.getElementById("editCIF").value = "<?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?>";
-                document.getElementById("editDomicilioSocial").value = "<?= htmlspecialchars($gestora['domicilio_social'] ?? '') ?>";
                 document.getElementById("editCodigoPostal").value = "<?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?>";
 
                 // Cargar los 3 campos nuevos en el modal
