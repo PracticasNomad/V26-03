@@ -54,7 +54,7 @@ if (isset($_POST['siguiente'])) {
         $emailError = true;
     }
 
-    if (!empty($errors)) {
+ if (!empty($errors)) {
         $formError = implode(' ', $errors);
     } else {
         $_SESSION['host']['nombre'] = $nombre;
@@ -69,9 +69,35 @@ if (isset($_POST['siguiente'])) {
             $_SESSION['host']['password2'] = $password2;
         }
 
-        if (isset($_SESSION['host'])) {
+       if (isset($_SESSION['host'])) {
+            // --- INICIO: GUARDAR EN REGISTROS ABANDONADOS ---
+            require_once '../vendor/autoload.php';
+            $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+            $dotenv->safeLoad();
+
+            $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados';
+            $ch = curl_init($url);
+            $data = [
+                'email' => $email,
+                'nombre' => $nombre
+            ];
+            
+            $payload = json_encode($data);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'apikey: ' . $_ENV['DATABASE_APIKEY'],
+                'Prefer: resolution=merge-duplicates'
+            ]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_exec($ch);
+            curl_close($ch);
+            // --- FIN: GUARDAR EN REGISTROS ABANDONADOS ---
+
             header('Location: registerAnfitrion-paso3.php');
             exit();
+        
         } else {
             $formError = 'Error al guardar los datos de sesión. Por favor, inténtalo de nuevo.';
         }

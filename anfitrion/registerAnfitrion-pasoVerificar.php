@@ -314,6 +314,23 @@ function insertarDatos()
     }
 
     insertarHorariosYServicios($uuid_espacio, $uuid_establecimiento, $token, $supabaseKey);
+
+    // --- NUEVO: ELIMINAR EL REGISTRO DE ABANDONOS (YA HA TERMINADO) ---
+    if (isset($_SESSION['host']['email'])) {
+        $emailBorrar = $_SESSION['host']['email'];
+        $urlBorrar = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados?email=eq.' . urlencode($emailBorrar);
+        
+        $chBorrar = curl_init($urlBorrar);
+        curl_setopt($chBorrar, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($chBorrar, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($chBorrar, CURLOPT_HTTPHEADER, [
+            'apikey: ' . $supabaseKey,
+            'Authorization: Bearer ' . $supabaseKey
+        ]);
+        curl_exec($chBorrar);
+        curl_close($chBorrar);
+    }
+    // ------------------------------------------------------------------
 }
 
 if (!isset($_SESSION['espacio_trabajo'])) {
@@ -564,7 +581,6 @@ if (isset($_POST['regenerar'])) {
     <script>
         $(document).ready(function() {
 
-
             $('#verificationForm').submit(function(e) {
                 if ($(this).find('button[name="regenerar"]').is(':focus')) {
                     return true;
@@ -585,6 +601,10 @@ if (isset($_POST['regenerar'])) {
                     $('#error-text').text('El código debe ser de 6 dígitos numéricos.');
                     return false;
                 }
+                
+                // Desactivamos el botón y el campo para que no le den dos veces mientras carga
+                $('#codigo').prop('readonly', true);
+                $('#btnVerificar').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Verificando...');
 
                 return true;
             });
