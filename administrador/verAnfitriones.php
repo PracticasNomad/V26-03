@@ -1,6 +1,5 @@
 <?php
 
-
 require '../vendor/autoload.php';
 
 use Dotenv\Dotenv;
@@ -112,6 +111,11 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Gestión Global de Anfitriones</title>
     <style>
+        :root {
+            --primary-color: #dc3545;
+            /* Rojo admin */
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #f8f9fa;
@@ -229,6 +233,7 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
             background-color: #e0a800;
         }
 
+        /* ESTILOS DEL FOOTER ADMIN */
         .footer {
             color: black;
             background-color: white;
@@ -253,38 +258,26 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
 
         .footer-item {
             padding: 8px 0;
+            text-decoration: none;
+            color: black;
+            font-size: 0.8rem;
         }
 
         .icon-container {
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, color 0.3s ease;
             padding: 5px 0;
+            color: #000000;
         }
 
         .footer-item:hover .icon-container {
             transform: translateY(-7px);
+            color: var(--primary-color);
         }
 
         a,
         a:visited,
         a:active {
-            color: black;
             text-decoration: none;
-        }
-
-        #lbl_anf {
-            color: #00B7CF !important;
-        }
-
-        #lbl_anf .icon-container {
-            color: #007bff;
-        }
-
-        .footer-item:hover {
-            color: #00B7CF !important;
-        }
-
-        .footer-item:hover .icon-container {
-            color: #007bff;
         }
     </style>
 </head>
@@ -446,22 +439,18 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                     var email = selectedOption.data('email');
                     var telefono = selectedOption.data('telefono');
 
-                    // 1. Rellenar la tarjeta visual
                     $('#card-nombre').text(nombre);
                     $('#card-email').text(email);
                     $('#card-telefono').text(telefono ? telefono : 'No registrado');
                     $('#card-id').text('#' + id);
 
-                    // 2. Configurar botón de establecimientos
                     $('#btn-view-est').attr('href', 'verEstablecimientos.php?host_id=' + id);
 
-                    // 3. Rellenar los inputs ocultos del Modal de Edición
                     $('#form_edit_id').val(id);
                     $('#form_edit_name').val(nombre);
                     $('#form_edit_email').val(email);
                     $('#form_edit_phone').val(telefono);
 
-                    // Mostrar tarjeta
                     $('#detalles-anfitrion').fadeIn();
                 } else {
                     $('#detalles-anfitrion').fadeOut();
@@ -470,73 +459,51 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
         });
     </script>
 
-    <div class="container-fluid footer p-3">
+    <div class="container-fluid footer mt-5 p-3">
         <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-            <label for="anf" id="lbl_anf" class="col-2 text-center footer-item">
+            <a href="dashboard.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <a href="Anfitriones.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-users p-1 m-0"></i>
-                            <div>Anfitriones</div>
-                        </div>
-                    </a>
+                    <div class="col-12 icon-container"><i class="h3 fas fa-chart-line p-1 m-0"></i>
+                        <div>Panel</div>
+                    </div>
                 </div>
-            </label>
-
-            <label for="val" id="lbl_val" class="col-2 text-center footer-item">
+            </a>
+            <a href="verGestores.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <a href="verValidar.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-check-circle p-1 m-0"></i>
-                            <div>Validar</div>
-                        </div>
-                    </a>
+                    <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
+                        <div>Gestores</div>
+                    </div>
                 </div>
-            </label>
-
-            <label for="res" id="lbl_res" class="col-2 text-center footer-item">
+            </a>
+            <a href="verAnfitriones.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <a href="verReservas.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-book-open p-1 m-0"></i>
-                            <div>Reservas</div>
-                        </div>
-                    </a>
+                    <div class="col-12 icon-container" style="color:var(--primary-color);"><i
+                            class="h3 fas fa-users p-1 m-0"></i>
+                        <div>Anfitriones</div>
+                    </div>
                 </div>
-            </label>
-
-            <label for="his" id="lbl_his" class="col-2 text-center footer-item">
+            </a>
+            <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <a href="verEstablecimientos.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-building p-1 m-0"></i>
-                            <div>Establecimientos</div>
-                        </div>
-                    </a>
+                    <div class="col-12 icon-container"><i class="h3 fas fa-building p-1 m-0"></i>
+                        <div>Espacios</div>
+                    </div>
                 </div>
-            </label>
-
-            <label for="esp" id="lbl_esp" class="col-2 text-center footer-item">
+            </a>
+            <a href="verValidar.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <a href="verEspacios.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-chair p-1 m-0"></i>
-                            <div>Espacios</div>
-                        </div>
-                    </a>
+                    <div class="col-12 icon-container"><i class="h3 fas fa-check-circle p-1 m-0"></i>
+                        <div>Validar</div>
+                    </div>
                 </div>
-            </label>
-
-            <label for="per" id="lbl_per" class="col-2 text-center footer-item">
+            </a>
+            <a href="tuPerfil.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <a href="tuPerfil.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-user-tie p-1 m-0"></i>
-                            <div>Perfil</div>
-                        </div>
-                    </a>
+                    <div class="col-12 icon-container"><i class="h3 fas fa-user-cog p-1 m-0"></i>
+                        <div>Perfil</div>
+                    </div>
                 </div>
-            </label>
+            </a>
         </div>
     </div>
 </body>
