@@ -503,290 +503,297 @@ function formatearDireccion($dir, $piso)
                             <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>">
                                 <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"
                                     <?php if (!empty($establecimiento['banner_image_url'])): ?> style="background-image:
-                                url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"<?php endif; ?>>
+                                url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');" <?php endif; ?>>
                                     <div class="card-header-overlay"></div>
                                     <div class="card-title">
-                                        <?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
+                                        <?php echo htmlspecialchars($establecimiento['nombre']); ?>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="info-row">
-                                            <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                            <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
-                                        </div>
-                                        <div class="info-row">
-                                            <div class="info-icon"><i class="fas fa-city"></i></div>
-                                            <div><?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?></div>
-                                        </div>
-                                        <div id="badge-container-<?php echo $establecimiento['id']; ?>">
-                                            <div class="info-row mt-2">
-                                                <div class="info-icon"><i class="fas fa-hourglass-half text-warning"></i>
-                                                </div>
-                                                <div><strong>Estado:</strong> <span
-                                                        class="badge bg-warning text-dark">Pendiente</span></div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="info-row">
+                                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                        <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-icon"><i class="fas fa-city"></i></div>
+                                        <div><?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?></div>
+                                    </div>
+                                    <div id="badge-container-<?php echo $establecimiento['id']; ?>">
+                                        <div class="info-row mt-2">
+                                            <div class="info-icon"><i class="fas fa-hourglass-half text-warning"></i>
                                             </div>
+                                            <div><strong>Estado:</strong> <span
+                                                    class="badge bg-warning text-dark">Pendiente</span></div>
                                         </div>
+                                    </div>
 
-                                        <div class="action-buttons-container"
-                                            id="action-container-<?php echo $establecimiento['id']; ?>">
-                                            <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
-                                                class="btn-validar mb-2"><i class="fas fa-eye"></i> Revisar completo</a>
-                                            <div class="quick-actions"
-                                                id="quick-actions-<?php echo $establecimiento['id']; ?>">
-                                                <button class="btn-quick approve"
-                                                    onclick="procesarValidacionRapida('<?php echo $establecimiento['id']; ?>', 'aprobar', this)"><i
-                                                        class="fas fa-check"></i> Aprobar</button>
-                                                <button class="btn-quick reject"
-                                                    onclick="procesarValidacionRapida('<?php echo $establecimiento['id']; ?>', 'rechazar', this)"><i
-                                                        class="fas fa-times"></i> Rechazar</button>
-                                            </div>
+                                    <div class="action-buttons-container"
+                                        id="action-container-<?php echo $establecimiento['id']; ?>">
+                                        <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
+                                            class="btn-validar mb-2"><i class="fas fa-eye"></i> Revisar completo</a>
+                                        <div class="quick-actions" id="quick-actions-<?php echo $establecimiento['id']; ?>">
+                                            <button class="btn-quick approve"
+                                                onclick="procesarValidacionRapida('<?php echo $establecimiento['id']; ?>', 'aprobar', this)"><i
+                                                    class="fas fa-check"></i> Aprobar</button>
+                                            <button class="btn-quick reject"
+                                                onclick="procesarValidacionRapida('<?php echo $establecimiento['id']; ?>', 'rechazar', this)"><i
+                                                    class="fas fa-times"></i> Rechazar</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="rechazados" role="tabpanel">
-                    <div class="row" id="row-rechazados">
-                        <div class="no-establecimientos" id="msg-no-rechazados"
-                            style="<?php echo empty($establecimientosRechazados) ? 'display:block;' : 'display:none;'; ?>">
-                            <h4 class="fw-bold mb-3">No hay establecimientos rechazados</h4>
                         </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
 
-                        <?php foreach ($establecimientosRechazados as $establecimiento):
-                            $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
-                            ?>
-                            <div class="col-12 col-md-6 col-lg-4 mb-4 card-container"
-                                id="col-est-<?php echo $establecimiento['id']; ?>">
-                                <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>"
-                                    style="border-left: 4px solid #dc3545; opacity: 0.85;">
-                                    <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"
-                                        <?php if (!empty($establecimiento['banner_image_url'])): ?> style="background-image:
-                                    url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"<?php endif; ?>>
-                                        <div class="card-header-overlay"></div>
-                                        <div class="card-title">
-                                            <?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="info-row">
-                                                <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                                <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
-                                            </div>
-                                            <div class="info-row">
-                                                <div class="info-icon"><i class="fas fa-city"></i></div>
-                                                <div><?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?>
-                                                </div>
-                                            </div>
-                                            <div id="badge-container-<?php echo $establecimiento['id']; ?>">
-                                                <div class="info-row mt-2">
-                                                    <div class="info-icon"><i class="fas fa-ban text-danger"></i></div>
-                                                    <div><strong>Estado:</strong> <span
-                                                            class="badge bg-danger">Rechazado</span></div>
-                                                </div>
-                                            </div>
-                                            <div class="action-buttons-container"
-                                                id="action-container-<?php echo $establecimiento['id']; ?>">
-                                                <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
-                                                    class="btn-validar"><i class="fas fa-eye"></i> Ver detalle completo</a>
-                                            </div>
-                                        </div>
+            <div class="tab-pane fade" id="rechazados" role="tabpanel">
+                <div class="row" id="row-rechazados">
+                    <div class="no-establecimientos" id="msg-no-rechazados"
+                        style="<?php echo empty($establecimientosRechazados) ? 'display:block;' : 'display:none;'; ?>">
+                        <h4 class="fw-bold mb-3">No hay establecimientos rechazados</h4>
+                    </div>
+
+                    <?php foreach ($establecimientosRechazados as $establecimiento):
+                        $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
+                        ?>
+                        <div class="col-12 col-md-6 col-lg-4 mb-4 card-container"
+                            id="col-est-<?php echo $establecimiento['id']; ?>">
+                            <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>"
+                                style="border-left: 4px solid #dc3545; opacity: 0.85;">
+                                <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"
+                                    <?php if (!empty($establecimiento['banner_image_url'])): ?> style="background-image:
+                                    url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"
+                                    <?php endif; ?>>
+                                    <div class="card-header-overlay"></div>
+                                    <div class="card-title">
+                                        <?php echo htmlspecialchars($establecimiento['nombre']); ?>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="validados" role="tabpanel">
-                        <div class="row" id="row-validados">
-                            <div class="no-establecimientos" id="msg-no-validados"
-                                style="<?php echo empty($establecimientosValidados) ? 'display:block;' : 'display:none;'; ?>">
-                                <h4 class="fw-bold mb-3">No hay establecimientos aprobados</h4>
-                            </div>
-
-                            <?php foreach ($establecimientosValidados as $establecimiento):
-                                $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
-                                ?>
-                                <div class="col-12 col-md-6 col-lg-4 mb-4 card-container"
-                                    id="col-est-<?php echo $establecimiento['id']; ?>">
-                                    <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>"
-                                        style="border-left: 4px solid #28a745;">
-                                        <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"
-                                            <?php if (!empty($establecimiento['banner_image_url'])): ?>
-                                                style="background-image: url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"<?php endif; ?>>
-                                            <div class="card-header-overlay"></div>
-                                            <div class="card-title">
-                                                <?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="info-row">
-                                                    <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                                    <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
-                                                </div>
-                                                <div class="info-row">
-                                                    <div class="info-icon"><i class="fas fa-city"></i></div>
-                                                    <div>
-                                                        <?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?>
-                                                    </div>
-                                                </div>
-                                                <div id="badge-container-<?php echo $establecimiento['id']; ?>">
-                                                    <div class="info-row mt-2">
-                                                        <div class="info-icon"><i
-                                                                class="fas fa-check-circle text-success"></i></div>
-                                                        <div><strong>Estado:</strong> <span
-                                                                class="badge bg-success">Aprobado</span></div>
-                                                    </div>
-                                                </div>
-                                                <div class="action-buttons-container"
-                                                    id="action-container-<?php echo $establecimiento['id']; ?>">
-                                                    <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
-                                                        class="btn-validar"><i class="fas fa-eye"></i> Ver detalle
-                                                        completo</a>
-                                                </div>
+                                <div class="card-body">
+                                    <div class="info-row">
+                                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                        <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-icon"><i class="fas fa-city"></i></div>
+                                        <div><?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?>
+                                        </div>
+                                    </div>
+                                    <div id="badge-container-<?php echo $establecimiento['id']; ?>">
+                                        <div class="info-row mt-2">
+                                            <div class="info-icon"><i class="fas fa-ban text-danger"></i></div>
+                                            <div><strong>Estado:</strong> <span class="badge bg-danger">Rechazado</span>
                                             </div>
                                         </div>
                                     </div>
-                                <?php endforeach; ?>
+                                    <div class="action-buttons-container"
+                                        id="action-container-<?php echo $establecimiento['id']; ?>">
+                                        <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
+                                            class="btn-validar"><i class="fas fa-eye"></i> Ver detalle completo</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
 
+            <div class="tab-pane fade" id="validados" role="tabpanel">
+                <div class="row" id="row-validados">
+                    <div class="no-establecimientos" id="msg-no-validados"
+                        style="<?php echo empty($establecimientosValidados) ? 'display:block;' : 'display:none;'; ?>">
+                        <h4 class="fw-bold mb-3">No hay establecimientos aprobados</h4>
+                    </div>
+
+                    <?php foreach ($establecimientosValidados as $establecimiento):
+                        $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
+                        ?>
+                        <div class="col-12 col-md-6 col-lg-4 mb-4 card-container"
+                            id="col-est-<?php echo $establecimiento['id']; ?>">
+                            <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>"
+                                style="border-left: 4px solid #28a745;">
+                                <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"
+                                    <?php if (!empty($establecimiento['banner_image_url'])): ?>
+                                        style="background-image: url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"
+                                    <?php endif; ?>>
+                                    <div class="card-header-overlay"></div>
+                                    <div class="card-title">
+                                        <?php echo htmlspecialchars($establecimiento['nombre']); ?>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="info-row">
+                                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                        <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-icon"><i class="fas fa-city"></i></div>
+                                        <div>
+                                            <?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?>
+                                        </div>
+                                    </div>
+                                    <div id="badge-container-<?php echo $establecimiento['id']; ?>">
+                                        <div class="info-row mt-2">
+                                            <div class="info-icon"><i class="fas fa-check-circle text-success"></i></div>
+                                            <div><strong>Estado:</strong> <span class="badge bg-success">Aprobado</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="action-buttons-container"
+                                        id="action-container-<?php echo $establecimiento['id']; ?>">
+                                        <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
+                                            class="btn-validar"><i class="fas fa-eye"></i> Ver detalle
+                                            completo</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <?php
+        #include_once 'footer.php'; //Se podría crear un footer común para no repetir el código y solo poner está linea y asi se incluye el footer en todas la páginas...
+    ?>
+
+    <div class="container-fluid footer p-3">
+        <div class="row text-center fixed-bottom pt-1 px-2 footer-container">
+            <a href="tuPerfil.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-chart-line p-1 m-0"></i>
+                        <div>Panel</div>
                     </div>
                 </div>
-
-                <div class="container-fluid footer mt-5 p-3">
-                    <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-                        <label id="lbl_anf" class="col-2 text-center footer-item">
-                            <div class="row"><a href="Anfitriones.php">
-                                    <div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i>
-                                        <div>Anfitriones</div>
-                                    </div>
-                                </a></div>
-                        </label>
-                        <label id="lbl_val" class="col-2 text-center footer-item">
-                            <div class="row"><a href="verValidar.php">
-                                    <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
-                                        <div>Validar</div>
-                                    </div>
-                                </a></div>
-                        </label>
-                        <label id="lbl_res" class="col-2 text-center footer-item">
-                            <div class="row"><a href="verReservas.php">
-                                    <div class="col-12 icon-container"><i class="h2 fas fa-book-open p-1 m-0"></i>
-                                        <div>Reservas</div>
-                                    </div>
-                                </a></div>
-                        </label>
-                        <label id="lbl_his" class="col-2 text-center footer-item">
-                            <div class="row"><a href="verEstablecimientos.php">
-                                    <div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i>
-                                        <div>Establecimientos</div>
-                                    </div>
-                                </a></div>
-                        </label>
-                        <label id="lbl_esp" class="col-2 text-center footer-item">
-                            <div class="row"><a href="verEspacios.php">
-                                    <div class="col-12 icon-container"><i class="h2 fas fa-chair p-1 m-0"></i>
-                                        <div>Espacios</div>
-                                    </div>
-                                </a></div>
-                        </label>
-                        <label id="lbl_per" class="col-2 text-center footer-item">
-                            <div class="row"><a href="tuPerfil.php">
-                                    <div class="col-12 icon-container"><i class="h2 fas fa-user-tie p-1 m-0"></i>
-                                        <div>Perfil</div>
-                                    </div>
-                                </a></div>
-                        </label>
+            </a>
+            <a href="verGestores.php" class="col-2 text-center footer-item footer-active">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
+                        <div>Gestores</div>
                     </div>
                 </div>
+            </a>
+            <a href="verAnfitriones.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-users p-1 m-0"></i>
+                        <div>Anfitriones</div>
+                    </div>
+                </div>
+            </a>
+            <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-building p-1 m-0"></i>
+                        <div>Espacios</div>
+                    </div>
+                </div>
+            </a>
+            <a href="verValidar.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-check-circle p-1 m-0"></i>
+                        <div>Validar</div>
+                    </div>
+                </div>
+            </a>
+            <a href="tuPerfil.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-user-cog p-1 m-0"></i>
+                        <div>Perfil</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
 
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                        tooltipTriggerList.forEach(function (el) {
-                            new bootstrap.Tooltip(el);
-                        });
-                    });
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (el) {
+                new bootstrap.Tooltip(el);
+            });
+        });
 
-                    function procesarValidacionRapida(id, accion, btnElement) {
-                        if (!confirm(accion === 'aprobar' ? '¿Aprobar y publicar?' : '¿Rechazar establecimiento?')) return;
+        function procesarValidacionRapida(id, accion, btnElement) {
+            if (!confirm(accion === 'aprobar' ? '¿Aprobar y publicar?' : '¿Rechazar establecimiento?')) return;
 
-                        const originalText = btnElement.innerHTML;
-                        btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
-                        btnElement.disabled = true;
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
+            btnElement.disabled = true;
 
-                        const formData = new FormData();
-                        formData.append('accion', accion);
+            const formData = new FormData();
+            formData.append('accion', accion);
 
-                        fetch('procesar_validacion.php?id=' + id + '&ajax=1', {
-                            method: 'POST',
-                            body: formData
-                        })
-                            .then(async response => {
-                                const textoCrudo = await response.text();
-                                try {
-                                    return JSON.parse(textoCrudo);
-                                } catch (e) {
-                                    alert("⚠️ Error del servidor:\n\n" + textoCrudo.substring(0, 150));
-                                    throw new Error("Respuesta inválida");
-                                }
-                            })
-                            .then(data => {
-                                if (data.success) {
-                                    alert(data.message);
-                                    moverTarjetaEnDOM(id, accion);
-                                } else {
-                                    alert('🚨 Error al guardar: ' + data.error);
-                                    btnElement.innerHTML = originalText;
-                                    btnElement.disabled = false;
-                                }
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                btnElement.innerHTML = originalText;
-                                btnElement.disabled = false;
-                            });
+            fetch('procesar_validacion.php?id=' + id + '&ajax=1', {
+                method: 'POST',
+                body: formData
+            })
+                .then(async response => {
+                    const textoCrudo = await response.text();
+                    try {
+                        return JSON.parse(textoCrudo);
+                    } catch (e) {
+                        alert("⚠️ Error del servidor:\n\n" + textoCrudo.substring(0, 150));
+                        throw new Error("Respuesta inválida");
                     }
-
-                    function moverTarjetaEnDOM(id, accion) {
-                        const cleanId = String(id).trim();
-                        const colContenedor = document.getElementById('col-est-' + cleanId);
-                        const tarjeta = document.getElementById('card-' + cleanId);
-                        const botonesRapidos = document.getElementById('quick-actions-' + cleanId);
-                        const badgeContenedor = document.getElementById('badge-container-' + cleanId);
-
-                        if (!colContenedor || !tarjeta) return;
-
-                        // Quitamos los botones de Aprobar/Rechazar al moverse
-                        if (botonesRapidos) botonesRapidos.remove();
-
-                        if (accion === 'aprobar') {
-                            tarjeta.style.borderLeft = '4px solid #28a745';
-                            tarjeta.style.opacity = '1';
-                            badgeContenedor.innerHTML = '<div class="info-row mt-2"><div class="info-icon"><i class="fas fa-check-circle text-success"></i></div><div><strong>Estado:</strong> <span class="badge bg-success">Aprobado</span></div></div>';
-
-                            document.getElementById('row-validados').appendChild(colContenedor);
-                            const msgValidados = document.getElementById('msg-no-validados');
-                            if (msgValidados) msgValidados.style.display = 'none';
-
-                        } else {
-                            tarjeta.style.borderLeft = '4px solid #dc3545';
-                            tarjeta.style.opacity = '0.85';
-                            badgeContenedor.innerHTML = '<div class="info-row mt-2"><div class="info-icon"><i class="fas fa-ban text-danger"></i></div><div><strong>Estado:</strong> <span class="badge bg-danger">Rechazado</span></div></div>';
-
-                            document.getElementById('row-rechazados').appendChild(colContenedor);
-                            const msgRechazados = document.getElementById('msg-no-rechazados');
-                            if (msgRechazados) msgRechazados.style.display = 'none';
-                        }
-
-                        // Validar si la lista de pendientes quedó vacía para enseñar el mensaje
-                        const pendientesActivos = document.querySelectorAll('#row-pendientes .card-container');
-                        if (pendientesActivos.length === 0) {
-                            const msgPendientes = document.getElementById('msg-no-pendientes');
-                            if (msgPendientes) msgPendientes.style.display = 'block';
-                        }
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        moverTarjetaEnDOM(id, accion);
+                    } else {
+                        alert('🚨 Error al guardar: ' + data.error);
+                        btnElement.innerHTML = originalText;
+                        btnElement.disabled = false;
                     }
-                </script>
+                })
+                .catch(err => {
+                    console.error(err);
+                    btnElement.innerHTML = originalText;
+                    btnElement.disabled = false;
+                });
+        }
+
+        function moverTarjetaEnDOM(id, accion) {
+            const cleanId = String(id).trim();
+            const colContenedor = document.getElementById('col-est-' + cleanId);
+            const tarjeta = document.getElementById('card-' + cleanId);
+            const botonesRapidos = document.getElementById('quick-actions-' + cleanId);
+            const badgeContenedor = document.getElementById('badge-container-' + cleanId);
+
+            if (!colContenedor || !tarjeta) return;
+
+            // Quitamos los botones de Aprobar/Rechazar al moverse
+            if (botonesRapidos) botonesRapidos.remove();
+
+            if (accion === 'aprobar') {
+                tarjeta.style.borderLeft = '4px solid #28a745';
+                tarjeta.style.opacity = '1';
+                badgeContenedor.innerHTML = '<div class="info-row mt-2"><div class="info-icon"><i class="fas fa-check-circle text-success"></i></div><div><strong>Estado:</strong> <span class="badge bg-success">Aprobado</span></div></div>';
+
+                document.getElementById('row-validados').appendChild(colContenedor);
+                const msgValidados = document.getElementById('msg-no-validados');
+                if (msgValidados) msgValidados.style.display = 'none';
+
+            } else {
+                tarjeta.style.borderLeft = '4px solid #dc3545';
+                tarjeta.style.opacity = '0.85';
+                badgeContenedor.innerHTML = '<div class="info-row mt-2"><div class="info-icon"><i class="fas fa-ban text-danger"></i></div><div><strong>Estado:</strong> <span class="badge bg-danger">Rechazado</span></div></div>';
+
+                document.getElementById('row-rechazados').appendChild(colContenedor);
+                const msgRechazados = document.getElementById('msg-no-rechazados');
+                if (msgRechazados) msgRechazados.style.display = 'none';
+            }
+
+            // Validar si la lista de pendientes quedó vacía para enseñar el mensaje
+            const pendientesActivos = document.querySelectorAll('#row-pendientes .card-container');
+            if (pendientesActivos.length === 0) {
+                const msgPendientes = document.getElementById('msg-no-pendientes');
+                if (msgPendientes) msgPendientes.style.display = 'block';
+            }
+        }
+    </script>
 </body>
 
 </html>
