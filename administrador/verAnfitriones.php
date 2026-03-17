@@ -10,7 +10,53 @@ $dotenv->load();
 
 $anfitriones = [];
 $error_db = null;
+$mensaje_exito = null;
 
+// --- PROCESAR FORMULARIO DE EDICIÓN DE ANFITRIÓN ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'editar_anfitrion') {
+    $edit_id = $_POST['edit_id'] ?? '';
+    $edit_name = $_POST['edit_name'] ?? '';
+    $edit_email = $_POST['edit_email'] ?? '';
+    $edit_phone = $_POST['edit_phone'] ?? '';
+
+    if (!empty($edit_id) && !empty($edit_name) && !empty($edit_email)) {
+        $urlUpdate = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/host?id=eq." . urlencode($edit_id);
+
+        $datosUpdate = [
+            'name' => $edit_name,
+            'email' => $edit_email,
+            'phone' => $edit_phone
+        ];
+
+        $chUpdate = curl_init($urlUpdate);
+        curl_setopt_array($chUpdate, [
+            CURLOPT_CUSTOMREQUEST => "PATCH",
+            CURLOPT_POSTFIELDS => json_encode($datosUpdate),
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+                'apikey: ' . $_ENV['SERVICE_APIKEY'],
+                'Content-Type: application/json',
+                'Prefer: return=representation'
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+        ]);
+
+        $resUpdate = curl_exec($chUpdate);
+        $codigoUpdate = curl_getinfo($chUpdate, CURLINFO_HTTP_CODE);
+        curl_close($chUpdate);
+
+        if ($codigoUpdate >= 200 && $codigoUpdate < 300) {
+            $mensaje_exito = "Datos del anfitrión actualizados correctamente.";
+        } else {
+            $error_db = "Error al actualizar el anfitrión (Código: $codigoUpdate).";
+        }
+    } else {
+        $error_db = "El nombre y el correo electrónico son obligatorios.";
+    }
+}
+// ---------------------------------------------------
+
+// BUSCAR TODOS LOS ESTABLECIMIENTOS (SIN FILTRO DE ZONA) Y EXTRAER SUS ANFITRIONES
 $urlEstablecimientos = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=host_id,host(id,name,email,phone,empresa)";
 
 $ch = curl_init($urlEstablecimientos);
@@ -29,6 +75,7 @@ curl_close($ch);
 if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     $establecimientos = json_decode($resultado, true);
 
+    // Extraemos los anfitriones y eliminamos duplicados
     $anfitrionesUnicos = [];
     foreach ($establecimientos as $est) {
         if (isset($est['host']) && $est['host']) {
@@ -39,6 +86,7 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
         }
     }
 
+    // Convertimos el array asociativo a uno indexado y ordenamos alfabéticamente
     $anfitriones = array_values($anfitrionesUnicos);
     usort($anfitriones, function ($a, $b) {
         return strcmp($a['name'] ?? '', $b['name'] ?? '');
@@ -169,12 +217,21 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
             color: white !important;
         }
 
-        .btn-edit {
+        .btn-view-est {
             background-color: #17a2b8;
         }
 
-        .btn-edit:hover {
+        .btn-view-est:hover {
             background-color: #138496;
+        }
+
+        .btn-edit-data {
+            background-color: #ffc107;
+            color: #212529 !important;
+        }
+
+        .btn-edit-data:hover {
+            background-color: #e0a800;
         }
 
         .footer {
@@ -249,14 +306,21 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     </header>
 
     <div class="contenedor-principal">
-        <?php if (isset($error_db)): ?>
+        <?php if ($error_db): ?>
             <div class="alert alert-danger text-center shadow-sm rounded-pill mb-4">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 <?php echo $error_db; ?>
             </div>
         <?php endif; ?>
 
-        <?php if (!isset($error_db) && empty($anfitriones)): ?>
+        <?php if ($mensaje_exito): ?>
+            <div class="alert alert-success text-center shadow-sm rounded-pill mb-4">
+                <i class="fas fa-check-circle me-2"></i>
+                <?php echo $mensaje_exito; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!$error_db && empty($anfitriones)): ?>
             <div class="alert alert-info text-center shadow-sm rounded-pill mb-4">
                 <i class="fas fa-info-circle me-2"></i> No hay anfitriones registrados en el sistema.
             </div>
@@ -272,7 +336,7 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                     <option value="<?php echo htmlspecialchars($anf['id']); ?>"
                         data-nombre="<?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?>"
                         data-email="<?php echo htmlspecialchars($anf['email'] ?? 'Sin email'); ?>"
-                        data-telefono="<?php echo htmlspecialchars($anf['phone'] ?? 'No registrado'); ?>">
+                        data-telefono="<?php echo htmlspecialchars($anf['phone'] ?? ''); ?>">
                         <?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?> -
                         <?php echo htmlspecialchars($anf['email'] ?? ''); ?>
                     </option>
@@ -314,17 +378,60 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                     </div>
 
                     <div class="btn-actions mt-4">
-                        <a href="#" id="btn-edit-anfitrion" class="btn btn-action btn-edit">
-                            <i class="fas fa-user-edit"></i> Ver Establecimientos
+                        <a href="#" id="btn-view-est" class="btn btn-action btn-view-est">
+                            <i class="fas fa-building"></i> Ver Establecimientos
                         </a>
+                        <button type="button" class="btn btn-action btn-edit-data" data-bs-toggle="modal"
+                            data-bs-target="#modalEditarAnfitrion">
+                            <i class="fas fa-user-edit"></i> Editar Datos
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="modal fade" id="modalEditarAnfitrion" tabindex="-1" aria-labelledby="modalEditarAnfitrionLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalEditarAnfitrionLabel">
+                        <i class="fas fa-edit me-2"></i>Editar Anfitrión
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form method="POST" action="">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="editar_anfitrion">
+                        <input type="hidden" name="edit_id" id="form_edit_id">
+
+                        <div class="mb-3">
+                            <label for="form_edit_name" class="form-label fw-bold">Nombre</label>
+                            <input type="text" class="form-control" id="form_edit_name" name="edit_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="form_edit_email" class="form-label fw-bold">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="form_edit_email" name="edit_email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="form_edit_phone" class="form-label fw-bold">Teléfono</label>
+                            <input type="text" class="form-control" id="form_edit_phone" name="edit_phone">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
+            // Inicializar Select2
             $('#select-anfitrion').select2({
                 placeholder: "-- Busca o selecciona un anfitrión --",
                 allowClear: true,
@@ -336,6 +443,7 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                 }
             });
 
+            // Lógica al seleccionar anfitrión
             $('#select-anfitrion').on('change', function () {
                 var selectedOption = $(this).find('option:selected');
                 var id = $(this).val();
@@ -345,15 +453,22 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                     var email = selectedOption.data('email');
                     var telefono = selectedOption.data('telefono');
 
-                    // Rellenar la tarjeta
+                    // 1. Rellenar la tarjeta visual
                     $('#card-nombre').text(nombre);
                     $('#card-email').text(email);
-                    $('#card-telefono').text(telefono);
+                    $('#card-telefono').text(telefono ? telefono : 'No registrado');
                     $('#card-id').text('#' + id);
 
-                    // Redirigir a los establecimientos de ESE anfitrión
-                    $('#btn-edit-anfitrion').attr('href', 'verEstablecimientos.php?host_id=' + id);
+                    // 2. Configurar botón de establecimientos
+                    $('#btn-view-est').attr('href', 'verEstablecimientos.php?host_id=' + id);
 
+                    // 3. Rellenar los inputs ocultos del Modal de Edición
+                    $('#form_edit_id').val(id);
+                    $('#form_edit_name').val(nombre);
+                    $('#form_edit_email').val(email);
+                    $('#form_edit_phone').val(telefono);
+
+                    // Mostrar tarjeta
                     $('#detalles-anfitrion').fadeIn();
                 } else {
                     $('#detalles-anfitrion').fadeOut();
