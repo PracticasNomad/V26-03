@@ -373,7 +373,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             <a href="verGestores.php" class="col-2 text-center footer-item">
                 <div class="row">
                     <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
-                        <div>Gestoras</div>
+                        <div>Gestores</div>
                     </div>
                 </div>
             </a>
