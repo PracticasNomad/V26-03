@@ -7,6 +7,8 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
 }
 
 require '../vendor/autoload.php';
+require_once __DIR__ . '/../gestor/invitacionGestoraToken.php';
+require_once __DIR__ . '/../emails/invitacionGestora.php';
 
 use Dotenv\Dotenv;
 
@@ -293,9 +295,88 @@ function sanitizeText($key)
     return trim((string) ($_POST[$key] ?? ''));
 }
 
+function normalizeInvitePlan($value)
+{
+    $normalized = strtolower(trim((string) $value));
+
+    if ($normalized === 'premium') {
+        return 'Premium';
+    }
+
+    if ($normalized === 'pro') {
+        return 'Pro';
+    }
+
+    return 'Basico';
+}
+
+function buildAppBaseUrl()
+{
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    $basePath = dirname(dirname($scriptName));
+
+    if ($basePath === '\\' || $basePath === '/' || $basePath === '.') {
+        $basePath = '';
+    }
+
+    return $scheme . '://' . $host . rtrim($basePath, '/');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $gestorId = trim((string) ($_POST['gestor_id'] ?? ''));
+
+    if ($action === 'enviar_invitacion_gestora') {
+        $nombre = sanitizeText('invite_nombre');
+        $email = sanitizeText('invite_email');
+        $empresa = sanitizeText('invite_empresa');
+        $cif = strtoupper(sanitizeText('invite_cif'));
+        $codigoPostal = sanitizeText('invite_codigo_postal');
+        $plan = normalizeInvitePlan($_POST['invite_plan'] ?? 'Basico');
+
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            setFlashMessage('danger', 'Debes indicar un correo valido para enviar la invitacion.');
+            header('Location: verGestores.php');
+            exit();
+        }
+
+        if (!preg_match('/^[0-9]{5}$/', $codigoPostal)) {
+            setFlashMessage('danger', 'El codigo postal inicial debe contener 5 digitos.');
+            header('Location: verGestores.php');
+            exit();
+        }
+
+        $existingGestor = apiRequest('/gestor?select=id&email=eq.' . urlencode($email) . '&limit=1');
+        if ($existingGestor['status'] >= 200 && $existingGestor['status'] < 300 && !empty($existingGestor['data'])) {
+            setFlashMessage('warning', 'Ya existe una gestora registrada con ese correo electronico.');
+            header('Location: verGestores.php');
+            exit();
+        }
+
+        $token = createGestoraInvitationToken([
+            'email' => $email,
+            'nombre' => $nombre,
+            'empresa' => $empresa,
+            'cif' => $cif,
+            'codigo_postal' => $codigoPostal,
+            'plan' => $plan,
+            'rol' => 'gestora',
+        ]);
+
+        $inviteLink = buildAppBaseUrl() . '/gestor/registerGestora.php?token=' . urlencode($token);
+        $mailResult = enviarCorreoInvitacionGestora($email, $inviteLink, $empresa, $codigoPostal, $plan);
+
+        if (!empty($mailResult['success'])) {
+            setFlashMessage('success', 'La invitacion para registrar la gestora se envio a ' . $email . '.');
+        } else {
+            setFlashMessage('danger', $mailResult['message'] ?? 'No se pudo enviar la invitacion.');
+        }
+
+        header('Location: verGestores.php');
+        exit();
+    }
 
     if ($gestorId === '') {
         setFlashMessage('danger', 'No se recibio un gestor valido.');
@@ -559,6 +640,31 @@ $postalCoverage = count($activePostalCodes);
             padding: 8px 14px;
             font-weight: 700;
             letter-spacing: 0.2px;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            font-weight: 800;
+            padding: 12px 18px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .btn-hero-primary:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.24);
+            transform: translateY(-1px);
         }
 
         .summary-grid {
@@ -955,6 +1061,11 @@ $postalCoverage = count($activePostalCodes);
                     </div>
                     <div class="hero-pill"><i class="fas fa-map-marked-alt"></i> Cobertura activa en <?php echo $postalCoverage; ?> codigos postales</div>
                 </div>
+                <div class="hero-actions">
+                    <button type="button" class="btn btn-hero-primary" id="openInviteGestora">
+                        <i class="fas fa-paper-plane"></i>Invitar gestora
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -1178,6 +1289,59 @@ $postalCoverage = count($activePostalCodes);
         </div>
     </div>
 
+    <div class="modal fade" id="inviteGestoraModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-brand">
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>Enviar invitacion de gestora</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="action" value="enviar_invitacion_gestora">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="invite_nombre" class="form-label fw-bold">Nombre de contacto</label>
+                                <input type="text" class="form-control" id="invite_nombre" name="invite_nombre">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="invite_email" class="form-label fw-bold">Correo electronico</label>
+                                <input type="email" class="form-control" id="invite_email" name="invite_email" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="invite_empresa" class="form-label fw-bold">Empresa</label>
+                                <input type="text" class="form-control" id="invite_empresa" name="invite_empresa">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="invite_cif" class="form-label fw-bold">CIF</label>
+                                <input type="text" class="form-control" id="invite_cif" name="invite_cif">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="invite_codigo_postal" class="form-label fw-bold">Codigo postal inicial</label>
+                                <input type="text" class="form-control" id="invite_codigo_postal" name="invite_codigo_postal" maxlength="5" pattern="[0-9]{5}" inputmode="numeric" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="invite_plan" class="form-label fw-bold">Plan sugerido</label>
+                                <select class="form-select" id="invite_plan" name="invite_plan">
+                                    <option value="Basico">Basico</option>
+                                    <option value="Pro">Pro</option>
+                                    <option value="Premium">Premium</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-text">Se enviara un enlace firmado para completar el alta y elegir el plan final de suscripcion de la gestora.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer px-4 pb-4 border-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Enviar invitacion</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="statsGestorModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -1329,9 +1493,14 @@ $postalCoverage = count($activePostalCodes);
         applyFilter();
 
         const editModal = new bootstrap.Modal(document.getElementById('editGestorModal'));
+        const inviteModal = new bootstrap.Modal(document.getElementById('inviteGestoraModal'));
         const statsModal = new bootstrap.Modal(document.getElementById('statsGestorModal'));
         const cpModal = new bootstrap.Modal(document.getElementById('cpGestorModal'));
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteGestorModal'));
+
+        document.getElementById('openInviteGestora')?.addEventListener('click', () => {
+            inviteModal.show();
+        });
 
         function getGestor(id) {
             return gestoresData[id] || null;
