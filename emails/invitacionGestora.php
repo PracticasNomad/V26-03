@@ -19,6 +19,7 @@ if (!function_exists('enviarCorreoInvitacionGestora')) {
 
         $emailBody = '
         <div style="font-family: Nunito, Arial, sans-serif; color: #1f2933; line-height: 1.6;">
+            {{ICONO_EMPRESA}}
             <p>Hola,</p>
             <p>Has recibido una invitacion para completar el alta de una gestora en TheNomadapp.</p>
             <div style="background: #f6f9fc; border: 1px solid #d8e1ea; border-radius: 14px; padding: 18px; margin: 20px 0;">
@@ -48,6 +49,19 @@ if (!function_exists('enviarCorreoInvitacionGestora')) {
 
             $mail->setFrom('noreply@yonomad.app', 'TheNomadapp');
             $mail->addAddress($destiny);
+
+            $iconMarkup = '';
+            $iconPath = dirname(__DIR__) . '/favicon-color.png';
+            if (!file_exists($iconPath)) {
+                $iconPath = dirname(__DIR__) . '/img/antena.png';
+            }
+
+            if (file_exists($iconPath)) {
+                $mail->AddEmbeddedImage($iconPath, 'company_icon', basename($iconPath));
+                $iconMarkup = '<div style="margin-bottom: 12px;"><img src="cid:company_icon" alt="Icono de empresa" style="width: 56px; height: 56px; border-radius: 14px; display: inline-block; object-fit: contain; background: #ffffff; border: 1px solid #d8e1ea; padding: 8px;"></div>';
+            }
+
+            $emailBody = str_replace('{{ICONO_EMPRESA}}', $iconMarkup, $emailBody);
 
             $logoPath = dirname(__DIR__) . '/img/logo.jpg';
             if (file_exists($logoPath)) {

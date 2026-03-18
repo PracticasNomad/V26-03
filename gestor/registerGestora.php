@@ -156,9 +156,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteError === '' && is_array($in
     if ($nombre === '' || $direccion === '' || $localidad === '' || $provincia === '') {
         $formError = 'Nombre, direccion, localidad y provincia son obligatorios.';
     } elseif ($password === '' || strlen($password) < 8) {
-        $formError = 'La contrasena debe tener al menos 8 caracteres.';
+        $formError = 'La contraseña debe tener al menos 8 caracteres.';
     } elseif ($password !== $passwordConfirm) {
-        $formError = 'Las contrasenas no coinciden.';
+        $formError = 'Las contraseñas no coinciden.';
     } else {
         $email = (string) ($inviteData['email'] ?? '');
         $signupPayload = [
@@ -549,11 +549,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteError === '' && is_array($in
                                     <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars((string) ($_POST['telefono'] ?? '')); ?>">
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="password" class="form-label fw-bold">Contrasena</label>
+                                    <label for="password" class="form-label fw-bold">Contraseña</label>
                                     <input type="password" class="form-control" id="password" name="password" minlength="8" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="password_confirm" class="form-label fw-bold">Repite la contrasena</label>
+                                    <label for="password_confirm" class="form-label fw-bold">Repite la contraseña</label>
                                     <input type="password" class="form-control" id="password_confirm" name="password_confirm" minlength="8" required>
                                 </div>
                                 <div class="col-12">
