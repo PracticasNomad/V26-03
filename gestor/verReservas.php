@@ -19,7 +19,7 @@ require_once 'verificar_sesion_gestor.php';
     <title>TheNomadapp - Reservas Gestor</title>
 
     <script>
-        window.onload = function() {
+        window.onload = function () {
             const today = new Date().toISOString().split('T')[0];
             const container = document.getElementById('container');
 
@@ -51,7 +51,7 @@ require_once 'verificar_sesion_gestor.php';
                 `;
             }
 
-            function hideLoadingIndicator() {}
+            function hideLoadingIndicator() { }
 
             function showErrorMessage() {
                 container.innerHTML = `
@@ -135,11 +135,11 @@ require_once 'verificar_sesion_gestor.php';
                             botonDetalles.style.boxShadow = '0 2px 5px rgba(33, 150, 243, 0.3)';
                             botonDetalles.innerHTML = '<i class="fas fa-info-circle me-1"></i>Mostrar detalles';
 
-                            botonDetalles.onmouseover = function() {
+                            botonDetalles.onmouseover = function () {
                                 this.style.backgroundColor = '#0d47a1';
                                 this.style.transition = 'background-color 0.3s';
                             };
-                            botonDetalles.onmouseout = function() {
+                            botonDetalles.onmouseout = function () {
                                 this.style.backgroundColor = '#1976d2';
                             };
 
@@ -331,52 +331,7 @@ require_once 'verificar_sesion_gestor.php';
     <div class="container" id="container">
     </div>
 
-    <div class="container-fluid footer mt-5 p-3">
-        <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-            <label for="anf" class="col-2 text-center footer-item">
-                <div class="row"><a href="Anfitriones.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i>
-                            <div>Anfitriones</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="val" class="col-2 text-center footer-item">
-                <div class="row"><a href="verValidar.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
-                            <div>Validar</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="res" class="col-2 text-center footer-item">
-                <div class="row"><a href="verReservas.php">
-                        <div class="col-12 icon-container" style="color: #007bff;"><i class="h2 fas fa-book-open p-1 m-0"></i>
-                            <div>Reservas</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="his" class="col-2 text-center footer-item">
-                <div class="row"><a href="verEstablecimientos.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i>
-                            <div>Establecimientos</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="esp" class="col-2 text-center footer-item">
-                <div class="row"><a href="verEspacios.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-chair p-1 m-0"></i>
-                            <div>Espacios</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="per" class="col-2 text-center footer-item">
-                <div class="row"><a href="tuPerfil.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-user-tie p-1 m-0"></i>
-                            <div>Perfil</div>
-                        </div>
-                    </a></div>
-            </label>
-        </div>
-    </div>
+    <?php include 'footer.php'; ?>
 </body>
 
 </html>

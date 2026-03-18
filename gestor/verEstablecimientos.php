@@ -22,13 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
             if ($archivo['error'] !== UPLOAD_ERR_OK) {
                 $mensajesError = [
-                    UPLOAD_ERR_INI_SIZE   => 'La imagen pesa demasiado (supera el limite configurado en PHP).',
-                    UPLOAD_ERR_FORM_SIZE  => 'La imagen supera el limite permitido por el formulario.',
-                    UPLOAD_ERR_PARTIAL    => 'El archivo se subio parcialmente.',
-                    UPLOAD_ERR_NO_FILE    => 'No se selecciono ninguna imagen.',
+                    UPLOAD_ERR_INI_SIZE => 'La imagen pesa demasiado (supera el limite configurado en PHP).',
+                    UPLOAD_ERR_FORM_SIZE => 'La imagen supera el limite permitido por el formulario.',
+                    UPLOAD_ERR_PARTIAL => 'El archivo se subio parcialmente.',
+                    UPLOAD_ERR_NO_FILE => 'No se selecciono ninguna imagen.',
                     UPLOAD_ERR_NO_TMP_DIR => 'Falta la carpeta temporal del servidor.',
                     UPLOAD_ERR_CANT_WRITE => 'No se pudo escribir el archivo en disco.',
-                    UPLOAD_ERR_EXTENSION  => 'Una extension de PHP detuvo la subida.'
+                    UPLOAD_ERR_EXTENSION => 'Una extension de PHP detuvo la subida.'
                 ];
                 $flashMessage = $mensajesError[$archivo['error']] ?? 'Error desconocido al subir la imagen.';
                 $flashType = 'danger';
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
                 $permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
                 if (!in_array($mimeReal, $permitidos, true)) {
-                    $flashMessage = 'Formato no compatible (' . htmlspecialchars((string)$mimeReal) . '). Usa JPG, PNG, WEBP o GIF.';
+                    $flashMessage = 'Formato no compatible (' . htmlspecialchars((string) $mimeReal) . '). Usa JPG, PNG, WEBP o GIF.';
                     $flashType = 'danger';
                 } else {
                     $directorioDestino = dirname(__DIR__) . '/uploads/establecimientos/';
@@ -78,8 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
             'provincia' => trim($_POST['provincia'] ?? ''),
             'codigo_postal' => trim($_POST['codigo_postal'] ?? ''),
             'piso' => trim($_POST['piso'] ?? ''),
-            'latitude' => ($_POST['latitude'] ?? '') !== '' ? (float)$_POST['latitude'] : null,
-            'longitude' => ($_POST['longitude'] ?? '') !== '' ? (float)$_POST['longitude'] : null,
+            'latitude' => ($_POST['latitude'] ?? '') !== '' ? (float) $_POST['latitude'] : null,
+            'longitude' => ($_POST['longitude'] ?? '') !== '' ? (float) $_POST['longitude'] : null,
         ];
 
         if ($flashType === 'danger') {
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
             if ($httpCodeUpdate >= 200 && $httpCodeUpdate < 300) {
                 if (!empty($nuevaImageUrl)) {
-                    $urlGalleryPatch = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gallery?establecimiento_id=eq.' . rawurlencode((string)$id);
+                    $urlGalleryPatch = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gallery?establecimiento_id=eq.' . rawurlencode((string) $id);
                     $chGalleryPatch = curl_init($urlGalleryPatch);
                     curl_setopt_array($chGalleryPatch, [
                         CURLOPT_CUSTOMREQUEST => 'PATCH',
@@ -377,7 +377,8 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         }
 
         .collapsed-content.show {
-            max-height: 1500px; /* Suficiente para contener todo el contenido */
+            max-height: 1500px;
+            /* Suficiente para contener todo el contenido */
             padding-top: 8px;
             margin-top: 8px;
             opacity: 1;
@@ -916,7 +917,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         // Función para confirmar eliminación
         function confirmarEliminacion(id, nombre) {
             document.getElementById('establecimiento-nombre').textContent = nombre;
-            document.getElementById('btn-confirmar-eliminar').onclick = function() {
+            document.getElementById('btn-confirmar-eliminar').onclick = function () {
                 window.location.href = 'establecimiento.php?id=' + id;
             };
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
@@ -938,9 +939,9 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             new bootstrap.Modal(document.getElementById('editModal')).show();
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function(el) {
+            tooltipTriggerList.forEach(function (el) {
                 new bootstrap.Tooltip(el);
             });
         });
@@ -952,76 +953,82 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         <div class="page-hero-inner">
             <div class="hero-title-row">
                 <div class="page-hero-title">Gestion de Establecimientos</div>
-                <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right" title="Controla imagen, estado, ubicacion y datos clave de tus negocios desde un solo panel."><i class="fas fa-info"></i></span>
+                <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right"
+                    title="Controla imagen, estado, ubicacion y datos clave de tus negocios desde un solo panel."><i
+                        class="fas fa-info"></i></span>
             </div>
         </div>
     </section>
 
-        <?php if (!empty($flashMessage)): ?>
-            <div class="container mt-3" style="max-width: 900px;">
-                <div class="alert alert-<?php echo $flashType === 'danger' ? 'danger' : 'success'; ?> alert-dismissible fade show" role="alert">
-                    <?php echo $flashMessage; ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+    <?php if (!empty($flashMessage)): ?>
+        <div class="container mt-3" style="max-width: 900px;">
+            <div class="alert alert-<?php echo $flashType === 'danger' ? 'danger' : 'success'; ?> alert-dismissible fade show"
+                role="alert">
+                <?php echo $flashMessage; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
-        <?php if (!empty($errorEstablecimientos)): ?>
-            <div class="container mt-3" style="max-width: 900px;">
-                <div class="alert alert-warning" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($errorEstablecimientos); ?>
-                </div>
+    <?php if (!empty($errorEstablecimientos)): ?>
+        <div class="container mt-3" style="max-width: 900px;">
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($errorEstablecimientos); ?>
             </div>
-        <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
-        <!-- Estadísticas del gestor -->
-        <div class="row mb-4 stats-grid" style="max-width: 1400px; margin: 1.2rem auto 1.5rem; padding: 0 15px;">
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary"><?php echo $totalEstablecimientos; ?></h5>
-                        <p class="card-text">Total Establecimientos</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-success"><?php echo $establecimientosAprobados; ?></h5>
-                        <p class="card-text">Aprobados</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-warning"><?php echo $establecimientosPendientes; ?></h5>
-                        <p class="card-text">Pendientes</p>
-                    </div>
+    <!-- Estadísticas del gestor -->
+    <div class="row mb-4 stats-grid" style="max-width: 1400px; margin: 1.2rem auto 1.5rem; padding: 0 15px;">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-primary"><?php echo $totalEstablecimientos; ?></h5>
+                    <p class="card-text">Total Establecimientos</p>
                 </div>
             </div>
         </div>
-
-        <?php if (empty($establecimientos)): ?>
-            <div class="no-establecimientos">
-                <img src="../img/establecimiento.png" width="80" alt="Logo Establecimiento" class="mb-3">
-                <h3 class="fw-bold mb-3">No tienes establecimientos asignados</h3>
-                <p class="text-muted">Los establecimientos que te sean asignados aparecerán aquí para su gestión.</p>
-
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-success"><?php echo $establecimientosAprobados; ?></h5>
+                    <p class="card-text">Aprobados</p>
+                </div>
             </div>
-        <?php else: ?>
-            <div class="row establecimientos-grid" style="max-width: 1400px; margin: 0 auto;">
-                <?php foreach ($establecimientos as $index => $establecimiento):
-                    $randomImage = $backgroundImages[$index % count($backgroundImages)];
-                    $direccionFormateada = formatearDireccion(
-                        $establecimiento['direccion'],
-                        $establecimiento['piso']
-                    );
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-warning"><?php echo $establecimientosPendientes; ?></h5>
+                    <p class="card-text">Pendientes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php if (empty($establecimientos)): ?>
+        <div class="no-establecimientos">
+            <img src="../img/establecimiento.png" width="80" alt="Logo Establecimiento" class="mb-3">
+            <h3 class="fw-bold mb-3">No tienes establecimientos asignados</h3>
+            <p class="text-muted">Los establecimientos que te sean asignados aparecerán aquí para su gestión.</p>
+
+        </div>
+    <?php else: ?>
+        <div class="row establecimientos-grid" style="max-width: 1400px; margin: 0 auto;">
+            <?php foreach ($establecimientos as $index => $establecimiento):
+                $randomImage = $backgroundImages[$index % count($backgroundImages)];
+                $direccionFormateada = formatearDireccion(
+                    $establecimiento['direccion'],
+                    $establecimiento['piso']
+                );
                 ?>
-                    <div class="col-12 col-md-6 col-xl-4 est-card-col">
+                <div class="col-12 col-md-6 col-xl-4 est-card-col">
                     <div id="establecimiento-main">
                         <div class="establecimiento-card" id="establecimiento-<?php echo $establecimiento['id']; ?>">
-                            <div class="card-header<?php echo empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? '')) ? ' default-image' : ''; ?>"<?php if (!empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''))): ?> style="background-image: url('<?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"<?php endif; ?>>
+                            <div class="card-header<?php echo empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? '')) ? ' default-image' : ''; ?>"
+                                <?php if (!empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''))): ?>
+                                    style="background-image: url('<?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"
+                                <?php endif; ?>>
                                 <div class="card-header-overlay"></div>
                                 <div class="card-title">
                                     <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
@@ -1043,7 +1050,8 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                             $estadoIcon = 'clock';
                                         }
                                         ?>
-                                        <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>" title="<?php echo $estadoText; ?>">
+                                        <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>"
+                                            title="<?php echo $estadoText; ?>">
                                             <i class="fas fa-<?php echo $estadoIcon; ?>"></i>
                                         </div>
                                         <?php if ($establecimiento['has_wifi']): ?>
@@ -1080,17 +1088,20 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                 <div class="collapsed-content" id="details-<?php echo $establecimiento['id']; ?>">
                                     <div class="info-row">
                                         <div class="info-icon"><i class="fas fa-align-left"></i></div>
-                                        <div><strong>Descripción:</strong> <?php echo htmlspecialchars($establecimiento['descripcion']); ?></div>
+                                        <div><strong>Descripción:</strong>
+                                            <?php echo htmlspecialchars($establecimiento['descripcion']); ?></div>
                                     </div>
 
                                     <div class="info-row">
                                         <div class="info-icon"><i class="fas fa-map"></i></div>
-                                        <div><strong>Provincia:</strong> <?php echo htmlspecialchars($establecimiento['provincia']); ?></div>
+                                        <div><strong>Provincia:</strong>
+                                            <?php echo htmlspecialchars($establecimiento['provincia']); ?></div>
                                     </div>
 
                                     <div class="info-row">
                                         <div class="info-icon"><i class="fas fa-map-pin"></i></div>
-                                        <div><strong>Código Postal:</strong> <?php echo htmlspecialchars($establecimiento['codigo_postal']); ?></div>
+                                        <div><strong>Código Postal:</strong>
+                                            <?php echo htmlspecialchars($establecimiento['codigo_postal']); ?></div>
                                     </div>
 
                                     <?php if ($establecimiento['has_wifi']): ?>
@@ -1099,7 +1110,8 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                             <div>
                                                 <strong>WiFi disponible</strong>
                                                 <span class="precio-tag">
-                                                    <i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['wifi_price'], 2); ?>/hora
+                                                    <i class="fas fa-euro-sign"></i>
+                                                    <?php echo number_format($establecimiento['wifi_price'], 2); ?>/hora
                                                 </span>
                                             </div>
                                         </div>
@@ -1111,7 +1123,8 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                             <div>
                                                 <strong>Parking disponible</strong>
                                                 <span class="precio-tag">
-                                                    <i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['parking_price'], 2); ?>/día
+                                                    <i class="fas fa-euro-sign"></i>
+                                                    <?php echo number_format($establecimiento['parking_price'], 2); ?>/día
                                                 </span>
                                             </div>
                                         </div>
@@ -1120,11 +1133,15 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                     <?php if (!empty($establecimiento['piso'])): ?>
                                         <div class="info-row">
                                             <div class="info-icon"><i class="fas fa-building"></i></div>
-                                            <div><strong>Piso:</strong> <?php echo htmlspecialchars($establecimiento['piso']); ?></div>
+                                            <div><strong>Piso:</strong> <?php echo htmlspecialchars($establecimiento['piso']); ?>
+                                            </div>
                                         </div>
                                     <?php endif; ?>
 
-                                    <div class="map-container" id="map-<?php echo $establecimiento['id']; ?>" data-lat="<?php echo htmlspecialchars((string)($establecimiento['latitude'] ?? '')); ?>" data-lng="<?php echo htmlspecialchars((string)($establecimiento['longitude'] ?? '')); ?>"></div>
+                                    <div class="map-container" id="map-<?php echo $establecimiento['id']; ?>"
+                                        data-lat="<?php echo htmlspecialchars((string) ($establecimiento['latitude'] ?? '')); ?>"
+                                        data-lng="<?php echo htmlspecialchars((string) ($establecimiento['longitude'] ?? '')); ?>">
+                                    </div>
                                 </div>
 
                                 <div class="btn-actions">
@@ -1146,172 +1163,111 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                     ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
                                         <i class="fas fa-edit"></i> Editar
                                     </button>
-                                    <button class="btn btn-action btn-delete" onclick='confirmarEliminacion(<?php echo json_encode((string)$establecimiento['id']); ?>, <?php echo json_encode((string)($establecimiento['nombre'] ?? '')); ?>)'>
+                                    <button class="btn btn-action btn-delete"
+                                        onclick='confirmarEliminacion(<?php echo json_encode((string) $establecimiento['id']); ?>, <?php echo json_encode((string) ($establecimiento['nombre'] ?? '')); ?>)'>
                                         <i class="fas fa-trash-alt"></i> Eliminar
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-        </div>
-
-        <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <form method="POST" action="verEstablecimientos.php" enctype="multipart/form-data">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Editar establecimiento</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <input type="hidden" name="action" value="update_establecimiento">
-                            <input type="hidden" id="edit-id" name="id">
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Nombre</label>
-                                    <input type="text" class="form-control" id="edit-nombre" name="nombre" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Dirección</label>
-                                    <input type="text" class="form-control" id="edit-direccion" name="direccion" required>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Descripción</label>
-                                    <textarea class="form-control" id="edit-descripcion" name="descripcion" rows="2"></textarea>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Localidad</label>
-                                    <input type="text" class="form-control" id="edit-localidad" name="localidad">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Provincia</label>
-                                    <input type="text" class="form-control" id="edit-provincia" name="provincia">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Código postal</label>
-                                    <input type="text" class="form-control" id="edit-codigo-postal" name="codigo_postal">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Piso</label>
-                                    <input type="text" class="form-control" id="edit-piso" name="piso">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Seleccionar nueva imagen</label>
-                                    <input type="file" class="form-control" id="edit-image-file" name="imagen_establecimiento" accept="image/jpeg,image/png,image/gif,image/webp">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Latitude</label>
-                                    <input type="number" step="any" class="form-control" id="edit-latitude" name="latitude">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Longitude</label>
-                                    <input type="number" step="any" class="form-control" id="edit-longitude" name="longitude">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                        </div>
-                    </form>
                 </div>
-            </div>
+            <?php endforeach; ?>
         </div>
+    <?php endif; ?>
+    </div>
 
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-confirm">
-                <div class="modal-content">
-                    <div class="modal-header delete">
-                        <div class="icon-box">
-                            <i class="fas fa-trash"></i>
-                        </div>
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" action="verEstablecimientos.php" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar establecimiento</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body text-center">
-                        <h4 class="modal-title mb-4">¿Estás seguro?</h4>
-                        <p>¿Realmente deseas eliminar el establecimiento "<span id="establecimiento-nombre"></span>"? Esta acción no se puede deshacer.</p>
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="update_establecimiento">
+                        <input type="hidden" id="edit-id" name="id">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="edit-nombre" name="nombre" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Dirección</label>
+                                <input type="text" class="form-control" id="edit-direccion" name="direccion" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Descripción</label>
+                                <textarea class="form-control" id="edit-descripcion" name="descripcion"
+                                    rows="2"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Localidad</label>
+                                <input type="text" class="form-control" id="edit-localidad" name="localidad">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Provincia</label>
+                                <input type="text" class="form-control" id="edit-provincia" name="provincia">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Código postal</label>
+                                <input type="text" class="form-control" id="edit-codigo-postal" name="codigo_postal">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Piso</label>
+                                <input type="text" class="form-control" id="edit-piso" name="piso">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Seleccionar nueva imagen</label>
+                                <input type="file" class="form-control" id="edit-image-file"
+                                    name="imagen_establecimiento" accept="image/jpeg,image/png,image/gif,image/webp">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Latitude</label>
+                                <input type="number" step="any" class="form-control" id="edit-latitude" name="latitude">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Longitude</label>
+                                <input type="number" step="any" class="form-control" id="edit-longitude"
+                                    name="longitude">
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" id="btn-confirmar-eliminar" class="btn btn-danger">Sí, eliminar</button>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-confirm">
+            <div class="modal-content">
+                <div class="modal-header delete">
+                    <div class="icon-box">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <h4 class="modal-title mb-4">¿Estás seguro?</h4>
+                    <p>¿Realmente deseas eliminar el establecimiento "<span id="establecimiento-nombre"></span>"? Esta
+                        acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btn-confirmar-eliminar" class="btn btn-danger">Sí, eliminar</button>
                 </div>
             </div>
         </div>
+    </div>
 
+    <?php include 'footer.php'; ?>
+</body>
 
-        <div class="container-fluid footer mt-5 p-3">
-            <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-                <label for="anf" id="lbl_anf" class="col-2 text-center footer-item">
-                    <div class="row">
-                        <a href="Anfitriones.php">
-                            <div class="col-12 icon-container">
-                                <i class="h2 fas fa-users p-1 m-0"></i>
-                                <div>Anfitriones</div>
-                            </div>
-                        </a>
-                    </div>
-                </label>
-
-                <label for="val" id="lbl_val" class="col-2 text-center footer-item">
-                    <div class="row">
-                        <a href="verValidar.php">
-                            <div class="col-12 icon-container">
-                                <i class="h2 fas fa-check-circle p-1 m-0"></i>
-                                <div>Validar</div>
-                            </div>
-                        </a>
-                    </div>
-                </label>
-
-                <label for="res" id="lbl_res" class="col-2 text-center footer-item">
-                    <div class="row">
-                        <a href="verReservas.php">
-                            <div class="col-12 icon-container">
-                                <i class="h2 fas fa-book-open p-1 m-0"></i>
-                                <div>Reservas</div>
-                            </div>
-                        </a>
-                    </div>
-                </label>
-                <label for="his" id="lbl_his" class="col-2 text-center footer-item">
-                    <div class="row">
-                        <a href="verEstablecimientos.php">
-                            <div class="col-12 icon-container">
-                                <i class="h2 fas fa-building p-1 m-0"></i>
-                                <div>Establecimientos</div>
-                            </div>
-                        </a>
-                    </div>
-                </label>
-                <label for="esp" id="lbl_esp" class="col-2 text-center footer-item">
-                    <div class="row">
-                        <a href="verEspacios.php">
-                            <div class="col-12 icon-container">
-                                <i class="h2 fas fa-chair p-1 m-0"></i>
-                                <div>Espacios</div>
-                            </div>
-                        </a>
-                    </div>
-                </label>
-                <label for="per" id="lbl_per" class="col-2 text-center footer-item">
-                    <div class="row">
-                        <a href="tuPerfil.php">
-                            <div class="col-12 icon-container">
-                                <i class="h2 fas fa-user-tie p-1 m-0"></i>
-                                <div>Perfil</div>
-                            </div>
-                        </a>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-    </body>
 
 </html>

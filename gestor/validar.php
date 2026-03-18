@@ -47,9 +47,6 @@ if (!$id) {
 }
 
 
-
-
-
 //// traer datos desde la API
 $establecimiento = null;
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']

@@ -262,6 +262,17 @@ if ($cpGestor) {
             text-decoration: none;
         }
 
+        .footer-item a,
+        .footer-item a:visited,
+        .footer-item a:active {
+            color: inherit !important;
+            text-decoration: none !important;
+        }
+
+        .footer-item:hover a {
+            color: #00B7CF !important;
+        }
+
         .icon-container {
             transition: transform 0.3s ease;
             padding: 5px 0;
@@ -484,56 +495,12 @@ if ($cpGestor) {
         </div>
     </div>
 
-    <div class="container-fluid footer p-3">
-        <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-            <a href="Anfitriones.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i>
-                        <div>Anfitriones</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verValidar.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
-                        <div>Validar</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verReservas.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h2 fas fa-book-open p-1 m-0"></i>
-                        <div>Reservas</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i>
-                        <div>Establecimientos</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verEspacios.php" class="col-2 text-center footer-item" style="color: #00B7CF;">
-                <div class="row">
-                    <div class="col-12 icon-container" style="color: #007bff;"><i class="h2 fas fa-chair p-1 m-0"></i>
-                        <div>Espacios</div>
-                    </div>
-                </div>
-            </a>
-            <a href="tuPerfil.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h2 fas fa-user-tie p-1 m-0"></i>
-                        <div>Perfil</div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+    <?php include 'footer.php'; ?>
+
 
     <script>
-        $(document).ready(function() {
-            $('.toggle-horarios').click(function() {
+        $(document).ready(function () {
+            $('.toggle-horarios').click(function () {
                 const espacioId = $(this).data('espacio-id');
                 $(`#horarios-${espacioId}`).slideToggle();
                 const icon = $(this).find('i');
@@ -548,7 +515,7 @@ if ($cpGestor) {
                 }
             });
 
-            $('.btn-toggle-visibilidad').click(function() {
+            $('.btn-toggle-visibilidad').click(function () {
                 const btn = $(this);
                 const espacioId = btn.data('espacio-id');
                 const esVisible = btn.data('visible') === true || btn.data('visible') === 'true';
@@ -563,7 +530,7 @@ if ($cpGestor) {
                         id: espacioId,
                         visible: nuevaVisibilidad
                     }),
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             if (nuevaVisibilidad) {
                                 btn.removeClass('btn-secondary').addClass('btn-warning');
@@ -581,7 +548,7 @@ if ($cpGestor) {
                         }
                         btn.prop('disabled', false);
                     },
-                    error: function() {
+                    error: function () {
                         $('#mensajeError').text('Error de conexión con el servidor.');
                         new bootstrap.Toast(document.getElementById('toastError')).show();
                         btn.prop('disabled', false);
@@ -590,13 +557,13 @@ if ($cpGestor) {
             });
 
             let espacioIdAEliminar = null;
-            $('.btn-eliminar').click(function() {
+            $('.btn-eliminar').click(function () {
                 espacioIdAEliminar = $(this).data('espacio-id');
                 $('#espacioNombre').text($(this).data('espacio-nombre'));
                 new bootstrap.Modal(document.getElementById('confirmModal')).show();
             });
 
-            $('#btnConfirmarEliminar').click(function() {
+            $('#btnConfirmarEliminar').click(function () {
                 if (espacioIdAEliminar) {
                     bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
                     $.ajax({
@@ -605,11 +572,11 @@ if ($cpGestor) {
                         data: {
                             id: espacioIdAEliminar
                         },
-                        success: function(response) {
+                        success: function (response) {
                             if (response.success) {
                                 $('#mensajeExito').html('<i class="fas fa-check-circle me-2"></i> Espacio eliminado correctamente.');
                                 new bootstrap.Toast(document.getElementById('toastExito')).show();
-                                $(`#card-${espacioIdAEliminar}`).fadeOut(500, function() {
+                                $(`#card-${espacioIdAEliminar}`).fadeOut(500, function () {
                                     $(this).remove();
                                 });
                             } else {
@@ -617,7 +584,7 @@ if ($cpGestor) {
                                 new bootstrap.Toast(document.getElementById('toastError')).show();
                             }
                         },
-                        error: function() {
+                        error: function () {
                             $('#mensajeError').text('Error de conexión.');
                             new bootstrap.Toast(document.getElementById('toastError')).show();
                         }
@@ -626,6 +593,8 @@ if ($cpGestor) {
             });
         });
     </script>
+
 </body>
+
 
 </html>

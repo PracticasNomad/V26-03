@@ -296,36 +296,46 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
     <div class="contenedorPerfil sombra fw-bold mt-5">
         <div class="fotoPerfilMovil centrar">
             <div class="profile-image-container sombra mb-3">
-                <img id="fotoPerfilMovil" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
+                <img id="fotoPerfilMovil" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>"
+                    alt="Profile Image">
             </div>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal"
+                data-bs-target="#cambiarImagenModal">
                 <i class="fas fa-camera"></i> Cambiar imágen
             </button>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal"
+                data-bs-target="#editarPerfilModal">
                 <i class="fas fa-edit"></i> Editar perfil
             </button>
-            <button type="button" class="btn btn-plan rounded-pill mt-2 w-100" onclick="window.location.href='Suscripciones.php'">
+            <button type="button" class="btn btn-plan rounded-pill mt-2 w-100"
+                onclick="window.location.href='Suscripciones.php'">
                 <i class="fas fa-exchange-alt"></i> Cambiar plan
             </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100"
+                onclick="window.location.href='cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
 
         <div class="perfilFotoBotones">
             <div class="profile-image-container sombra mb-3">
-                <img id="fotoPerfil" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
+                <img id="fotoPerfil" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>"
+                    alt="Profile Image">
             </div>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal"
+                data-bs-target="#cambiarImagenModal">
                 <i class="fas fa-camera"></i> Cambiar imágen
             </button>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal"
+                data-bs-target="#editarPerfilModal">
                 <i class="fas fa-edit"></i> Editar perfil
             </button>
-            <button type="button" class="btn btn-plan rounded-pill mt-2 w-100" onclick="window.location.href='Suscripciones.php'">
+            <button type="button" class="btn btn-plan rounded-pill mt-2 w-100"
+                onclick="window.location.href='Suscripciones.php'">
                 <i class="fas fa-exchange-alt"></i> Cambiar plan
             </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100"
+                onclick="window.location.href='cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
@@ -337,67 +347,24 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             <div id="email" class="info-item">E-mail: <?= htmlspecialchars($gestora['email'] ?? '') ?></div>
             <div id="telefono" class="info-item">Teléfono: <?= htmlspecialchars($gestora['phone'] ?? '') ?></div>
             <div id="empresa" class="info-item">Empresa: <?= htmlspecialchars($gestora['empresa'] ?? '') ?></div>
-            <div id="cif" class="info-item">CIF/NIF: <?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?></div>
+            <div id="cif" class="info-item">CIF/NIF: <?= htmlspecialchars($gestora['cif'] ?? $gestora['nif'] ?? '') ?>
+            </div>
 
             <div id="direccion" class="info-item">Dirección: <?= htmlspecialchars($gestora['direccion'] ?? '') ?></div>
             <div id="localidad" class="info-item">Localidad: <?= htmlspecialchars($gestora['localidad'] ?? '') ?></div>
             <div id="provincia" class="info-item">Provincia: <?= htmlspecialchars($gestora['provincia'] ?? '') ?></div>
 
-            <div id="codigoPostal" class="info-item">Código Postal: <?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?></div>
+            <div id="codigoPostal" class="info-item">Código Postal:
+                <?= htmlspecialchars($gestora['codigo_postal'] ?? '') ?>
+            </div>
             <div id="plan" class="info-item">Plan: <?= htmlspecialchars($gestora['plan'] ?? 'Básico') ?></div>
 
             <div id="finPlan" class="info-item">
-                <i class="fas fa-calendar-alt text-primary me-2"></i> <strong>Fin del plan:</strong> &nbsp;<?= !empty($gestora['fin_plan']) ? date('d/m/Y', strtotime($gestora['fin_plan'])) : 'Pendiente de asignar' ?>
+                <i class="fas fa-calendar-alt text-primary me-2"></i> <strong>Fin del plan:</strong>
+                &nbsp;<?= !empty($gestora['fin_plan']) ? date('d/m/Y', strtotime($gestora['fin_plan'])) : 'Pendiente de asignar' ?>
             </div>
 
             <input type="hidden" id="gestorId" value="<?= htmlspecialchars($gestora['id'] ?? '') ?>">
-        </div>
-    </div>
-
-    <div class="container-fluid footer mt-5 p-3">
-        <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-            <label for="anf" class="col-2 text-center footer-item">
-                <div class="row"><a href="Anfitriones.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-users p-1 m-0"></i>
-                            <div>Anfitriones</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="val" class="col-2 text-center footer-item">
-                <div class="row"><a href="verValidar.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-check-circle p-1 m-0"></i>
-                            <div>Validar</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="res" class="col-2 text-center footer-item">
-                <div class="row"><a href="verReservas.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-book-open p-1 m-0"></i>
-                            <div>Reservas</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="his" class="col-2 text-center footer-item">
-                <div class="row"><a href="verEstablecimientos.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-building p-1 m-0"></i>
-                            <div>Establecimientos</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="esp" class="col-2 text-center footer-item">
-                <div class="row"><a href="verEspacios.php">
-                        <div class="col-12 icon-container"><i class="h2 fas fa-chair p-1 m-0"></i>
-                            <div>Espacios</div>
-                        </div>
-                    </a></div>
-            </label>
-            <label for="per" class="col-2 text-center footer-item">
-                <div class="row"><a href="tuPerfil.php">
-                        <div class="col-12 icon-container" style="color:var(--primary-color);"><i class="fas fa-user-tie p-1 m-0"></i>
-                            <div>Perfil</div>
-                        </div>
-                    </a></div>
-            </label>
         </div>
     </div>
 
@@ -451,8 +418,10 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarCambios">Guardar cambios</button>
+                    <button type="button" class="btn btn-cancel rounded-pill px-4"
+                        data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarCambios">Guardar
+                        cambios</button>
                 </div>
             </div>
         </div>
@@ -468,27 +437,34 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                     <form id="formCambiarImagen">
                         <div class="text-center mb-4">
                             <div class="profile-image-container mx-auto">
-                                <img id="previewImagen" src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>" alt="Imagen de perfil">
+                                <img id="previewImagen"
+                                    src="<?= htmlspecialchars($gestora['avatar_url'] ?? '../img/perfil.png') ?>"
+                                    alt="Imagen de perfil">
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="inputImagen" class="form-label fw-bold">Seleccionar nueva imagen:</label>
                             <input type="file" class="form-control" id="inputImagen" name="imagen" accept="image/*">
-                            <input type="hidden" id="imagenGestorId" name="gestorId" value="<?= htmlspecialchars($gestora['id'] ?? '') ?>">
+                            <input type="hidden" id="imagenGestorId" name="gestorId"
+                                value="<?= htmlspecialchars($gestora['id'] ?? '') ?>">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarImagen">Guardar cambios</button>
+                    <button type="button" class="btn btn-cancel rounded-pill px-4"
+                        data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarImagen">Guardar
+                        cambios</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+        
+        <?php include 'footer.php'; ?>
     <script>
         // Cargar los datos en el modal cuando se abre
         document.querySelectorAll('.botonEditar').forEach(boton => {
-            boton.addEventListener('click', function() {
+            boton.addEventListener('click', function () {
                 document.getElementById("editNombre").value = "<?= htmlspecialchars($gestora['name'] ?? '') ?>";
                 document.getElementById("editEmail").value = "<?= htmlspecialchars($gestora['email'] ?? '') ?>";
                 document.getElementById("editEmpresa").value = "<?= htmlspecialchars($gestora['empresa'] ?? '') ?>";
@@ -504,16 +480,16 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
         });
 
         // Guardar cambios apuntando al nuevo archivo
-        document.getElementById("btnGuardarCambios").addEventListener("click", function() {
+        document.getElementById("btnGuardarCambios").addEventListener("click", function () {
             const formData = new FormData(document.getElementById("formEditarPerfil"));
             const btn = this;
             btn.disabled = true;
             btn.textContent = "Guardando...";
 
             fetch("actualizarGestor.php", {
-                    method: "POST",
-                    body: formData
-                })
+                method: "POST",
+                body: formData
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -534,18 +510,18 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
         });
 
         // --- SCRIPT PARA CAMBIAR IMAGEN ---
-        document.getElementById('inputImagen').addEventListener('change', function(event) {
+        document.getElementById('inputImagen').addEventListener('change', function (event) {
             const archivo = event.target.files[0];
             if (archivo) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     document.getElementById('previewImagen').src = e.target.result;
                 };
                 reader.readAsDataURL(archivo);
             }
         });
 
-        document.getElementById('btnGuardarImagen').addEventListener('click', function() {
+        document.getElementById('btnGuardarImagen').addEventListener('click', function () {
             const formData = new FormData();
             const inputImagen = document.getElementById("inputImagen");
 
@@ -562,9 +538,9 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
             btn.textContent = "Guardando...";
 
             fetch("subir-imagen-perfil-gestor.php", {
-                    method: "POST",
-                    body: formData
-                })
+                method: "POST",
+                body: formData
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -587,6 +563,7 @@ $gestora = count($datosGestor) > 0 ? $datosGestor[0] : [];
                 });
         });
     </script>
+
 </body>
 
 </html>
