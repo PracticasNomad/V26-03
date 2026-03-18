@@ -1,20 +1,21 @@
 <?php
 session_start();
 
-// Verificamos sesión básica (como es entorno de prueba, comprueba que pasaste por el login falso)
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
+// Verificamos que el usuario está logueado y es administrador
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['token']) || $_SESSION['rol'] !== 'administrador') {
     header('Location: inicio_sesion_admin.php');
     exit();
 }
 
 require '../vendor/autoload.php';
+
 use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
-// 1. CARGAMOS LOS DATOS DEL ADMIN DIRECTAMENTE EN PHP (Usando Service Key por RLS)
-$urlAdmin = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/administrador?id=eq." . $_SESSION["user_id"];
+// 1. CARGAMOS LOS DATOS DEL ADMIN DESDE SUPABASE
+$urlAdmin = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/admin?id=eq." . $_SESSION["user_id"];
 $ch = curl_init($urlAdmin);
 curl_setopt_array($ch, [
     CURLOPT_HTTPHEADER => [
@@ -28,23 +29,14 @@ curl_close($ch);
 
 $datosAdmin = json_decode($resultado, true);
 
+// Si existe en la BD, recogemos sus datos. Si no, redirigimos al login (algo fue mal)
 if (is_array($datosAdmin) && count($datosAdmin) > 0) {
     $admin = $datosAdmin[0];
 } else {
-    // 🚀 MODO PRUEBA: Si no encuentra el admin simulado en la BD, inyecta estos datos falsos para poder probar las vistas
-    $admin = [
-        'id' => $_SESSION["user_id"],
-        'name' => 'Administrador Prueba',
-        'email' => $_SESSION["email"] ?? 'admin@yonomadapp.com',
-        'phone' => '+34 600 000 000',
-        'empresa' => 'TheNomadapp Global',
-        'cif' => 'B12345678',
-        'direccion' => 'Sede Central, Planta 5',
-        'localidad' => 'Madrid',
-        'provincia' => 'Madrid',
-        'codigo_postal' => '28001',
-        'avatar_url' => '../img/perfil.png'
-    ];
+    // Seguridad extra: Si tiene sesión pero no existe en la BD, lo echamos
+    session_destroy();
+    header('Location: inicio_sesion_admin.php?error=no_data');
+    exit();
 }
 ?>
 
@@ -67,11 +59,8 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
     <style>
         :root {
             --primary-color: #dc3545;
-            /* Rojo admin para diferenciarlo */
             --secondary-color: #6c757d;
             --cancel-color: #343a40;
-            /* Oscuro para el botón de cancelar */
-            --plan-color: #28a745;
             --light-bg: #f8f9fa;
             --white: #ffffff;
             --dark-text: #343a40;
@@ -169,8 +158,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         }
 
         .btn-primary,
-        .btn-cancel,
-        .btn-plan {
+        .btn-cancel {
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
@@ -286,19 +274,15 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         <div class="fotoPerfilMovil centrar">
             <span class="badge-admin fw-bold"><i class="fas fa-shield-alt"></i> Panel Global</span>
             <div class="profile-image-container sombra mb-3">
-                <img id="fotoPerfilMovil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>"
-                    alt="Profile Image">
+                <img id="fotoPerfilMovil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
             </div>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal"
-                data-bs-target="#cambiarImagenModal">
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
                 <i class="fas fa-camera"></i> Cambiar imágen
             </button>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal"
-                data-bs-target="#editarPerfilModal">
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
                 <i class="fas fa-edit"></i> Información legal
             </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100"
-                onclick="window.location.href='../cerrarSesion.php'">
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
@@ -306,19 +290,15 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         <div class="perfilFotoBotones">
             <span class="badge-admin fw-bold"><i class="fas fa-shield-alt"></i> Administrador Global</span>
             <div class="profile-image-container sombra mb-3">
-                <img id="fotoPerfil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>"
-                    alt="Profile Image">
+                <img id="fotoPerfil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
             </div>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal"
-                data-bs-target="#cambiarImagenModal">
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
                 <i class="fas fa-camera"></i> Cambiar imágen
             </button>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal"
-                data-bs-target="#editarPerfilModal">
+            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
                 <i class="fas fa-edit"></i> Información legal
             </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100"
-                onclick="window.location.href='../cerrarSesion.php'">
+            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
@@ -326,36 +306,16 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         <div class="perfilInfo">
             <p class="h5 fw-bold mb-3"><u>Información Legal Global:</u></p>
 
-            <div class="info-item"><i class="fas fa-user-shield text-danger me-2"></i> <strong>Nombre:</strong> &nbsp;
-                <?= htmlspecialchars($admin['name'] ?? '') ?>
-            </div>
-            <div class="info-item"><i class="fas fa-envelope text-danger me-2"></i> <strong>E-mail:</strong> &nbsp;
-                <?= htmlspecialchars($admin['email'] ?? '') ?>
-            </div>
-            <div class="info-item"><i class="fas fa-phone text-danger me-2"></i> <strong>Teléfono:</strong> &nbsp;
-                <?= htmlspecialchars($admin['phone'] ?? '') ?>
-            </div>
-            <div class="info-item"><i class="fas fa-building text-danger me-2"></i> <strong>Empresa:</strong> &nbsp;
-                <?= htmlspecialchars($admin['empresa'] ?? '') ?>
-            </div>
-            <div class="info-item"><i class="fas fa-id-card text-danger me-2"></i> <strong>CIF/NIF:</strong> &nbsp;
-                <?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? '') ?>
-            </div>
+            <div id="nombre" class="info-item">Nombre: <?= htmlspecialchars($admin['name'] ?? '') ?></div>
+            <div id="email" class="info-item">E-mail: <?= htmlspecialchars($admin['email'] ?? '') ?></div>
+            <div id="telefono" class="info-item">Teléfono: <?= htmlspecialchars($admin['phone'] ?? '') ?></div>
+            <div id="empresa" class="info-item">Empresa: <?= htmlspecialchars($admin['empresa'] ?? '') ?></div>
+            <div id="cif" class="info-item">CIF/NIF: <?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? '') ?></div>
 
-            <div class="info-item"><i class="fas fa-map-marker-alt text-danger me-2"></i> <strong>Dirección:</strong>
-                &nbsp;
-                <?= htmlspecialchars($admin['direccion'] ?? '') ?>
-            </div>
-            <div class="info-item"><i class="fas fa-city text-danger me-2"></i> <strong>Localidad:</strong> &nbsp;
-                <?= htmlspecialchars($admin['localidad'] ?? '') ?>
-            </div>
-            <div class="info-item"><i class="fas fa-map text-danger me-2"></i> <strong>Provincia:</strong> &nbsp;
-                <?= htmlspecialchars($admin['provincia'] ?? '') ?>
-            </div>
-            <div class="info-item"><i class="fas fa-mail-bulk text-danger me-2"></i> <strong>Código Postal:</strong>
-                &nbsp;
-                <?= htmlspecialchars($admin['codigo_postal'] ?? '') ?>
-            </div>
+            <div id="direccion" class="info-item">Dirección: <?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? '') ?></div>
+            <div id="localidad" class="info-item">Localidad: <?= htmlspecialchars($admin['localidad'] ?? '') ?></div>
+            <div id="provincia" class="info-item">Provincia: <?= htmlspecialchars($admin['provincia'] ?? '') ?></div>
+            <div id="codigoPostal" class="info-item">Código Postal: <?= htmlspecialchars($admin['codigo_postal'] ?? '') ?></div>
 
             <input type="hidden" id="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
         </div>
@@ -365,43 +325,48 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
             <a href="dashboard.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-chart-line p-1 m-0"></i>
+                    <div class="col-12 icon-container">
+                        <i class="h3 fas fa-chart-line p-1 m-0"></i>
                         <div>Panel</div>
                     </div>
                 </div>
             </a>
             <a href="verGestores.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
+                    <div class="col-12 icon-container">
+                        <i class="h3 fas fa-user-tie p-1 m-0"></i>
                         <div>Gestores</div>
                     </div>
                 </div>
             </a>
             <a href="verAnfitriones.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-users p-1 m-0"></i>
+                    <div class="col-12 icon-container">
+                        <i class="h3 fas fa-users p-1 m-0"></i>
                         <div>Anfitriones</div>
                     </div>
                 </div>
             </a>
             <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-building p-1 m-0"></i>
+                    <div class="col-12 icon-container">
+                        <i class="h3 fas fa-building p-1 m-0"></i>
                         <div>Espacios</div>
                     </div>
                 </div>
             </a>
             <a href="verValidar.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-check-circle p-1 m-0"></i>
+                    <div class="col-12 icon-container">
+                        <i class="h3 fas fa-check-circle p-1 m-0"></i>
                         <div>Validar</div>
                     </div>
                 </div>
             </a>
             <a href="tuPerfil.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <div class="col-12 icon-container" style="color:var(--primary-color);"><i
-                            class="h3 fas fa-user-cog p-1 m-0"></i>
+                    <div class="col-12 icon-container" style="color:var(--primary-color);">
+                        <i class="h3 fas fa-user-cog p-1 m-0"></i>
                         <div>Perfil</div>
                     </div>
                 </div>
@@ -445,12 +410,11 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                         </div>
 
                         <hr>
-                        <h6 class="fw-bold mb-3 text-danger"><i class="fas fa-map-marker-alt me-1"></i> Dirección de
-                            Facturación Global</h6>
+                        <h6 class="fw-bold mb-3 text-danger"><i class="fas fa-map-marker-alt me-1"></i> Dirección de Facturación Global</h6>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Dirección Completa:</label>
-                            <input type="text" class="form-control" id="editDireccion" name="direccion">
+                            <input type="text" class="form-control" id="editDireccion" name="domicilio_social">
                         </div>
 
                         <div class="row">
@@ -470,10 +434,8 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel rounded-pill px-4"
-                        data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarCambios">Guardar
-                        cambios</button>
+                    <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarCambios">Guardar cambios</button>
                 </div>
             </div>
         </div>
@@ -490,57 +452,52 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                     <form id="formCambiarImagen">
                         <div class="text-center mb-4">
                             <div class="profile-image-container mx-auto">
-                                <img id="previewImagen"
-                                    src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>"
-                                    alt="Imagen de administrador">
+                                <img id="previewImagen" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Imagen de administrador">
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="inputImagen" class="form-label fw-bold">Seleccionar nueva imagen:</label>
                             <input type="file" class="form-control" id="inputImagen" name="imagen" accept="image/*">
-                            <input type="hidden" id="imagenAdminId" name="adminId"
-                                value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
+                            <input type="hidden" id="imagenAdminId" name="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel rounded-pill px-4"
-                        data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarImagen">Guardar
-                        cambios</button>
+                    <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarImagen">Guardar cambios</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // CARGAR DATOS EN EL MODAL DE EDICIÓN
+        // Cargar los datos en el modal de edición
         document.querySelectorAll('.botonEditar').forEach(boton => {
-            boton.addEventListener('click', function () {
+            boton.addEventListener('click', function() {
                 document.getElementById("editNombre").value = "<?= htmlspecialchars($admin['name'] ?? '') ?>";
                 document.getElementById("editEmail").value = "<?= htmlspecialchars($admin['email'] ?? '') ?>";
                 document.getElementById("editEmpresa").value = "<?= htmlspecialchars($admin['empresa'] ?? '') ?>";
                 document.getElementById("editTelefono").value = "<?= htmlspecialchars($admin['phone'] ?? '') ?>";
                 document.getElementById("editCIF").value = "<?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? '') ?>";
 
-                document.getElementById("editDireccion").value = "<?= htmlspecialchars($admin['direccion'] ?? '') ?>";
+                document.getElementById("editDireccion").value = "<?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? '') ?>";
                 document.getElementById("editProvincia").value = "<?= htmlspecialchars($admin['provincia'] ?? '') ?>";
                 document.getElementById("editLocalidad").value = "<?= htmlspecialchars($admin['localidad'] ?? '') ?>";
                 document.getElementById("editCodigoPostal").value = "<?= htmlspecialchars($admin['codigo_postal'] ?? '') ?>";
             });
         });
 
-        // GUARDAR CAMBIOS DE TEXTO (Apunta a actualizarAdmin.php)
-        document.getElementById("btnGuardarCambios").addEventListener("click", function () {
+        // Guardar cambios del perfil
+        document.getElementById("btnGuardarCambios").addEventListener("click", function() {
             const formData = new FormData(document.getElementById("formEditarPerfil"));
             const btn = this;
             btn.disabled = true;
             btn.textContent = "Guardando...";
 
             fetch("actualizarAdmin.php", {
-                method: "POST",
-                body: formData
-            })
+                    method: "POST",
+                    body: formData
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -554,27 +511,26 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                 })
                 .catch(error => {
                     console.error("Error:", error);
-                    alert("Aviso Modo Prueba: Falta el archivo actualizarAdmin.php para procesar los datos.");
+                    alert("Aviso: Falta el archivo actualizarAdmin.php para procesar los datos.");
                     btn.disabled = false;
                     btn.textContent = "Guardar cambios";
                 });
         });
 
-        // PREVISUALIZAR IMAGEN
-        document.getElementById('inputImagen').addEventListener('change', function (event) {
+        // Previsualizar la imagen seleccionada
+        document.getElementById('inputImagen').addEventListener('change', function(event) {
             const archivo = event.target.files[0];
             if (archivo) {
                 const reader = new FileReader();
-                reader.onload = function (e) {
+                reader.onload = function(e) {
                     document.getElementById('previewImagen').src = e.target.result;
                 };
                 reader.readAsDataURL(archivo);
             }
         });
 
-        // GUARDAR IMAGEN (Apunta a subir-imagen-perfil-admin.php)
-        document.getElementById('btnGuardarImagen').addEventListener('click', function () {
-            const formData = new FormData();
+        // Guardar nueva imagen
+        document.getElementById('btnGuardarImagen').addEventListener('click', function() {
             const inputImagen = document.getElementById("inputImagen");
 
             if (inputImagen.files.length === 0) {
@@ -582,6 +538,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                 return;
             }
 
+            const formData = new FormData();
             formData.append('imagen', inputImagen.files[0]);
             formData.append('adminId', document.getElementById('imagenAdminId').value);
 
@@ -590,9 +547,9 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             btn.textContent = "Guardando...";
 
             fetch("subir-imagen-perfil-admin.php", {
-                method: "POST",
-                body: formData
-            })
+                    method: "POST",
+                    body: formData
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -607,7 +564,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                 })
                 .catch(error => {
                     console.error("Error:", error);
-                    alert("Aviso Modo Prueba: Falta el archivo subir-imagen-perfil-admin.php para guardar la foto.");
+                    alert("Aviso: Falta el archivo subir-imagen-perfil-admin.php para guardar la foto.");
                 })
                 .finally(() => {
                     btn.disabled = false;

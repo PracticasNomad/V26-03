@@ -1,23 +1,87 @@
 <?php
 session_start();
 
+require '../vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load();
+
+$errorMsg = "";
+
 // ==========================================
-// 🚀 MODO PRUEBA: INGRESO DIRECTO COMO ADMIN
+// 🚀 LOGIN REAL CON SUPABASE
 // ==========================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Generamos variables de sesión falsas para engañar a tus verificadores
-    $_SESSION["token"] = "token_de_prueba_administrador";
-    $_SESSION["email"] = "admin@yonomadapp.com";
-    $_SESSION["user_id"] = "id_simulado_admin_12345";
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-    // Opcional: si en el futuro usas una variable de rol para las vistas admin
-    $_SESSION["rol"] = "administrador";
+    if (!empty($email) && !empty($password)) {
 
-    // Redirigimos directamente a la vista de perfil/dashboard del admin
-    header('Location: tuPerfil.php');
-    exit();
+        // 1. Autenticar al usuario en Auth de Supabase
+        $authUrl = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/auth/v1/token?grant_type=password";
+        $authData = json_encode(['email' => $email, 'password' => $password]);
+
+        $ch = curl_init($authUrl);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $authData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'apikey: ' . $_ENV['DATABASE_APIKEY'],
+            'Content-Type: application/json'
+        ]);
+
+        $authResponse = curl_exec($ch);
+        $authHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($authHttpCode === 200) {
+            $authResult = json_decode($authResponse, true);
+            $userId = $authResult['user']['id'];
+            $token = $authResult['access_token'];
+
+            // 2. VERIFICACIÓN DE ROL: ¿Es realmente un Administrador?
+            // Buscamos su ID en la tabla 'admin' que creaste
+            $adminCheckUrl = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/admin?id=eq." . urlencode($userId) . "&select=id";
+
+            $chAdmin = curl_init($adminCheckUrl);
+            curl_setopt_array($chAdmin, [
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'], // <-- Llave maestra
+                    'apikey: ' . $_ENV['SERVICE_APIKEY']                // <-- Llave maestra
+                ],
+                CURLOPT_RETURNTRANSFER => true
+            ]);
+            $adminResponse = curl_exec($chAdmin);
+            $adminHttpCode = curl_getinfo($chAdmin, CURLINFO_HTTP_CODE);
+            curl_close($chAdmin);
+
+            $adminData = json_decode($adminResponse, true);
+
+            // Si devuelve un 200 y el array tiene datos, es que existe en la tabla admin
+            if ($adminHttpCode === 200 && is_array($adminData) && count($adminData) > 0) {
+
+                // ¡Acceso Concedido! Guardamos las variables de sesión reales
+                $_SESSION["token"] = $token;
+                $_SESSION["email"] = $email;
+                $_SESSION["user_id"] = $userId;
+                $_SESSION["rol"] = "administrador"; // Muy útil para luego proteger vistas
+
+                header('Location: tuPerfil.php');
+                exit();
+            } else {
+                // Existe en Auth pero NO es administrador (es un anfitrión o un gestor intentando colarse)
+                $errorMsg = "Acceso denegado: Esta cuenta no tiene privilegios de Administrador.";
+            }
+        } else {
+            // Error de email o contraseña
+            $errorMsg = "Credenciales incorrectas. Revisa tu email y contraseña.";
+        }
+    } else {
+        $errorMsg = "Por favor, rellena todos los campos.";
+    }
 }
-// ==========================================
 ?>
 
 <!DOCTYPE html>
@@ -124,28 +188,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h2 class="login-title">Panel de Control</h2>
                 <h3 class="login-subtitle">Acceso exclusivo Administradores</h3>
 
-                <div class="row">
+                <div class="row text-start">
                     <label for="email" class="form-label">
                         <span>E-mail de administrador</span>
-                        <input type="text" class="form-control" name="email" id="email" value="admin@ejemplo.com">
+                        <input type="email" class="form-control" name="email" id="email" placeholder="admin@ejemplo.com" required>
                     </label>
                 </div>
 
-                <div class="row">
+                <div class="row text-start">
                     <label for="password" class="form-label">
                         <span>Contraseña</span>
-                        <input type="password" class="form-control" name="password" id="password" value="123456">
+                        <input type="password" class="form-control" name="password" id="password" placeholder="******" required>
                     </label>
                 </div>
 
-                <div class="alert alert-warning text-center" role="alert" style="font-size: 0.9em;">
-                    <strong>Modo Desarrollo:</strong> El login está puenteado. Haz clic abajo para entrar directo a las
-                    vistas y probar.
-                </div>
+                <?php if (!empty($errorMsg)): ?>
+                    <div class="alert alert-danger text-center" role="alert" style="font-size: 0.9em; border-radius: 15px;">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <strong>Error:</strong> <?php echo $errorMsg; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-info text-center" role="alert" style="font-size: 0.9em; border-radius: 15px;">
+                        <i class="fas fa-shield-alt me-2"></i> Área de acceso restringido.
+                    </div>
+                <?php endif; ?>
 
-                <div class="d-flex justify-content-center mb-3">
+                <div class="d-flex justify-content-center mb-3 mt-3">
                     <button class="btn btn-danger btn-custom" type="submit">
-                        🧪 Entrar al Panel de Admin
+                        <i class="fas fa-sign-in-alt me-2"></i> Entrar al Panel de Admin
                     </button>
                 </div>
 
