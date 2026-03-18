@@ -603,7 +603,9 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                 zoom: 14,
             });
 
-            new mapboxgl.Marker({ color: '#dc3545' })
+            new mapboxgl.Marker({
+                    color: '#dc3545'
+                })
                 .setLngLat([lng, lat])
                 .addTo(map);
 
@@ -612,7 +614,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
 
         function confirmarEliminacion(id, nombre) {
             document.getElementById('establecimiento-nombre').textContent = nombre;
-            document.getElementById('btn-confirmar-eliminar').onclick = function () {
+            document.getElementById('btn-confirmar-eliminar').onclick = function() {
                 window.location.href = 'establecimiento.php?id=' + id;
             };
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
@@ -732,47 +734,47 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         <div class="row establecimientos-grid" style="max-width: 1400px; margin: 0 auto;">
             <?php foreach ($establecimientos as $index => $establecimiento):
                 $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
-                ?>
+            ?>
                 <div class="col-12 col-md-6 col-xl-4 est-card-col">
                     <div class="establecimiento-card" id="establecimiento-<?php echo $establecimiento['id']; ?>">
-                        <div class="card-header<?php echo empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? '')) ? ' default-image' : ''; ?>"
+                        <div class="card-header<?php echo empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? '')) ? ' default-image' : ''; ?>" <?php if (!empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''))): ?>style="background-image: url('<?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');" <?php endif; ?>>
                             <?php if (!empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''))): ?> style="background-image: url('
-                    <?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"
-                            <?php endif; ?>>
-                            <div class="card-header-overlay"></div>
-                            <div class="card-title">
-                                <div>
-                                    <?php echo htmlspecialchars($establecimiento['nombre']); ?>
-                                </div>
-                                <div class="service-icons">
-                                    <?php
-                                    $estadoValidacion = $establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null;
-                                    if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidacion === 't' || $estadoValidacion === 1 || $estadoValidacion === '1') {
-                                        $estadoClass = 'success';
-                                        $estadoIcon = 'check-circle';
-                                        $estadoText = 'Aprobado';
-                                    } elseif ($estadoValidacion === false || $estadoValidacion === 'false' || $estadoValidacion === 'f' || $estadoValidacion === 0 || $estadoValidacion === '0') {
-                                        $estadoClass = 'danger';
-                                        $estadoIcon = 'ban';
-                                        $estadoText = 'Rechazado';
-                                    } else {
-                                        $estadoClass = 'warning';
-                                        $estadoIcon = 'clock';
-                                        $estadoText = 'Pendiente';
-                                    }
-                                    ?>
-                                    <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>"
-                                        title="<?php echo $estadoText; ?>">
-                                        <i class="fas fa-<?php echo $estadoIcon; ?>"></i>
+                                <?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"
+                                <?php endif; ?>>
+                                <div class="card-header-overlay"></div>
+                                <div class="card-title">
+                                    <div>
+                                        <?php echo htmlspecialchars($establecimiento['nombre']); ?>
                                     </div>
-                                    <?php if ($establecimiento['has_wifi']): ?>
-                                        <div class="service-icon" title="WiFi disponible"><i class="fas fa-wifi"></i></div>
-                                    <?php endif; ?>
-                                    <?php if ($establecimiento['has_parking']): ?>
-                                        <div class="service-icon" title="Parking disponible"><i class="fas fa-parking"></i></div>
-                                    <?php endif; ?>
+                                    <div class="service-icons">
+                                        <?php
+                                        $estadoValidacion = $establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null;
+                                        if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidacion === 't' || $estadoValidacion === 1 || $estadoValidacion === '1') {
+                                            $estadoClass = 'success';
+                                            $estadoIcon = 'check-circle';
+                                            $estadoText = 'Aprobado';
+                                        } elseif ($estadoValidacion === false || $estadoValidacion === 'false' || $estadoValidacion === 'f' || $estadoValidacion === 0 || $estadoValidacion === '0') {
+                                            $estadoClass = 'danger';
+                                            $estadoIcon = 'ban';
+                                            $estadoText = 'Rechazado';
+                                        } else {
+                                            $estadoClass = 'warning';
+                                            $estadoIcon = 'clock';
+                                            $estadoText = 'Pendiente';
+                                        }
+                                        ?>
+                                        <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>"
+                                            title="<?php echo $estadoText; ?>">
+                                            <i class="fas fa-<?php echo $estadoIcon; ?>"></i>
+                                        </div>
+                                        <?php if ($establecimiento['has_wifi']): ?>
+                                            <div class="service-icon" title="WiFi disponible"><i class="fas fa-wifi"></i></div>
+                                        <?php endif; ?>
+                                        <?php if ($establecimiento['has_parking']): ?>
+                                            <div class="service-icon" title="Parking disponible"><i class="fas fa-parking"></i></div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                            </div>
                         </div>
 
                         <div class="card-body">
@@ -837,17 +839,17 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                     <i class="fas fa-door-open"></i> Espacios
                                 </a>
                                 <button class="btn btn-action btn-edit" type="button" onclick='abrirModalEditar(<?php echo json_encode([
-                                    'id' => $establecimiento['id'],
-                                    'nombre' => $establecimiento['nombre'] ?? '',
-                                    'descripcion' => $establecimiento['descripcion'] ?? '',
-                                    'direccion' => $establecimiento['direccion'] ?? '',
-                                    'localidad' => $establecimiento['localidad'] ?? '',
-                                    'provincia' => $establecimiento['provincia'] ?? '',
-                                    'codigo_postal' => $establecimiento['codigo_postal'] ?? '',
-                                    'piso' => $establecimiento['piso'] ?? '',
-                                    'latitude' => $establecimiento['latitude'] ?? '',
-                                    'longitude' => $establecimiento['longitude'] ?? ''
-                                ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
+                                                                                                                    'id' => $establecimiento['id'],
+                                                                                                                    'nombre' => $establecimiento['nombre'] ?? '',
+                                                                                                                    'descripcion' => $establecimiento['descripcion'] ?? '',
+                                                                                                                    'direccion' => $establecimiento['direccion'] ?? '',
+                                                                                                                    'localidad' => $establecimiento['localidad'] ?? '',
+                                                                                                                    'provincia' => $establecimiento['provincia'] ?? '',
+                                                                                                                    'codigo_postal' => $establecimiento['codigo_postal'] ?? '',
+                                                                                                                    'piso' => $establecimiento['piso'] ?? '',
+                                                                                                                    'latitude' => $establecimiento['latitude'] ?? '',
+                                                                                                                    'longitude' => $establecimiento['longitude'] ?? ''
+                                                                                                                ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
                                 <button class="btn btn-action btn-delete"

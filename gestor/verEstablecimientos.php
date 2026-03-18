@@ -907,7 +907,9 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                 zoom: 14,
             });
 
-            new mapboxgl.Marker({ color: '#28a745' })
+            new mapboxgl.Marker({
+                    color: '#28a745'
+                })
                 .setLngLat([lng, lat])
                 .addTo(map);
 
@@ -917,7 +919,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         // Función para confirmar eliminación
         function confirmarEliminacion(id, nombre) {
             document.getElementById('establecimiento-nombre').textContent = nombre;
-            document.getElementById('btn-confirmar-eliminar').onclick = function () {
+            document.getElementById('btn-confirmar-eliminar').onclick = function() {
                 window.location.href = 'establecimiento.php?id=' + id;
             };
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
@@ -939,9 +941,9 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             new bootstrap.Modal(document.getElementById('editModal')).show();
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function (el) {
+            tooltipTriggerList.forEach(function(el) {
                 new bootstrap.Tooltip(el);
             });
         });
@@ -1021,13 +1023,13 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                     $establecimiento['direccion'],
                     $establecimiento['piso']
                 );
-                ?>
+            ?>
                 <div class="col-12 col-md-6 col-xl-4 est-card-col">
                     <div id="establecimiento-main">
                         <div class="establecimiento-card" id="establecimiento-<?php echo $establecimiento['id']; ?>">
                             <div class="card-header<?php echo empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? '')) ? ' default-image' : ''; ?>"
                                 <?php if (!empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''))): ?>
-                                    style="background-image: url('<?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"
+                                style="background-image: url('<?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"
                                 <?php endif; ?>>
                                 <div class="card-header-overlay"></div>
                                 <div class="card-title">
@@ -1149,18 +1151,18 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                         <i class="fas fa-door-open"></i> Gestionar Espacios
                                     </a>
                                     <button class="btn btn-action btn-edit" type="button" onclick='abrirModalEditar(<?php echo json_encode([
-                                        'id' => $establecimiento['id'],
-                                        'nombre' => $establecimiento['nombre'] ?? '',
-                                        'descripcion' => $establecimiento['descripcion'] ?? '',
-                                        'direccion' => $establecimiento['direccion'] ?? '',
-                                        'localidad' => $establecimiento['localidad'] ?? '',
-                                        'provincia' => $establecimiento['provincia'] ?? '',
-                                        'codigo_postal' => $establecimiento['codigo_postal'] ?? '',
-                                        'piso' => $establecimiento['piso'] ?? '',
-                                        'image_url' => $establecimiento['image_url'] ?? '',
-                                        'latitude' => $establecimiento['latitude'] ?? '',
-                                        'longitude' => $establecimiento['longitude'] ?? ''
-                                    ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
+                                                                                                                        'id' => $establecimiento['id'],
+                                                                                                                        'nombre' => $establecimiento['nombre'] ?? '',
+                                                                                                                        'descripcion' => $establecimiento['descripcion'] ?? '',
+                                                                                                                        'direccion' => $establecimiento['direccion'] ?? '',
+                                                                                                                        'localidad' => $establecimiento['localidad'] ?? '',
+                                                                                                                        'provincia' => $establecimiento['provincia'] ?? '',
+                                                                                                                        'codigo_postal' => $establecimiento['codigo_postal'] ?? '',
+                                                                                                                        'piso' => $establecimiento['piso'] ?? '',
+                                                                                                                        'image_url' => $establecimiento['image_url'] ?? '',
+                                                                                                                        'latitude' => $establecimiento['latitude'] ?? '',
+                                                                                                                        'longitude' => $establecimiento['longitude'] ?? ''
+                                                                                                                    ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
                                         <i class="fas fa-edit"></i> Editar
                                     </button>
                                     <button class="btn btn-action btn-delete"
