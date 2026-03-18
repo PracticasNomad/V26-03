@@ -1,4 +1,5 @@
 <?php
+require_once 'verificar_sesion_admin.php'; // Asegurado de que usa tu verificador
 require '../vendor/autoload.php';
 
 use Dotenv\Dotenv;
@@ -187,51 +188,49 @@ function formatearDireccion($dir, $piso)
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
-    <title>Gestión de Validaciones</title>
+    <title>Validaciones Globales - Admin</title>
     <style>
         :root {
-            --ink: #1f2933;
-            --muted: #66788a;
-            --surface: #ffffff;
-            --line: #d9e2ec;
-            --brand: #0f4c5c;
+            --brand-ink: #1f2933;
+            --brand-accent: #dc3545;
+            /* Rojo admin */
+            --brand-soft: #f8f9fa;
+            --success-color: #28a745;
+            --reject-color: #343a40;
+            /* Gris oscuro para rechazar, contraste con el rojo principal */
+            --card-radius: 16px;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
-            background:
-                radial-gradient(circle at 12% 0%, rgba(15, 76, 92, 0.08), transparent 30%),
-                radial-gradient(circle at 88% 6%, rgba(31, 41, 51, 0.08), transparent 28%),
-                linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
-            color: var(--ink);
-            padding-bottom: 80px;
+            background: #eef2f5;
+            color: var(--brand-ink);
+            padding-bottom: 120px;
         }
 
-        .page-header {
-            max-width: 1320px;
-            margin: 16px auto 8px;
-            padding: 0 12px;
+        /* ESTILOS DEL HERO (CABECERA ADMIN) */
+        .page-hero {
+            max-width: 1400px;
+            margin: 1.2rem auto 0.5rem;
+            padding: 0 15px;
         }
 
-        .page-header-inner {
-            border-radius: 16px;
-            background: linear-gradient(130deg, #123b49 0%, #0f4c5c 65%, #2a4b57 120%);
+        .page-hero-inner {
+            border-radius: 20px;
+            background: var(--brand-accent);
             color: #ffffff;
-            padding: 14px 16px;
-            box-shadow: 0 14px 28px rgba(15, 76, 92, 0.22);
+            padding: 1.1rem 1.2rem;
+            box-shadow: 0 14px 30px rgba(220, 53, 69, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .page-title {
+        .page-hero-title {
             font-size: 1.25rem;
             font-weight: 800;
-            margin: 0;
             letter-spacing: 0.2px;
-        }
-
-        .title-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin: 0;
         }
 
         .info-hint-btn {
@@ -254,27 +253,56 @@ function formatearDireccion($dir, $piso)
             transform: translateY(-1px);
         }
 
+        /* ESTILOS DE TABS (PESTAÑAS) */
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            font-weight: 700;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--brand-accent);
+            border-bottom: 3px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--brand-accent);
+            border-bottom: 3px solid var(--brand-accent);
+            background: transparent;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
         .validation-shell {
-            max-width: 1320px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
+        /* TARJETAS DE ESTABLECIMIENTOS */
         .establecimiento-card {
-            background-color: var(--surface);
-            border-radius: 16px;
-            box-shadow: 0 10px 22px rgba(31, 41, 51, 0.1);
+            background-color: white;
+            border-radius: var(--card-radius);
+            box-shadow: 0 10px 25px rgba(31, 41, 51, 0.06);
             margin-bottom: 1.5rem;
             overflow: hidden;
-            transition: 0.3s;
-            border: 1px solid var(--line);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             height: 100%;
         }
 
         .establecimiento-card:hover {
-            box-shadow: 0 18px 34px rgba(31, 41, 51, 0.16);
-            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(31, 41, 51, 0.12);
+            transform: translateY(-3px);
         }
 
         .card-header {
@@ -284,12 +312,12 @@ function formatearDireccion($dir, $piso)
             display: flex;
             align-items: flex-end;
             position: relative;
-            background-color: #cad4de;
+            background-color: #e9ecef;
         }
 
         .card-header.default-image {
             background-image: none !important;
-            background-color: #c4ccd3;
+            background-color: #dee2e6;
         }
 
         .card-header-overlay {
@@ -298,20 +326,21 @@ function formatearDireccion($dir, $piso)
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.68));
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.75));
         }
 
         .card-title {
             color: white;
             padding: 15px;
             font-weight: 700;
-            font-size: 1.08rem;
+            font-size: 1.15rem;
             z-index: 1;
             width: 100%;
+            margin: 0;
         }
 
         .card-body {
-            padding: 16px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -320,102 +349,123 @@ function formatearDireccion($dir, $piso)
         .info-row {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
-            gap: 8px;
-            font-size: 0.94rem;
-            color: #3b4b5a;
+            margin-bottom: 10px;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: #495057;
         }
 
         .info-icon {
-            color: var(--brand);
-            width: 18px;
+            color: var(--brand-accent);
+            width: 20px;
             text-align: center;
+            font-size: 1rem;
         }
 
+        .badge {
+            font-size: 0.85rem;
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        /* BOTONES DE ACCIÓN */
         .action-buttons-container {
             margin-top: auto;
-            padding-top: 14px;
-            border-top: 1px solid #e5ebf1;
+            padding-top: 15px;
+            border-top: 1px solid #f1f3f5;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .quick-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .btn-quick {
             flex: 1;
             border: none;
             border-radius: 8px;
-            padding: 0.52rem;
-            font-size: 0.84rem;
+            padding: 0.6rem;
+            font-size: 0.9rem;
             font-weight: 700;
             color: white;
-            transition: 0.2s;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
         }
 
         .btn-quick.approve {
-            background-color: #1f8f5d;
+            background-color: var(--success-color);
         }
 
         .btn-quick.approve:hover {
-            background-color: #187448;
+            background-color: #218838;
+            transform: translateY(-2px);
         }
 
         .btn-quick.reject {
-            background-color: #b54857;
+            background-color: var(--reject-color);
         }
 
         .btn-quick.reject:hover {
-            background-color: #983a47;
+            background-color: #23272b;
+            transform: translateY(-2px);
         }
 
         .btn-quick:disabled {
             opacity: 0.7;
             cursor: not-allowed;
+            transform: none !important;
         }
 
         .btn-validar {
-            background-color: #295b83;
-            border: none;
-            color: white;
+            background-color: transparent;
+            border: 2px solid var(--brand-accent);
+            color: var(--brand-accent);
             border-radius: 8px;
-            padding: 0.52rem;
+            padding: 0.6rem;
             font-weight: 700;
-            font-size: 0.84rem;
+            font-size: 0.9rem;
             text-align: center;
             text-decoration: none;
             display: block;
-            transition: 0.2s;
+            transition: all 0.2s ease;
         }
 
         .btn-validar:hover {
-            background-color: #214969;
+            background-color: var(--brand-accent);
             color: white;
         }
 
+        /* MENSAJE VACÍO */
         .no-establecimientos {
-            background-color: var(--surface);
+            background-color: white;
             border-radius: 16px;
-            box-shadow: 0 10px 22px rgba(31, 41, 51, 0.08);
-            padding: 3rem 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 4rem 2rem;
             text-align: center;
-            border: 1px solid var(--line);
+            border: 1px dashed #ced4da;
             width: 100%;
             margin-top: 1rem;
         }
 
-        /* Footer */
+        /* FOOTER ADMIN */
         .footer {
-            background-color: #E3E1E1;
-            position: fixed;
-            bottom: 0;
+            color: black;
+            background-color: white;
             width: 100%;
-            z-index: 1000;
+            -webkit-user-select: none;
+            user-select: none;
+            bottom: 0;
             font-size: 15px;
+            background: #E3E1E1;
+            text-align: center;
+            position: fixed;
+            z-index: 1000;
         }
 
         .footer-container {
@@ -423,66 +473,62 @@ function formatearDireccion($dir, $piso)
             box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
             padding-top: 1px !important;
             padding-bottom: 1px !important;
+            height: auto;
         }
 
         .footer-item {
             padding: 8px 0;
-            -webkit-tap-highlight-color: transparent;
+            text-decoration: none;
+            color: black;
+            font-size: 0.8rem;
         }
 
         .icon-container {
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, color 0.3s ease;
             padding: 5px 0;
+            color: #000000;
         }
 
         .footer-item:hover .icon-container {
             transform: translateY(-7px);
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        #lbl_val .icon-container {
-            color: #007bff;
-        }
-
-        #lbl_val {
-            color: #00B7CF !important;
+            color: var(--brand-accent);
         }
     </style>
 </head>
 
 <body>
-    <header class="page-header">
-        <div class="page-header-inner">
-            <div class="title-row">
-                <h1 class="page-title">Gestión de Validaciones</h1>
-                <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right"
-                    title="Revisa y clasifica establecimientos con una vista clara y ordenada."><i
-                        class="fas fa-info"></i></span>
-            </div>
+    <section class="page-hero">
+        <div class="page-hero-inner">
+            <h1 class="page-hero-title">Gestión de Validaciones Global</h1>
+            <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="left"
+                title="Aprueba o rechaza nuevos establecimientos en la plataforma."><i
+                    class="fas fa-info"></i></span>
         </div>
-    </header>
+    </section>
 
-    <div class="container-fluid pb-5 px-3 px-md-4 validation-shell">
+    <div class="container-fluid pb-5 px-3 px-md-4 validation-shell mt-3">
         <?php if (!empty($error_db)): ?>
-            <div class="alert alert-warning" role="alert">
+            <div class="alert alert-warning border-0 shadow-sm rounded-3" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error_db); ?>
             </div>
         <?php endif; ?>
 
         <ul class="nav nav-tabs" id="validationTabs" role="tablist">
-            <li class="nav-item" role="presentation"><button class="nav-link active" id="pendientes-tab"
-                    data-bs-toggle="tab" data-bs-target="#pendientes" type="button" role="tab"><i
-                        class="fas fa-hourglass-half me-2"></i>Pendientes</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" id="rechazados-tab" data-bs-toggle="tab"
-                    data-bs-target="#rechazados" type="button" role="tab"><i
-                        class="fas fa-times-circle me-2"></i>Rechazados</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" id="validados-tab" data-bs-toggle="tab"
-                    data-bs-target="#validados" type="button" role="tab"><i
-                        class="fas fa-check-circle me-2"></i>Aprobados</button></li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pendientes-tab" data-bs-toggle="tab" data-bs-target="#pendientes" type="button" role="tab">
+                    <i class="fas fa-hourglass-half me-2"></i>Pendientes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rechazados-tab" data-bs-toggle="tab" data-bs-target="#rechazados" type="button" role="tab">
+                    <i class="fas fa-times-circle me-2"></i>Rechazados
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="validados-tab" data-bs-toggle="tab" data-bs-target="#validados" type="button" role="tab">
+                    <i class="fas fa-check-circle me-2"></i>Aprobados
+                </button>
+            </li>
         </ul>
 
         <div class="tab-content mt-4" id="validationTabsContent">
@@ -491,13 +537,14 @@ function formatearDireccion($dir, $piso)
                 <div class="row" id="row-pendientes">
                     <div class="no-establecimientos" id="msg-no-pendientes"
                         style="<?php echo empty($establecimientos) ? 'display:block;' : 'display:none;'; ?>">
-                        <img src="../img/establecimiento.png" width="80" alt="Sin pendientes" class="mb-3">
-                        <h4 class="fw-bold mb-3">No hay establecimientos pendientes</h4>
+                        <img src="../img/establecimiento.png" width="80" alt="Sin pendientes" class="mb-3 opacity-50">
+                        <h4 class="fw-bold mb-2 text-muted">No hay establecimientos pendientes</h4>
+                        <p class="text-muted mb-0">Todo está al día en la plataforma.</p>
                     </div>
 
                     <?php foreach ($establecimientos as $establecimiento):
                         $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
-                        ?>
+                    ?>
                         <div class="col-12 col-md-6 col-lg-4 mb-4 card-container"
                             id="col-est-<?php echo $establecimiento['id']; ?>">
                             <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>">
@@ -523,19 +570,19 @@ function formatearDireccion($dir, $piso)
                                             <div class="info-icon"><i class="fas fa-hourglass-half text-warning"></i>
                                             </div>
                                             <div><strong>Estado:</strong> <span
-                                                    class="badge bg-warning text-dark">Pendiente</span></div>
+                                                    class="badge bg-warning text-dark border">Pendiente</span></div>
                                         </div>
                                     </div>
 
                                     <div class="action-buttons-container"
                                         id="action-container-<?php echo $establecimiento['id']; ?>">
                                         <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
-                                            class="btn-validar mb-2"><i class="fas fa-eye"></i> Revisar completo</a>
+                                            class="btn-validar mb-2"><i class="fas fa-search me-1"></i> Revisar completo</a>
                                         <div class="quick-actions" id="quick-actions-<?php echo $establecimiento['id']; ?>">
-                                            <button class="btn-quick approve"
+                                            <button class="btn-quick approve shadow-sm"
                                                 onclick="procesarValidacionRapida('<?php echo $establecimiento['id']; ?>', 'aprobar', this)"><i
                                                     class="fas fa-check"></i> Aprobar</button>
-                                            <button class="btn-quick reject"
+                                            <button class="btn-quick reject shadow-sm"
                                                 onclick="procesarValidacionRapida('<?php echo $establecimiento['id']; ?>', 'rechazar', this)"><i
                                                     class="fas fa-times"></i> Rechazar</button>
                                         </div>
@@ -551,16 +598,16 @@ function formatearDireccion($dir, $piso)
                 <div class="row" id="row-rechazados">
                     <div class="no-establecimientos" id="msg-no-rechazados"
                         style="<?php echo empty($establecimientosRechazados) ? 'display:block;' : 'display:none;'; ?>">
-                        <h4 class="fw-bold mb-3">No hay establecimientos rechazados</h4>
+                        <h4 class="fw-bold mb-2 text-muted">No hay establecimientos rechazados</h4>
                     </div>
 
                     <?php foreach ($establecimientosRechazados as $establecimiento):
                         $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
-                        ?>
+                    ?>
                         <div class="col-12 col-md-6 col-lg-4 mb-4 card-container"
                             id="col-est-<?php echo $establecimiento['id']; ?>">
                             <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>"
-                                style="border-left: 4px solid #dc3545; opacity: 0.85;">
+                                style="border-left: 4px solid var(--brand-accent); opacity: 0.85;">
                                 <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"
                                     <?php if (!empty($establecimiento['banner_image_url'])): ?> style="background-image:
                                     url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"
@@ -572,11 +619,11 @@ function formatearDireccion($dir, $piso)
                                 </div>
                                 <div class="card-body">
                                     <div class="info-row">
-                                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                        <div class="info-icon"><i class="fas fa-map-marker-alt text-muted"></i></div>
                                         <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
                                     </div>
                                     <div class="info-row">
-                                        <div class="info-icon"><i class="fas fa-city"></i></div>
+                                        <div class="info-icon"><i class="fas fa-city text-muted"></i></div>
                                         <div><?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?>
                                         </div>
                                     </div>
@@ -590,7 +637,7 @@ function formatearDireccion($dir, $piso)
                                     <div class="action-buttons-container"
                                         id="action-container-<?php echo $establecimiento['id']; ?>">
                                         <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
-                                            class="btn-validar"><i class="fas fa-eye"></i> Ver detalle completo</a>
+                                            class="btn-validar"><i class="fas fa-search me-1"></i> Ver detalle completo</a>
                                     </div>
                                 </div>
                             </div>
@@ -603,19 +650,19 @@ function formatearDireccion($dir, $piso)
                 <div class="row" id="row-validados">
                     <div class="no-establecimientos" id="msg-no-validados"
                         style="<?php echo empty($establecimientosValidados) ? 'display:block;' : 'display:none;'; ?>">
-                        <h4 class="fw-bold mb-3">No hay establecimientos aprobados</h4>
+                        <h4 class="fw-bold mb-2 text-muted">No hay establecimientos aprobados</h4>
                     </div>
 
                     <?php foreach ($establecimientosValidados as $establecimiento):
                         $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
-                        ?>
+                    ?>
                         <div class="col-12 col-md-6 col-lg-4 mb-4 card-container"
                             id="col-est-<?php echo $establecimiento['id']; ?>">
                             <div class="establecimiento-card" id="card-<?php echo $establecimiento['id']; ?>"
-                                style="border-left: 4px solid #28a745;">
+                                style="border-left: 4px solid var(--success-color);">
                                 <div class="card-header<?php echo empty($establecimiento['banner_image_url']) ? ' default-image' : ''; ?>"
                                     <?php if (!empty($establecimiento['banner_image_url'])): ?>
-                                        style="background-image: url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"
+                                    style="background-image: url('<?php echo htmlspecialchars($establecimiento['banner_image_url']); ?>');"
                                     <?php endif; ?>>
                                     <div class="card-header-overlay"></div>
                                     <div class="card-title">
@@ -624,11 +671,11 @@ function formatearDireccion($dir, $piso)
                                 </div>
                                 <div class="card-body">
                                     <div class="info-row">
-                                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                        <div class="info-icon"><i class="fas fa-map-marker-alt text-muted"></i></div>
                                         <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
                                     </div>
                                     <div class="info-row">
-                                        <div class="info-icon"><i class="fas fa-city"></i></div>
+                                        <div class="info-icon"><i class="fas fa-city text-muted"></i></div>
                                         <div>
                                             <?php echo htmlspecialchars($establecimiento['localidad'] ?? ''); ?>
                                         </div>
@@ -643,7 +690,7 @@ function formatearDireccion($dir, $piso)
                                     <div class="action-buttons-container"
                                         id="action-container-<?php echo $establecimiento['id']; ?>">
                                         <a href="validar.php?id=<?php echo $establecimiento['id']; ?>"
-                                            class="btn-validar"><i class="fas fa-eye"></i> Ver detalle
+                                            class="btn-validar"><i class="fas fa-search me-1"></i> Ver detalle
                                             completo</a>
                                     </div>
                                 </div>
@@ -656,20 +703,16 @@ function formatearDireccion($dir, $piso)
         </div>
     </div>
 
-    <?php
-        #include_once 'footer.php'; //Se podría crear un footer común para no repetir el código y solo poner está linea y asi se incluye el footer en todas la páginas...
-    ?>
-
     <div class="container-fluid footer p-3">
         <div class="row text-center fixed-bottom pt-1 px-2 footer-container">
-            <a href="tuPerfil.php" class="col-2 text-center footer-item">
+            <a href="dashboard.php" class="col-2 text-center footer-item">
                 <div class="row">
                     <div class="col-12 icon-container"><i class="h3 fas fa-chart-line p-1 m-0"></i>
                         <div>Panel</div>
                     </div>
                 </div>
             </a>
-            <a href="verGestores.php" class="col-2 text-center footer-item footer-active">
+            <a href="verGestores.php" class="col-2 text-center footer-item">
                 <div class="row">
                     <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
                         <div>Gestores</div>
@@ -692,7 +735,7 @@ function formatearDireccion($dir, $piso)
             </a>
             <a href="verValidar.php" class="col-2 text-center footer-item">
                 <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-check-circle p-1 m-0"></i>
+                    <div class="col-12 icon-container" style="color:var(--brand-accent);"><i class="h3 fas fa-check-circle p-1 m-0"></i>
                         <div>Validar</div>
                     </div>
                 </div>
@@ -708,15 +751,15 @@ function formatearDireccion($dir, $piso)
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function (el) {
+            tooltipTriggerList.forEach(function(el) {
                 new bootstrap.Tooltip(el);
             });
         });
 
         function procesarValidacionRapida(id, accion, btnElement) {
-            if (!confirm(accion === 'aprobar' ? '¿Aprobar y publicar?' : '¿Rechazar establecimiento?')) return;
+            if (!confirm(accion === 'aprobar' ? '¿Aprobar y publicar este establecimiento?' : '¿Rechazar establecimiento de la plataforma?')) return;
 
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
@@ -726,9 +769,9 @@ function formatearDireccion($dir, $piso)
             formData.append('accion', accion);
 
             fetch('procesar_validacion.php?id=' + id + '&ajax=1', {
-                method: 'POST',
-                body: formData
-            })
+                    method: 'POST',
+                    body: formData
+                })
                 .then(async response => {
                     const textoCrudo = await response.text();
                     try {
@@ -740,7 +783,6 @@ function formatearDireccion($dir, $piso)
                 })
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
                         moverTarjetaEnDOM(id, accion);
                     } else {
                         alert('🚨 Error al guardar: ' + data.error);
