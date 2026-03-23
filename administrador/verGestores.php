@@ -209,51 +209,57 @@ function fetchGestores(&$errorDb = null)
     return [];
 }
 
+// CORRECCIÓN INFALIBLE: Select * evita errores 400 de Supabase, y formateamos el CP para que coincida siempre.
 function buildStatsByPostalCode(array $gestores)
 {
     $statsByCp = [];
-    $postalCodes = [];
 
     foreach ($gestores as $gestor) {
         $cp = trim((string) ($gestor['codigo_postal'] ?? ''));
+        // Rellenamos con ceros si el CP es número y tiene menos de 5 dígitos (ej: 3820 -> 03820)
+        if (is_numeric($cp) && strlen($cp) < 5 && $cp !== '') {
+            $cp = str_pad($cp, 5, '0', STR_PAD_LEFT);
+        }
+
         if ($cp !== '') {
-            $postalCodes[] = $cp;
+            if (!isset($statsByCp[$cp])) {
+                $statsByCp[$cp] = [
+                    'codigo_postal' => $cp,
+                    'establecimientos' => 0,
+                    'aprobados' => 0,
+                    'pendientes' => 0,
+                    'rechazados' => 0,
+                    'espacios' => 0,
+                    'reservas' => 0,
+                    'anfitriones' => 0,
+                ];
+            }
         }
     }
 
-    $postalCodes = array_values(array_unique($postalCodes));
+    // DESCARGAMOS TODOS LOS ESTABLECIMIENTOS USANDO * (Para que no falle si la columna no existe)
+    $estResp = apiRequest('/establecimiento?select=*,space(id)');
+    $establecimientos = is_array($estResp['data']) ? $estResp['data'] : [];
 
-    foreach ($postalCodes as $cp) {
-        $statsByCp[$cp] = [
-            'codigo_postal' => $cp,
-            'establecimientos' => 0,
-            'aprobados' => 0,
-            'pendientes' => 0,
-            'rechazados' => 0,
-            'espacios' => 0,
-            'reservas' => 0,
-            'anfitriones' => 0,
-        ];
-    }
-
-    if (empty($postalCodes)) {
-        return $statsByCp;
-    }
-
-    $establecimientoResponse = apiRequest('/establecimiento?select=id,host_id,codigo_postal,estaValidado,estavalidado,space(id)&codigo_postal=in.(' . buildInFilter($postalCodes) . ')');
-
-    $establecimientos = is_array($establecimientoResponse['data']) ? $establecimientoResponse['data'] : [];
     $hostIdsByCp = [];
+    $spaceToCpMap = [];
 
-    foreach ($establecimientos as $establecimiento) {
-        $cp = trim((string) ($establecimiento['codigo_postal'] ?? ''));
+    foreach ($establecimientos as $est) {
+        $cp = trim((string) ($est['codigo_postal'] ?? ''));
+        if (is_numeric($cp) && strlen($cp) < 5 && $cp !== '') {
+            $cp = str_pad($cp, 5, '0', STR_PAD_LEFT);
+        }
+
+        // Si este CP no lo lleva ningún gestor, lo ignoramos
         if ($cp === '' || !isset($statsByCp[$cp])) {
             continue;
         }
 
         $statsByCp[$cp]['establecimientos']++;
 
-        $estado = normalizarEstadoValidacion($establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null);
+        $val = $est['estaValidado'] ?? $est['estavalidado'] ?? $est['esta_validado'] ?? null;
+        $estado = normalizarEstadoValidacion($val);
+
         if ($estado === 'aprobado') {
             $statsByCp[$cp]['aprobados']++;
         } elseif ($estado === 'rechazado') {
@@ -262,12 +268,17 @@ function buildStatsByPostalCode(array $gestores)
             $statsByCp[$cp]['pendientes']++;
         }
 
-        if (!empty($establecimiento['host_id'])) {
-            $hostIdsByCp[$cp][(string) $establecimiento['host_id']] = true;
+        if (!empty($est['host_id'])) {
+            $hostIdsByCp[$cp][(string)$est['host_id']] = true;
         }
 
-        if (!empty($establecimiento['space']) && is_array($establecimiento['space'])) {
-            $statsByCp[$cp]['espacios'] += count($establecimiento['space']);
+        if (!empty($est['space']) && is_array($est['space'])) {
+            $statsByCp[$cp]['espacios'] += count($est['space']);
+            foreach ($est['space'] as $sp) {
+                if (isset($sp['id'])) {
+                    $spaceToCpMap[$sp['id']] = $cp;
+                }
+            }
         }
     }
 
@@ -275,16 +286,21 @@ function buildStatsByPostalCode(array $gestores)
         $statsByCp[$cp]['anfitriones'] = count($hostIds);
     }
 
-    $reservationResponse = apiRequest('/reservation?select=id,space(id,establecimiento(codigo_postal))&space.establecimiento.codigo_postal=in.(' . buildInFilter($postalCodes) . ')');
-    $reservations = is_array($reservationResponse['data']) ? $reservationResponse['data'] : [];
+    // DESCARGAMOS TODAS LAS RESERVAS USANDO *
+    $resResp = apiRequest('/reservation?select=*,space(*)');
+    $reservas = is_array($resResp['data']) ? $resResp['data'] : [];
 
-    foreach ($reservations as $reservation) {
-        $cp = trim((string) (($reservation['space']['establecimiento']['codigo_postal'] ?? '')));
-        if ($cp === '' || !isset($statsByCp[$cp])) {
-            continue;
+    foreach ($reservas as $res) {
+        $cp = '';
+
+        // Asignamos la reserva al CP del espacio que mapeamos antes
+        if (!empty($res['space_id']) && isset($spaceToCpMap[$res['space_id']])) {
+            $cp = $spaceToCpMap[$res['space_id']];
         }
 
-        $statsByCp[$cp]['reservas']++;
+        if ($cp !== '' && isset($statsByCp[$cp])) {
+            $statsByCp[$cp]['reservas']++;
+        }
     }
 
     return $statsByCp;
@@ -492,6 +508,10 @@ $gestoresForJs = [];
 
 foreach ($gestores as &$gestor) {
     $cp = trim((string) ($gestor['codigo_postal'] ?? ''));
+    if (is_numeric($cp) && strlen($cp) < 5 && $cp !== '') {
+        $cp = str_pad($cp, 5, '0', STR_PAD_LEFT);
+    }
+
     $gestor['codigo_postal'] = $cp;
     $gestor['plan_label'] = formatPlanName($gestor['plan'] ?? '');
     $gestor['plan_class'] = formatPlanClass($gestor['plan'] ?? '');
@@ -1420,7 +1440,7 @@ $postalCoverage = count($activePostalCodes);
         </div>
     </div>
 
- <?php include 'footerAdmin.php'; ?>
+    <?php include 'footerAdmin.php'; ?>
 
     <script>
         const gestoresData = <?php echo json_encode($gestoresForJs, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
