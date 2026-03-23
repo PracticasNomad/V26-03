@@ -1420,52 +1420,7 @@ $postalCoverage = count($activePostalCodes);
         </div>
     </div>
 
-    <div class="container-fluid footer p-3">
-        <div class="row text-center fixed-bottom pt-1 px-2 footer-container">
-            <a href="tuPerfil.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-chart-line p-1 m-0"></i>
-                        <div>Panel</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verGestores.php" class="col-2 text-center footer-item footer-active">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
-                        <div>Gestores</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verAnfitriones.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-users p-1 m-0"></i>
-                        <div>Anfitriones</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-building p-1 m-0"></i>
-                        <div>Establecimientos</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verValidar.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-check-circle p-1 m-0"></i>
-                        <div>Validar</div>
-                    </div>
-                </div>
-            </a>
-            <a href="tuPerfil.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-user-cog p-1 m-0"></i>
-                        <div>Perfil</div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+ <?php include 'footerAdmin.php'; ?>
 
     <script>
         const gestoresData = <?php echo json_encode($gestoresForJs, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;

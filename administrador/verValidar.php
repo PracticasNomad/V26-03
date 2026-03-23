@@ -453,46 +453,6 @@ function formatearDireccion($dir, $piso)
             margin-top: 1rem;
         }
 
-        /* FOOTER ADMIN */
-        .footer {
-            color: black;
-            background-color: white;
-            width: 100%;
-            -webkit-user-select: none;
-            user-select: none;
-            bottom: 0;
-            font-size: 15px;
-            background: #E3E1E1;
-            text-align: center;
-            position: fixed;
-            z-index: 1000;
-        }
-
-        .footer-container {
-            background-color: white;
-            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-            padding-top: 1px !important;
-            padding-bottom: 1px !important;
-            height: auto;
-        }
-
-        .footer-item {
-            padding: 8px 0;
-            text-decoration: none;
-            color: black;
-            font-size: 0.8rem;
-        }
-
-        .icon-container {
-            transition: transform 0.3s ease, color 0.3s ease;
-            padding: 5px 0;
-            color: #000000;
-        }
-
-        .footer-item:hover .icon-container {
-            transform: translateY(-7px);
-            color: var(--brand-accent);
-        }
     </style>
 </head>
 
@@ -703,52 +663,7 @@ function formatearDireccion($dir, $piso)
         </div>
     </div>
 
-    <div class="container-fluid footer p-3">
-        <div class="row text-center fixed-bottom pt-1 px-2 footer-container">
-            <a href="dashboard.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-chart-line p-1 m-0"></i>
-                        <div>Panel</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verGestores.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
-                        <div>Gestores</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verAnfitriones.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-users p-1 m-0"></i>
-                        <div>Anfitriones</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-building p-1 m-0"></i>
-                        <div>Establecimientos</div>
-                    </div>
-                </div>
-            </a>
-            <a href="verValidar.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container" style="color:var(--brand-accent);"><i class="h3 fas fa-check-circle p-1 m-0"></i>
-                        <div>Validar</div>
-                    </div>
-                </div>
-            </a>
-            <a href="tuPerfil.php" class="col-2 text-center footer-item">
-                <div class="row">
-                    <div class="col-12 icon-container"><i class="h3 fas fa-user-cog p-1 m-0"></i>
-                        <div>Perfil</div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+     <?php include 'footerAdmin.php'; ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
