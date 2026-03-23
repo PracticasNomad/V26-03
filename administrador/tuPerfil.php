@@ -351,7 +351,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                 <div class="row">
                     <div class="col-12 icon-container">
                         <i class="h3 fas fa-building p-1 m-0"></i>
-                        <div>Espacios</div>
+                        <div>Establecimientos</div>
                     </div>
                 </div>
             </a>

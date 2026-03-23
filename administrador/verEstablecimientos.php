@@ -980,7 +980,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                 <div class="row">
                     <div class="col-12 icon-container" style="color:var(--primary-color);"><i
                             class="h3 fas fa-building p-1 m-0"></i>
-                        <div>Espacios</div>
+                        <div>Establecimientos</div>
                     </div>
                 </div>
             </a>

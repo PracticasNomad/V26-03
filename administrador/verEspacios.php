@@ -565,7 +565,7 @@ if ($err || $httpCode >= 300) {
                 <div class="row">
                     <div class="col-12 icon-container" style="color:var(--primary-color);"><i
                             class="h3 fas fa-building p-1 m-0"></i>
-                        <div>Espacios</div>
+                        <div>Establecimientos</div>
                     </div>
                 </div>
             </a>
@@ -587,8 +587,8 @@ if ($err || $httpCode >= 300) {
     </div>
 
     <script>
-        $(document).ready(function () {
-            $('.toggle-horarios').click(function () {
+        $(document).ready(function() {
+            $('.toggle-horarios').click(function() {
                 const espacioId = $(this).data('espacio-id');
                 $(`#horarios-${espacioId}`).slideToggle();
                 const icon = $(this).find('i');
@@ -603,7 +603,7 @@ if ($err || $httpCode >= 300) {
                 }
             });
 
-            $('.btn-toggle-visibilidad').click(function () {
+            $('.btn-toggle-visibilidad').click(function() {
                 const btn = $(this);
                 const espacioId = btn.data('espacio-id');
                 const esVisible = btn.data('visible') === true || btn.data('visible') === 'true';
@@ -618,7 +618,7 @@ if ($err || $httpCode >= 300) {
                         id: espacioId,
                         visible: nuevaVisibilidad
                     }),
-                    success: function (response) {
+                    success: function(response) {
                         if (response.success) {
                             if (nuevaVisibilidad) {
                                 btn.removeClass('btn-secondary').addClass('btn-warning');
@@ -636,7 +636,7 @@ if ($err || $httpCode >= 300) {
                         }
                         btn.prop('disabled', false);
                     },
-                    error: function () {
+                    error: function() {
                         $('#mensajeError').text('Error de conexión con el servidor.');
                         new bootstrap.Toast(document.getElementById('toastError')).show();
                         btn.prop('disabled', false);
@@ -645,13 +645,13 @@ if ($err || $httpCode >= 300) {
             });
 
             let espacioIdAEliminar = null;
-            $('.btn-eliminar').click(function () {
+            $('.btn-eliminar').click(function() {
                 espacioIdAEliminar = $(this).data('espacio-id');
                 $('#espacioNombre').text($(this).data('espacio-nombre'));
                 new bootstrap.Modal(document.getElementById('confirmModal')).show();
             });
 
-            $('#btnConfirmarEliminar').click(function () {
+            $('#btnConfirmarEliminar').click(function() {
                 if (espacioIdAEliminar) {
                     bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
                     $.ajax({
@@ -660,11 +660,11 @@ if ($err || $httpCode >= 300) {
                         data: {
                             id: espacioIdAEliminar
                         },
-                        success: function (response) {
+                        success: function(response) {
                             if (response.success) {
                                 $('#mensajeExito').html('<i class="fas fa-check-circle me-2"></i> Espacio eliminado correctamente.');
                                 new bootstrap.Toast(document.getElementById('toastExito')).show();
-                                $(`#card-${espacioIdAEliminar}`).fadeOut(500, function () {
+                                $(`#card-${espacioIdAEliminar}`).fadeOut(500, function() {
                                     $(this).remove();
                                 });
                             } else {
@@ -672,7 +672,7 @@ if ($err || $httpCode >= 300) {
                                 new bootstrap.Toast(document.getElementById('toastError')).show();
                             }
                         },
-                        error: function () {
+                        error: function() {
                             $('#mensajeError').text('Error de conexión.');
                             new bootstrap.Toast(document.getElementById('toastError')).show();
                         }

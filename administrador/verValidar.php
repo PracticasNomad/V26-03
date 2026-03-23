@@ -729,7 +729,7 @@ function formatearDireccion($dir, $piso)
             <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
                 <div class="row">
                     <div class="col-12 icon-container"><i class="h3 fas fa-building p-1 m-0"></i>
-                        <div>Espacios</div>
+                        <div>Establecimientos</div>
                     </div>
                 </div>
             </a>

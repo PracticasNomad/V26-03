@@ -44,7 +44,8 @@ if (!$establecimiento) {
     exit;
 }
 
-function normalizarUrlImagen($url) {
+function normalizarUrlImagen($url)
+{
     if (empty($url)) {
         return '';
     }
@@ -498,7 +499,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
         <div id="establecimiento-main">
             <div class="establecimiento-card">
 
-                <div class="card-header<?php echo empty($fotoPrincipal) ? ' default-image' : ''; ?>"<?php if (!empty($fotoPrincipal)): ?> style="background-image: url('<?php echo htmlspecialchars($fotoPrincipal); ?>');"<?php endif; ?>>
+                <div class="card-header<?php echo empty($fotoPrincipal) ? ' default-image' : ''; ?>" <?php if (!empty($fotoPrincipal)): ?> style="background-image: url('<?php echo htmlspecialchars($fotoPrincipal); ?>');" <?php endif; ?>>
                     <div class="card-header-overlay"></div>
                     <div class="card-title">
                         <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
@@ -642,7 +643,7 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
                     <a href="verEspacios.php">
                         <div class="col-12 icon-container">
                             <i class="h2 fas fa-chair p-1 m-0"></i>
-                            <div>Espacios</div>
+                            <div>Establecimientos</div>
                         </div>
                     </a>
                 </div>
@@ -661,128 +662,129 @@ if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidac
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const btnAprobar = document.getElementById('btn-aprobar');
-        const btnRechazar = document.getElementById('btn-rechazar');
-        const card = document.querySelector('.establecimiento-card');
-        const statusBadge = document.getElementById('validation-status-badge');
-        const btnActions = document.getElementById('btn-actions');
-        const mapContainer = document.getElementById('map-validacion');
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnAprobar = document.getElementById('btn-aprobar');
+            const btnRechazar = document.getElementById('btn-rechazar');
+            const card = document.querySelector('.establecimiento-card');
+            const statusBadge = document.getElementById('validation-status-badge');
+            const btnActions = document.getElementById('btn-actions');
+            const mapContainer = document.getElementById('map-validacion');
 
-        const latitude = <?php echo json_encode($latitud); ?>;
-        const longitude = <?php echo json_encode($longitud); ?>;
-        const nombreEstablecimiento = <?php echo json_encode($establecimiento['nombre'] ?? 'Establecimiento'); ?>;
-        const direccionEstablecimiento = <?php echo json_encode(($establecimiento['direccion'] ?? '') . ', ' . ($establecimiento['localidad'] ?? '')); ?>;
+            const latitude = <?php echo json_encode($latitud); ?>;
+            const longitude = <?php echo json_encode($longitud); ?>;
+            const nombreEstablecimiento = <?php echo json_encode($establecimiento['nombre'] ?? 'Establecimiento'); ?>;
+            const direccionEstablecimiento = <?php echo json_encode(($establecimiento['direccion'] ?? '') . ', ' . ($establecimiento['localidad'] ?? '')); ?>;
 
-        const MAPBOX_TOKEN = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
+            const MAPBOX_TOKEN = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
 
-        function initMap() {
-            const lat = Number(latitude);
-            const lng = Number(longitude);
+            function initMap() {
+                const lat = Number(latitude);
+                const lng = Number(longitude);
 
-            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-                mapContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light text-muted">No hay coordenadas validas (latitude / longitude) para mostrar el mapa.</div>';
-                return;
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                    mapContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light text-muted">No hay coordenadas validas (latitude / longitude) para mostrar el mapa.</div>';
+                    return;
+                }
+
+                if (typeof mapboxgl === 'undefined') {
+                    mapContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light text-muted">No se pudo cargar Mapbox.</div>';
+                    return;
+                }
+
+                mapboxgl.accessToken = MAPBOX_TOKEN;
+
+                const map = new mapboxgl.Map({
+                    container: 'map-validacion',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: [lng, lat],
+                    zoom: 14
+                });
+
+                new mapboxgl.Marker({
+                        color: '#1f8f5d'
+                    })
+                    .setLngLat([lng, lat])
+                    .setPopup(new mapboxgl.Popup().setHTML('<strong>' + nombreEstablecimiento + '</strong><br>' + direccionEstablecimiento))
+                    .addTo(map);
             }
 
-            if (typeof mapboxgl === 'undefined') {
-                mapContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light text-muted">No se pudo cargar Mapbox.</div>';
-                return;
-            }
+            initMap();
 
-            mapboxgl.accessToken = MAPBOX_TOKEN;
-
-            const map = new mapboxgl.Map({
-                container: 'map-validacion',
-                style: 'mapbox://styles/mapbox/streets-v11',
-                center: [lng, lat],
-                zoom: 14
-            });
-
-            new mapboxgl.Marker({ color: '#1f8f5d' })
-                .setLngLat([lng, lat])
-                .setPopup(new mapboxgl.Popup().setHTML('<strong>' + nombreEstablecimiento + '</strong><br>' + direccionEstablecimiento))
-                .addTo(map);
-        }
-
-        initMap();
-
-        function performValidation(action) {
-            if (!confirm(action === 'aprobar' ? 
-                        '¿Aprobar y validar este establecimiento?' : 
+            function performValidation(action) {
+                if (!confirm(action === 'aprobar' ?
+                        '¿Aprobar y validar este establecimiento?' :
                         '¿Rechazar este establecimiento? No podrá ser publicado.')) {
-                return;
-            }
+                    return;
+                }
 
-            const id = btnAprobar.dataset.id;
-            const button = action === 'aprobar' ? btnAprobar : btnRechazar;
+                const id = btnAprobar.dataset.id;
+                const button = action === 'aprobar' ? btnAprobar : btnRechazar;
 
-            // Mostrar estado de procesamiento
-            button.classList.add('processing');
-            button.disabled = true;
+                // Mostrar estado de procesamiento
+                button.classList.add('processing');
+                button.disabled = true;
 
-            // Hacer la petición AJAX
-            const formData = new FormData();
-            formData.append('accion', action);
+                // Hacer la petición AJAX
+                const formData = new FormData();
+                formData.append('accion', action);
 
-            fetch('procesar_validacion.php?id=' + id + '&ajax=1', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json()) // Espera una respuesta JSON
-                .then(data => {
-                    if (data.success) {
-                        // Éxito: mostrar mensaje y cambiar estilos
-                        statusBadge.classList.remove('error', 'success');
-                        statusBadge.classList.add('show', action === 'aprobar' ? 'success' : 'error');
-                        statusBadge.innerHTML = `<i class="fas fa-${action === 'aprobar' ? 'check' : 'times'}-circle me-2"></i>${data.message}`;
+                fetch('procesar_validacion.php?id=' + id + '&ajax=1', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json()) // Espera una respuesta JSON
+                    .then(data => {
+                        if (data.success) {
+                            // Éxito: mostrar mensaje y cambiar estilos
+                            statusBadge.classList.remove('error', 'success');
+                            statusBadge.classList.add('show', action === 'aprobar' ? 'success' : 'error');
+                            statusBadge.innerHTML = `<i class="fas fa-${action === 'aprobar' ? 'check' : 'times'}-circle me-2"></i>${data.message}`;
 
-                        if (action === 'aprobar') {
-                            card.classList.add('validado');
+                            if (action === 'aprobar') {
+                                card.classList.add('validado');
+                            } else {
+                                card.classList.add('rechazado');
+                            }
+
+                            // Deshabilitar ambos botones después de validar
+                            btnAprobar.disabled = true;
+                            btnRechazar.disabled = true;
+                            btnAprobar.classList.remove('processing');
+                            btnRechazar.classList.remove('processing');
+                            btnAprobar.style.opacity = '0.5';
+                            btnRechazar.style.opacity = '0.5';
+
+                            // Redirigir después de 2 segundos
+                            setTimeout(() => {
+                                window.location.href = 'verValidar.php';
+                            }, 2000);
                         } else {
-                            card.classList.add('rechazado');
+                            // Error
+                            statusBadge.classList.add('show', 'error');
+                            statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${data.error}`;
+                            button.classList.remove('processing');
+                            button.disabled = false;
                         }
-
-                        // Deshabilitar ambos botones después de validar
-                        btnAprobar.disabled = true;
-                        btnRechazar.disabled = true;
-                        btnAprobar.classList.remove('processing');
-                        btnRechazar.classList.remove('processing');
-                        btnAprobar.style.opacity = '0.5';
-                        btnRechazar.style.opacity = '0.5';
-
-                        // Redirigir después de 2 segundos
-                        setTimeout(() => {
-                            window.location.href = 'verValidar.php';
-                        }, 2000);
-                    } else {
-                        // Error
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
                         statusBadge.classList.add('show', 'error');
-                        statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${data.error}`;
+                        statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>Error en la conexión`;
                         button.classList.remove('processing');
                         button.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    statusBadge.classList.add('show', 'error');
-                    statusBadge.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>Error en la conexión`;
-                    button.classList.remove('processing');
-                    button.disabled = false;
-                });
-        }
+                    });
+            }
 
-        btnAprobar.addEventListener('click', function () {
-            performValidation('aprobar');
-        });
+            btnAprobar.addEventListener('click', function() {
+                performValidation('aprobar');
+            });
 
-        btnRechazar.addEventListener('click', function () {
-            performValidation('rechazar');
+            btnRechazar.addEventListener('click', function() {
+                performValidation('rechazar');
+            });
         });
-    });
-</script>
+    </script>
 
 </body>
 
 </html>
-

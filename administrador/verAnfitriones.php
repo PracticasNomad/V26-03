@@ -418,19 +418,19 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     </div>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#select-anfitrion').select2({
                 placeholder: "-- Busca o selecciona un anfitrión --",
                 allowClear: true,
                 width: '100%',
                 language: {
-                    noResults: function () {
+                    noResults: function() {
                         return "No se encontró ningún anfitrión";
                     }
                 }
             });
 
-            $('#select-anfitrion').on('change', function () {
+            $('#select-anfitrion').on('change', function() {
                 var selectedOption = $(this).find('option:selected');
                 var id = $(this).val();
 
@@ -486,7 +486,7 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
             <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
                 <div class="row">
                     <div class="col-12 icon-container"><i class="h3 fas fa-building p-1 m-0"></i>
-                        <div>Espacios</div>
+                        <div>Establecimientos</div>
                     </div>
                 </div>
             </a>
