@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Verificación de sesión
+// Verificación de sesión igual que en el resto del admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
     header('Location: inicio_sesion_admin.php');
     exit();
@@ -44,7 +44,7 @@ function getCountFromApi($endpoint)
 }
 
 // Extraemos los datos reales llamando a tu API
-$totalNomadas = getCountFromApi('user'); // Corregido a 'user'
+$totalNomadas = getCountFromApi('user');
 $totalAnfitriones = getCountFromApi('host');
 $totalGestores = getCountFromApi('gestor');
 $totalEstablecimientos = getCountFromApi('establecimiento');
@@ -54,7 +54,7 @@ $totalReservas = getCountFromApi('reserva');
 $distribucionNombres = ['Nómadas', 'Anfitriones', 'Gestores'];
 $distribucionCantidades = [$totalNomadas, $totalAnfitriones, $totalGestores];
 
-// Datos para el gráfico de barras
+// Datos para el gráfico de barras (simulados por ahora para evitar saturar la BD)
 $mesesGrafico = ['Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar'];
 $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
 ?>
@@ -67,23 +67,26 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Nomadapp Admin</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
 
     <style>
         :root {
             --primary-color: #dc3545;
-            /* Tu rojo de admin */
-            --white: #ffffff;
-            --light-bg: #f8f9fa;
+            /* Rojo admin */
         }
 
         body {
-            background-color: var(--light-bg);
             font-family: 'Nunito', sans-serif;
-            padding-bottom: 100px;
-            /* Importante para que el contenido no quede tapado por el footer */
+            background-color: #f8f9fa;
+            padding-bottom: 15%;
+            /* Espacio para el footer */
         }
 
         .card {
@@ -105,13 +108,27 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
             bottom: 10px;
         }
 
+        /* ESTILOS DEL FOOTER ADMIN EXACTOS */
+        .footer {
+            color: black;
+            background-color: white;
+            width: 100%;
+            -webkit-user-select: none;
+            user-select: none;
+            bottom: 0;
+            font-size: 15px;
+            background: #E3E1E1;
+            text-align: center;
+            position: fixed;
+            z-index: 1000;
+        }
+
         .footer-container {
-            background-color: var(--white);
+            background-color: white;
             box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
             padding-top: 1px !important;
             padding-bottom: 1px !important;
             height: auto;
-            z-index: 1000;
         }
 
         .footer-item {
@@ -119,9 +136,6 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
             text-decoration: none;
             color: black;
             font-size: 0.8rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
         .icon-container {
@@ -134,32 +148,28 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
             transform: translateY(-7px);
             color: var(--primary-color);
         }
+
+        a,
+        a:visited,
+        a:active {
+            text-decoration: none;
+        }
     </style>
 </head>
 
 <body>
 
-    <header class="bg-white shadow-sm py-3 mb-4">
-        <div class="container-fluid px-4">
-            <div class="row align-items-center">
-                <div class="col-8">
-                    <img src="../img/logo.jpg" alt="Nomadapp" style="height: 40px; border-radius: 8px;">
-                    <span class="ms-2 fw-bold text-dark h5 mb-0 align-middle">Panel Global</span>
-                </div>
-                <div class="col-4 text-end">
-                    <a href="cerrarSesion.php" class="btn btn-danger btn-sm rounded-pill px-3">
-                        <i class="fas fa-sign-out-alt me-1"></i> Salir
-                    </a>
+    <header>
+        <div class="container-fluid info text-center">
+            <div class="row">
+                <div class="col color-white h2 fw-bold pt-3 pb-2">
+                    Estadísticas Plataforma
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-0 text-dark fw-bold">Estadísticas Plataforma</h3>
-        </div>
-
+    <div class="container mt-4">
         <div class="row g-4 mb-4">
             <div class="col-xl-3 col-md-6">
                 <div class="card bg-primary text-white p-3 h-100 position-relative">
@@ -226,32 +236,50 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
         </div>
     </div>
 
-    <div class="fixed-bottom footer-container">
-        <div class="container-fluid d-flex justify-content-around align-items-center px-1">
-            <a href="dashboard.php" class="text-center footer-item">
-                <div class="icon-container"><i class="fas fa-chart-pie fa-lg" style="color: var(--primary-color);"></i>
+    <div class="container-fluid footer mt-5 p-3">
+        <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
+            <a href="dashboard.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container" style="color:var(--primary-color);"><i
+                            class="h3 fas fa-chart-line p-1 m-0"></i>
+                        <div>Panel</div>
+                    </div>
                 </div>
-                <span class="fw-bold" style="color: var(--primary-color);">Dashboard</span>
             </a>
-            <a href="verAnfitriones.php" class="text-center footer-item">
-                <div class="icon-container"><i class="fas fa-users fa-lg"></i></div>
-                <span>Usuarios</span>
+            <a href="verGestores.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
+                        <div>Gestores</div>
+                    </div>
+                </div>
             </a>
-            <a href="verEstablecimientos.php" class="text-center footer-item">
-                <div class="icon-container"><i class="fas fa-building fa-lg"></i></div>
-                <span>Establecim.</span>
+            <a href="verAnfitriones.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-users p-1 m-0"></i>
+                        <div>Anfitriones</div>
+                    </div>
+                </div>
             </a>
-            <a href="verEspacios.php" class="text-center footer-item">
-                <div class="icon-container"><i class="fas fa-door-open fa-lg"></i></div>
-                <span>Espacios</span>
+            <a href="verEstablecimientos.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-building p-1 m-0"></i>
+                        <div>Establecimientos</div>
+                    </div>
+                </div>
             </a>
-            <a href="verValidar.php" class="text-center footer-item">
-                <div class="icon-container"><i class="fas fa-check-circle fa-lg"></i></div>
-                <span>Validar</span>
+            <a href="verValidar.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-check-circle p-1 m-0"></i>
+                        <div>Validar</div>
+                    </div>
+                </div>
             </a>
-            <a href="tuPerfil.php" class="text-center footer-item">
-                <div class="icon-container"><i class="fas fa-user-shield fa-lg"></i></div>
-                <span>Perfil</span>
+            <a href="tuPerfil.php" class="col-2 text-center footer-item">
+                <div class="row">
+                    <div class="col-12 icon-container"><i class="h3 fas fa-user-cog p-1 m-0"></i>
+                        <div>Perfil</div>
+                    </div>
+                </div>
             </a>
         </div>
     </div>
