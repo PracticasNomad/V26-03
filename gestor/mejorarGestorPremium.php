@@ -8,15 +8,53 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(DIRNAME(__DIR__));
 $dotenv->load();
 
-if (!isset($_SESSION['direccion'], $_SESSION['plan'], $_SESSION['fecha_fin'], $_SESSION['total'])) {
+// Quitamos $_SESSION['total'] de la comprobación porque lo vamos a generar dinámicamente ahora
+if (!isset($_SESSION['direccion'], $_SESSION['plan'], $_SESSION['fecha_fin'])) {
     echo "No hay datos de suscripción almacenados. <a href='Suscripciones.php'>Volver a planes</a>";
     exit;
 }
 
+// OBTENER PRECIO DINÁMICO DE LA BBDD ---
+$supabaseKey = $_ENV['DATABASE_APIKEY'];
+$serverIp = $_ENV['SERVER_IP'];
+$dbPort = $_ENV['DATABASE_PORT'];
+
+$url = 'http://' . $serverIp . ':' . $dbPort . '/rest/v1/planes_suscripcion?tipo_usuario=eq.gestor&nombre=eq.Premium&select=*';
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'apikey: ' . $supabaseKey,
+    'Authorization: Bearer ' . $supabaseKey
+]);
+$result = curl_exec($ch);
+curl_close($ch);
+$planes = json_decode($result, true);
+
+// Precios por defecto
+$precioMensual = 2850;
+$precioAnual = 31350;
+
+if (!empty($planes) && !isset($planes['error'])) {
+    $precioMensual = floatval($planes[0]['precio_mensual']);
+    $precioAnual = floatval($planes[0]['precio_anual']);
+}
+
+// $_SESSION['plan'] guarda 'mensual' o 'anual' desde el formulario anterior
+$periodo = strtolower($_SESSION['plan']);
+if ($periodo === 'mensual') {
+    $totalCalculado = $precioMensual;
+} else {
+    $totalCalculado = $precioAnual;
+}
+
+// Sobrescribimos el total en la sesión para que la pasarela de pago (Stripe/Redsys) cobre lo correcto
+$_SESSION['total'] = $totalCalculado;
+// --------------------------------------------------
+
 $direccion = htmlspecialchars($_SESSION['direccion']);
 $plan = htmlspecialchars(ucfirst($_SESSION['plan']));
 $fechaFin = date('d/m/Y', strtotime($_SESSION['fecha_fin']));
-$total = number_format($_SESSION['total'], 2, ',', '.');
+$total = number_format($totalCalculado, 0, ',', '.'); // A 0 decimales para importes grandes
 
 ?>
 <!DOCTYPE html>

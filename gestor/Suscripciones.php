@@ -5,20 +5,23 @@ require '../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
-
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
-// Hacemos la consulta a la tabla GESTOR
-$url = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/gestor?id=eq." . $_SESSION['user_id'];
+$supabaseKey = $_ENV['DATABASE_APIKEY'];
+$serverIp = $_ENV['SERVER_IP'];
+$dbPort = $_ENV['DATABASE_PORT'];
+
+// --- OBTENER EL PLAN ACTUAL DEL GESTOR ---
+$url = "http://" . $serverIp . ":" . $dbPort . "/rest/v1/gestor?id=eq." . $_SESSION['user_id'];
 
 $ch = curl_init($url);
 curl_setopt_array($ch, array(
     CURLOPT_CUSTOMREQUEST => "GET",
     CURLOPT_HTTPHEADER => array(
         'Content-Type: application/json',
-        'apikey: ' . $_ENV['DATABASE_APIKEY'],
-        'Authorization: Bearer ' . $_SESSION['token'] // ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA!
+        'apikey: ' . $supabaseKey,
+        'Authorization: Bearer ' . $_SESSION['token']
     ),
     CURLOPT_RETURNTRANSFER => true,
 ));
@@ -36,6 +39,49 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
         $_SESSION['plan_actual'] = $plan;
     }
 }
+
+// --- OBTENER PRECIOS DE LOS PLANES DE LA BASE DE DATOS (GESTOR) ---
+$urlPlanes = "http://" . $serverIp . ":" . $dbPort . "/rest/v1/planes_suscripcion?tipo_usuario=eq.gestor&select=*";
+$chPlanes = curl_init($urlPlanes);
+curl_setopt_array($chPlanes, array(
+    CURLOPT_CUSTOMREQUEST => "GET",
+    CURLOPT_HTTPHEADER => array(
+        'Content-Type: application/json',
+        'apikey: ' . $supabaseKey
+    ),
+    CURLOPT_RETURNTRANSFER => true,
+));
+$resultadoPlanes = curl_exec($chPlanes);
+curl_close($chPlanes);
+$planesObtenidos = json_decode($resultadoPlanes, true);
+
+// Valores por defecto (Salvavidas según precios de Gestor)
+$precioMensualBasico = 700;
+$precioAnualBasico = 7700;
+$precioMensualPro = 1900;
+$precioAnualPro = 20900;
+$precioMensualPremium = 2850;
+$precioAnualPremium = 31350;
+
+if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
+    foreach ($planesObtenidos as $p) {
+        if ($p['nombre'] === 'Basico') {
+            $precioMensualBasico = floatval($p['precio_mensual']);
+            $precioAnualBasico = floatval($p['precio_anual']);
+        } elseif ($p['nombre'] === 'Pro') {
+            $precioMensualPro = floatval($p['precio_mensual']);
+            $precioAnualPro = floatval($p['precio_anual']);
+        } elseif ($p['nombre'] === 'Premium') {
+            $precioMensualPremium = floatval($p['precio_mensual']);
+            $precioAnualPremium = floatval($p['precio_anual']);
+        }
+    }
+}
+
+// Calculamos el ahorro automáticamente
+$ahorroBasico = ($precioMensualBasico * 12) - $precioAnualBasico;
+$ahorroPro = ($precioMensualPro * 12) - $precioAnualPro;
+$ahorroPremium = ($precioMensualPremium * 12) - $precioAnualPremium;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -337,8 +383,11 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                 <div class="plan-header">
                     <div class="plan-name">Plan Básico</div>
                     <div class="plan-price">
-                        <span class="currency">€</span>700
+                        <span class="currency">€</span><?php echo number_format($precioMensualBasico, 0, ',', '.'); ?>
                         <div class="plan-period">/mes</div>
+                    </div>
+                    <div class="plan-annual">
+                        💰 €<?php echo number_format($precioAnualBasico, 0, ',', '.'); ?>/año (ahorra €<?php echo number_format($ahorroBasico, 0, ',', '.'); ?>)
                     </div>
                 </div>
 
@@ -361,11 +410,11 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                 <div class="plan-header">
                     <div class="plan-name">Plan Pro</div>
                     <div class="plan-price">
-                        <span class="currency">€</span>1900
+                        <span class="currency">€</span><?php echo number_format($precioMensualPro, 0, ',', '.'); ?>
                         <div class="plan-period">/mes</div>
                     </div>
                     <div class="plan-annual">
-                        💰 €20.900/año (ahorra €1.900)
+                        💰 €<?php echo number_format($precioAnualPro, 0, ',', '.'); ?>/año (ahorra €<?php echo number_format($ahorroPro, 0, ',', '.'); ?>)
                     </div>
                 </div>
 
@@ -390,11 +439,11 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                 <div class="plan-header">
                     <div class="plan-name">Plan Premium</div>
                     <div class="plan-price">
-                        <span class="currency">€</span>2850
+                        <span class="currency">€</span><?php echo number_format($precioMensualPremium, 0, ',', '.'); ?>
                         <div class="plan-period">/mes</div>
                     </div>
                     <div class="plan-annual">
-                        💰 €31.350/año (ahorra €2.850)
+                        💰 €<?php echo number_format($precioAnualPremium, 0, ',', '.'); ?>/año (ahorra €<?php echo number_format($ahorroPremium, 0, ',', '.'); ?>)
                     </div>
                 </div>
 
@@ -430,9 +479,9 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                     <tbody>
                         <tr>
                             <td><strong>Precio mensual</strong></td>
-                            <td class="text-center">€700</td>
-                            <td class="text-center">€1.900</td>
-                            <td class="text-center">€2.850</td>
+                            <td class="text-center">€<?php echo number_format($precioMensualBasico, 0, ',', '.'); ?></td>
+                            <td class="text-center">€<?php echo number_format($precioMensualPro, 0, ',', '.'); ?></td>
+                            <td class="text-center">€<?php echo number_format($precioMensualPremium, 0, ',', '.'); ?></td>
                         </tr>
                         <tr>
                             <td><strong>Anfitriones incluidos</strong></td>
@@ -506,7 +555,7 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                     boton.innerHTML = '<i class="fas fa-arrow-down"></i> Bajar a ' + datosPlan.name;
                     boton.classList.remove("disabled");
                     
-                    // --- NUEVO: CREAMOS EL MENSAJE DE AVISO DE SOPORTE ---
+                    // CREAMOS EL MENSAJE DE AVISO DE SOPORTE ---
                     let aviso = document.createElement("div");
                     aviso.className = "text-center mt-2";
                     aviso.innerHTML = "<small style='color: #dc3545; font-weight: 700;'><i class='fas fa-headset'></i> Contactarás con soporte para gestionar esta bajada.</small>";

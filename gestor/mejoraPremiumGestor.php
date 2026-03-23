@@ -1,3 +1,41 @@
+<?php
+require_once 'verificar_sesion_gestor.php';
+require '../vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load();
+
+$supabaseKey = $_ENV['DATABASE_APIKEY'];
+$serverIp = $_ENV['SERVER_IP'];
+$dbPort = $_ENV['DATABASE_PORT'];
+
+// --- OBTENER PRECIOS DE LA BASE DE DATOS ---
+$url = 'http://' . $serverIp . ':' . $dbPort . '/rest/v1/planes_suscripcion?tipo_usuario=eq.gestor&nombre=eq.Premium&select=*';
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'apikey: ' . $supabaseKey,
+    'Authorization: Bearer ' . $supabaseKey
+]);
+$result = curl_exec($ch);
+curl_close($ch);
+$planes = json_decode($result, true);
+
+// Valores por defecto (Salvavidas adaptados a los precios de Gestor)
+$precioMensual = 2850;
+$precioAnual = 31350;
+
+if (!empty($planes) && !isset($planes['error'])) {
+    $precioMensual = floatval($planes[0]['precio_mensual']);
+    $precioAnual = floatval($planes[0]['precio_anual']);
+}
+
+// Cálculo del ahorro
+$ahorro = ($precioMensual * 12) - $precioAnual;
+// --------------------------------------------------
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -226,7 +264,7 @@
                                     <input type="radio" id="planMensual" name="subscriptionPlan" value="mensual"
                                         class="custom-control-input" required>
                                     <label for="planMensual" class="custom-control-label">
-                                        Plan Mensual - €2.850
+                                        Plan Mensual - €<?php echo number_format($precioMensual, 0, ',', '.'); ?>
                                     </label>
                                 </div>
                             </div>
@@ -235,7 +273,8 @@
                                     <input type="radio" id="planAnual" name="subscriptionPlan" value="anual"
                                         class="custom-control-input" required>
                                     <label for="planAnual" class="custom-control-label">
-                                        Plan Anual - €31.350 (¡Ahorra €2.850!)
+                                        Plan Anual - €<?php echo number_format($precioAnual, 0, ',', '.'); ?> 
+                                        <span class="text-success fw-bold">(¡Ahorra €<?php echo number_format($ahorro, 0, ',', '.'); ?>!)</span>
                                     </label>
                                 </div>
                             </div>

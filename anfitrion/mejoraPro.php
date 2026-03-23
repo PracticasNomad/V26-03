@@ -11,7 +11,7 @@ $supabaseKey = $_ENV['DATABASE_APIKEY'];
 $serverIp = $_ENV['SERVER_IP'];
 $dbPort = $_ENV['DATABASE_PORT'];
 
-// --- NUEVO: OBTENER PRECIOS DE LA BASE DE DATOS ---
+// --- OBTENER PRECIOS DE LA BASE DE DATOS ---
 $url = 'http://' . $serverIp . ':' . $dbPort . '/rest/v1/planes_suscripcion?tipo_usuario=eq.host&nombre=eq.Pro&select=*';
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

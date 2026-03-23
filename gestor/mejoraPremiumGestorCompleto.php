@@ -11,11 +11,11 @@ $dotenv->load();
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gestor?id=eq.' . $_SESSION['user_id'];
 $ch = curl_init($url);
 
-// SOLO GUARDAMOS LOS DATOS REALES DE LA SUSCRIPCIÓN (sin la dirección)
+// SOLO GUARDAMOS LOS DATOS REALES DE LA SUSCRIPCIÓN (Corregido de domicilio_social a direccion)
 $data = [
     'plan' => $_SESSION['tipoSuscripcion'],
     'plan_end' => $_SESSION['fecha_fin'],
-    'domicilio_social' => $_SESSION['direccion']
+    'direccion' => $_SESSION['direccion']
 ];
 
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

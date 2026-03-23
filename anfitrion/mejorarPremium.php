@@ -8,37 +8,54 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(DIRNAME(__DIR__));
 $dotenv->load();
 
-/*
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
-if (!isset($_SESSION['token'])) {
-    header("Location: logoutHost.php");
-    exit();
-}
-*/
-
-if (!isset($_SESSION['direccion']) || !isset($_SESSION['plan'])) {
-    echo "No hay datos de suscripción almacenados.";
-}
-
-
-
-
-if (!isset($_SESSION['direccion'], $_SESSION['plan'], $_SESSION['fecha_fin'], $_SESSION['total'])) {
-    echo "No hay datos de suscripción almacenados.";
+// Quitamos $_SESSION['total'] de la comprobación para generarlo dinámicamente
+if (!isset($_SESSION['direccion'], $_SESSION['plan'], $_SESSION['fecha_fin'])) {
+    echo "No hay datos de suscripción almacenados. <a href='Suscripciones.php'>Volver a planes</a>";
     exit;
 }
 
+// --- NUEVO: OBTENER PRECIO DINÁMICO DE LA BBDD ---
+$supabaseKey = $_ENV['DATABASE_APIKEY'];
+$serverIp = $_ENV['SERVER_IP'];
+$dbPort = $_ENV['DATABASE_PORT'];
+
+$url = 'http://' . $serverIp . ':' . $dbPort . '/rest/v1/planes_suscripcion?tipo_usuario=eq.host&nombre=eq.Premium&select=*';
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'apikey: ' . $supabaseKey,
+    'Authorization: Bearer ' . $supabaseKey
+]);
+$result = curl_exec($ch);
+curl_close($ch);
+$planes = json_decode($result, true);
+
+// Precios por defecto (Salvavidas)
+$precioMensual = 19.99;
+$precioAnual = 179.99;
+
+if (!empty($planes) && !isset($planes['error'])) {
+    $precioMensual = floatval($planes[0]['precio_mensual']);
+    $precioAnual = floatval($planes[0]['precio_anual']);
+}
+
+// $_SESSION['plan'] guarda 'mensual' o 'anual' desde el formulario anterior
+$periodo = strtolower($_SESSION['plan']);
+if ($periodo === 'mensual') {
+    $totalCalculado = $precioMensual;
+} else {
+    $totalCalculado = $precioAnual;
+}
 
 $_SESSION['tipoSuscripcion'] = 'Premium';
-$direccion = htmlspecialchars($_SESSION['direccion']);
-$plan = htmlspecialchars($_SESSION['plan']);
-$fechaFin = date('d/m/Y', strtotime($_SESSION['fecha_fin']));
-$total = number_format($_SESSION['total'], 2, ',', '.');
+// Sobrescribimos el total en la sesión para cobrar lo correcto
+$_SESSION['total'] = $totalCalculado;
+// --------------------------------------------------
 
+$direccion = htmlspecialchars($_SESSION['direccion']);
+$plan = htmlspecialchars(ucfirst($_SESSION['plan']));
+$fechaFin = date('d/m/Y', strtotime($_SESSION['fecha_fin']));
+$total = number_format($totalCalculado, 2, ',', '.');
 
 ?>
 
@@ -206,17 +223,18 @@ $total = number_format($_SESSION['total'], 2, ',', '.');
                                     <div class="col-md-6">
                                         <div class="info-label">Dirección</div>
                                         <div class="info-value"><?php echo $direccion; ?></div>
-                                        <div class="info-label">Plan</div>
-                                        <div class="info-value"><?php echo $plan; ?></div>
+                                        <div class="info-label">Plan Seleccionado</div>
+                                        <div class="info-value">Premium Anfitrión (<?php echo $plan; ?>)</div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="info-label">Fecha Fin</div>
+                                        <div class="info-label">Fecha de Renovación</div>
                                         <div class="info-value"><?php echo $fechaFin; ?></div>
                                     </div>
                                 </div>
                             </div>
 
-                            <h5 class="section-title"><i class="fas fa-credit-card me-2"></i>Método de Pago</h5>
+                            <h5 class="section-title"><i class="fas fa-credit-card me-2"></i>Pasarela de Pago</h5>
+                            <p class="text-muted small">Aquí iría el elemento de pago con tarjeta (Stripe/Redsys).</p>
 
                             <div class="text-center mt-4">
                                 <a href="mejoraPremium.php" class="btn btn-secondary me-3">
@@ -224,7 +242,7 @@ $total = number_format($_SESSION['total'], 2, ',', '.');
                                 </a>
 
                                 <button type="submit" class="btn btn-nomad">
-                                    <i class="fas fa-check-circle me-2"></i>Completar Pago
+                                    <i class="fas fa-check-circle me-2"></i>Confirmar y Pagar
                                 </button>
                             </div>
                         </form>
@@ -239,12 +257,14 @@ $total = number_format($_SESSION['total'], 2, ',', '.');
                     </div>
                     <div class="card-body">
                         <h5 class="section-title">Detalles del Precio</h5>
+                        
                         <div class="price-detail">
-
+                            <span>Suscripción Premium (<?php echo $plan; ?>)</span>
+                            <span><?php echo $total; ?> €</span>
                         </div>
 
                         <div class="price-total mt-2">
-                            <span>Total</span>
+                            <span>Total a pagar</span>
                             <span><?php echo $total; ?> €</span>
                         </div>
 
