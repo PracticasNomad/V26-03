@@ -1,6 +1,13 @@
 <?php
 session_start();
 
+// Añadimos el autoload y Dotenv para poder conectarnos a Supabase
+require '../vendor/autoload.php';
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->safeLoad();
+
 $formSuccess = '';
 
 // Si el usuario envía el formulario con el botón Terminar
@@ -15,6 +22,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
         }, 1500);
     </script>";
 }
+
+// --- OBTENER PRECIOS DE LOS PLANES DE LA BASE DE DATOS ---
+$supabaseKey = $_ENV['DATABASE_APIKEY'];
+$serverIp = $_ENV['SERVER_IP'];
+$dbPort = $_ENV['DATABASE_PORT'];
+
+$urlPlanes = "http://" . $serverIp . ":" . $dbPort . "/rest/v1/planes_suscripcion?tipo_usuario=eq.host&select=*";
+$chPlanes = curl_init($urlPlanes);
+curl_setopt_array($chPlanes, array(
+    CURLOPT_CUSTOMREQUEST => "GET",
+    CURLOPT_HTTPHEADER => array(
+        'Content-Type: application/json',
+        'apikey: ' . $supabaseKey
+    ),
+    CURLOPT_RETURNTRANSFER => true,
+));
+$resultadoPlanes = curl_exec($chPlanes);
+curl_close($chPlanes);
+$planesObtenidos = json_decode($resultadoPlanes, true);
+
+// Valores por defecto (Salvavidas según tus precios)
+$precioMensualPro = 9.99;
+$precioAnualPro = 99.99;
+$precioMensualPremium = 19.99;
+$precioAnualPremium = 179.99;
+
+if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
+    foreach ($planesObtenidos as $p) {
+        if ($p['nombre'] === 'Pro') {
+            $precioMensualPro = floatval($p['precio_mensual']);
+            $precioAnualPro = floatval($p['precio_anual']);
+        } elseif ($p['nombre'] === 'Premium') {
+            $precioMensualPremium = floatval($p['precio_mensual']);
+            $precioAnualPremium = floatval($p['precio_anual']);
+        }
+    }
+}
+
+// Calculamos el ahorro automáticamente
+$ahorroPro = ($precioMensualPro * 12) - $precioAnualPro;
+$ahorroPremium = ($precioMensualPremium * 12) - $precioAnualPremium;
+
+// Función para separar los euros de los céntimos para el diseño HTML (<small>)
+function getWholeAndDecimal($price) {
+    $parts = explode('.', number_format($price, 2, '.', ''));
+    return ['whole' => $parts[0], 'decimal' => $parts[1]];
+}
+$proPriceParts = getWholeAndDecimal($precioMensualPro);
+$premiumPriceParts = getWholeAndDecimal($precioMensualPremium);
+// ---------------------------------------------------------
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -310,11 +367,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
                 <div class="plan-card popular" onclick="seleccionarPlan('Pro', this)">
                     <div class="plan-name">PLAN PRO</div>
                     <div class="plan-price">
-                        <span class="currency">€</span>9<small>.99</small>
+                        <span class="currency">€</span><?php echo $proPriceParts['whole']; ?><small>.<?php echo $proPriceParts['decimal']; ?></small>
                         <div class="plan-period">/mes</div>
                     </div>
                     <div class="plan-annual">
-                        💰 €99.99/año (ahorra €19.89)
+                        💰 €<?php echo number_format($precioAnualPro, 2); ?>/año (ahorra €<?php echo number_format($ahorroPro, 2); ?>)
                     </div>
                     <div class="commission-badge">Comisión del 12%</div>
                     <ul class="plan-features">
@@ -331,11 +388,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
                 <div class="plan-card" onclick="seleccionarPlan('Premium', this)">
                     <div class="plan-name">PLAN PREMIUM</div>
                     <div class="plan-price">
-                        <span class="currency">€</span>19<small>.99</small>
+                        <span class="currency">€</span><?php echo $premiumPriceParts['whole']; ?><small>.<?php echo $premiumPriceParts['decimal']; ?></small>
                         <div class="plan-period">/mes</div>
                     </div>
                     <div class="plan-annual">
-                        💰 €179.99/año (ahorra €59.89)
+                        💰 €<?php echo number_format($precioAnualPremium, 2); ?>/año (ahorra €<?php echo number_format($ahorroPremium, 2); ?>)
                     </div>
                     <div class="commission-badge">Comisión del 10%</div>
                     <ul class="plan-features">

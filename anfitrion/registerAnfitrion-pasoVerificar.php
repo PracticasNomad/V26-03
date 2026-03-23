@@ -602,6 +602,13 @@ if (isset($_POST['regenerar'])) {
                     return false;
                 }
                 
+               // Añadimos un input oculto con el nombre del botón para que PHP lo detecte
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'verificar',
+                    value: '1'
+                }).appendTo(this);
+
                 // Desactivamos el botón y el campo para que no le den dos veces mientras carga
                 $('#codigo').prop('readonly', true);
                 $('#btnVerificar').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Verificando...');

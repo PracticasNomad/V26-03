@@ -8,38 +8,77 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
-/*
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'No hay sesion activa']);
-}
-*/
+$supabaseKey = $_ENV['DATABASE_APIKEY'];
+$serverIp = $_ENV['SERVER_IP'];
+$dbPort = $_ENV['DATABASE_PORT'];
 
-$url = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/host?id=eq." . $_SESSION['user_id'];
-
+// --- 1. OBTENER EL PLAN ACTUAL DEL USUARIO ---
+$url = "http://" . $serverIp . ":" . $dbPort . "/rest/v1/host?id=eq." . $_SESSION['user_id'];
 $ch = curl_init($url);
 curl_setopt_array($ch, array(
     CURLOPT_CUSTOMREQUEST => "GET",
     CURLOPT_HTTPHEADER => array(
         'Content-Type: application/json',
-        'apikey: ' . $_ENV['DATABASE_APIKEY']
+        'apikey: ' . $supabaseKey
     ),
     CURLOPT_RETURNTRANSFER => true,
 ));
-
 $resultado = curl_exec($ch);
 $codigoRespuesta = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
+$plan = "Basico"; // Por defecto
 if ($codigoRespuesta === 200) {
     $datos = json_decode($resultado, true);
     if (count($datos) > 0) {
-
         $plan = $datos[0]['plan'];
     }
 }
 
+// --- 2. OBTENER PRECIOS DE LOS PLANES DE LA BASE DE DATOS ---
+$urlPlanes = "http://" . $serverIp . ":" . $dbPort . "/rest/v1/planes_suscripcion?tipo_usuario=eq.host&select=*";
+$chPlanes = curl_init($urlPlanes);
+curl_setopt_array($chPlanes, array(
+    CURLOPT_CUSTOMREQUEST => "GET",
+    CURLOPT_HTTPHEADER => array(
+        'Content-Type: application/json',
+        'apikey: ' . $supabaseKey
+    ),
+    CURLOPT_RETURNTRANSFER => true,
+));
+$resultadoPlanes = curl_exec($chPlanes);
+curl_close($chPlanes);
+$planesObtenidos = json_decode($resultadoPlanes, true);
 
+// Valores por defecto (Salvavidas según tus nuevos precios)
+$precioMensualPro = 9.99;
+$precioAnualPro = 99.99;
+$precioMensualPremium = 19.99;
+$precioAnualPremium = 179.99;
+
+if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
+    foreach ($planesObtenidos as $p) {
+        if ($p['nombre'] === 'Pro') {
+            $precioMensualPro = floatval($p['precio_mensual']);
+            $precioAnualPro = floatval($p['precio_anual']);
+        } elseif ($p['nombre'] === 'Premium') {
+            $precioMensualPremium = floatval($p['precio_mensual']);
+            $precioAnualPremium = floatval($p['precio_anual']);
+        }
+    }
+}
+
+// Calculamos el ahorro automáticamente
+$ahorroPro = ($precioMensualPro * 12) - $precioAnualPro;
+$ahorroPremium = ($precioMensualPremium * 12) - $precioAnualPremium;
+
+// Función para separar los euros de los céntimos para el diseño HTML (<small>)
+function getWholeAndDecimal($price) {
+    $parts = explode('.', number_format($price, 2, '.', ''));
+    return ['whole' => $parts[0], 'decimal' => $parts[1]];
+}
+$proPriceParts = getWholeAndDecimal($precioMensualPro);
+$premiumPriceParts = getWholeAndDecimal($precioMensualPremium);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -478,11 +517,11 @@ if ($codigoRespuesta === 200) {
                 <div class="plan-header">
                     <div class="plan-name">Plan Pro</div>
                     <div class="plan-price">
-                        <span class="currency">€</span>9<small>.99</small>
+                        <span class="currency">€</span><?php echo $proPriceParts['whole']; ?><small>.<?php echo $proPriceParts['decimal']; ?></small>
                         <div class="plan-period">/mes</div>
                     </div>
                     <div class="plan-annual">
-                        💰 €99.99/año (ahorra €19.89)
+                        💰 €<?php echo number_format($precioAnualPro, 2); ?>/año (ahorra €<?php echo number_format($ahorroPro, 2); ?>)
                     </div>
                 </div>
 
@@ -508,11 +547,11 @@ if ($codigoRespuesta === 200) {
                 <div class="plan-header">
                     <div class="plan-name">Plan Premium</div>
                     <div class="plan-price">
-                        <span class="currency">€</span>19<small>.99</small>
+                        <span class="currency">€</span><?php echo $premiumPriceParts['whole']; ?><small>.<?php echo $premiumPriceParts['decimal']; ?></small>
                         <div class="plan-period">/mes</div>
                     </div>
                     <div class="plan-annual">
-                        💰 €179.99/año (ahorra €59.89)
+                        💰 €<?php echo number_format($precioAnualPremium, 2); ?>/año (ahorra €<?php echo number_format($ahorroPremium, 2); ?>)
                     </div>
                 </div>
 
@@ -550,8 +589,8 @@ if ($codigoRespuesta === 200) {
                         <tr>
                             <td><strong>Precio mensual</strong></td>
                             <td class="text-center">Gratis</td>
-                            <td class="text-center">€9.99</td>
-                            <td class="text-center">€19.99</td>
+                            <td class="text-center">€<?php echo number_format($precioMensualPro, 2); ?></td>
+                            <td class="text-center">€<?php echo number_format($precioMensualPremium, 2); ?></td>
                         </tr>
                         <tr>
                             <td><strong>Comisión por reserva</strong></td>
@@ -623,8 +662,8 @@ if ($codigoRespuesta === 200) {
     </div>
 
     <script>
-        var currentPlan = "<?php echo $plan ?>";
-        console.log(currentPlan);
+        var currentPlan = "<?php echo htmlspecialchars($plan); ?>";
+        console.log("Plan actual:", currentPlan);
 
         document.addEventListener('DOMContentLoaded', function () {
             const btnBasic = document.getElementById("btnBasic");
