@@ -1,5 +1,6 @@
 <?php
-require_once 'verificar_sesion_admin.php';
+// INICIAMOS SESIÓN, PERO NO LA VERIFICAMOS (porque aquí venimos a loguearnos)
+session_start();
 
 require '../vendor/autoload.php';
 

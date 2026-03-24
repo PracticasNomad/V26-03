@@ -4,13 +4,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Comprobamos si NO existe el token o el ID de usuario
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
-    // Si no existen, borramos cualquier rastro de la sesión
+// Comprobamos si NO existe el token, el ID, o si NO es administrador
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['token']) || !isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
+
+
     session_unset();
     session_destroy();
 
-    // Y lo expulsamos a la pantalla de login del gestor
+    // Los expulsamos a la pantalla principal
     header("Location: /");
     exit();
 }

@@ -311,70 +311,6 @@ if (isset($_POST['cerrar'])) {
             color: #28a745;
         }
 
-        .footer {
-            width: 100%;
-            left: 0;
-            right: 0;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            bottom: 0;
-            color: #333;
-            font-size: 15px;
-            background: white;
-            text-align: center;
-            position: fixed;
-            padding: 15px 0 10px;
-            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            margin: 0;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-        }
-
-        .footer i {
-            font-size: 1.5em;
-        }
-
-        .footer input[type="radio"] {
-            display: none;
-        }
-
-        .footer-item {
-            height: 60px;
-        }
-
-        .footer-label {
-            display: block;
-            padding: 5px 0;
-            cursor: pointer;
-        }
-
-        .footer-link {
-            display: block;
-            text-decoration: none;
-            color: #6c757d;
-            transition: all 0.3s ease;
-            padding: 5px 0;
-        }
-
-        .footer-link:hover {
-            transform: translateY(-5px);
-        }
-
-        .footer-icon {
-            margin-bottom: 5px;
-        }
-
-        #marcado {
-            color: #28a745;
-        }
-
-        .footer .row {
-            margin: 0;
-            width: 100%;
-        }
-
         .modal-content {
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -537,41 +473,10 @@ if (isset($_POST['cerrar'])) {
             <p class="mt-3 fw-bold text-secondary">Cargando espacios...</p>
         </div>
 
-        <div id="contenedor"></div>
+        <div id="contenedor" style="display: none; width: 100%; flex-wrap: wrap; gap: 20px;"></div>
 
-        <div class="footer">
-            <div class="row g-0">
-                <input type="radio" name="footer" id="exp">
-                <input type="radio" name="footer" id="res">
-                <input type="radio" name="footer" id="per">
-                <div class="col-4 text-center footer-item">
-                    <label for="exp" id="lbl_exp" class="w-100 h-100 footer-label">
-                        <a href="nomada_explorar.php" class="footer-link" id="marcado">
-                            <div class="footer-icon"><i class="fas fa-search-location"></i></div>
-                            <div class="fw-bold">Explorar</div>
-                        </a>
-                    </label>
-                </div>
+        <?php include 'footerNomada.php'; ?>
 
-                <div class="col-4 text-center footer-item">
-                    <label for="res" id="lbl_res" class="w-100 h-100 footer-label">
-                        <a href="nomada_reservas.php" class="footer-link">
-                            <div class="footer-icon"><i class="fas fa-book"></i></div>
-                            <div class="fw-bold">Reservas</div>
-                        </a>
-                    </label>
-                </div>
-
-                <div class="col-4 text-center footer-item">
-                    <label for="per" id="lbl_per" class="w-100 h-100 footer-label">
-                        <a href="nomada_perfil.php" class="footer-link">
-                            <div class="footer-icon"><i class="fas fa-user-tie"></i></div>
-                            <div class="fw-bold">Perfil</div>
-                        </a>
-                    </label>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>

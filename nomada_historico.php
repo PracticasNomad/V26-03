@@ -367,68 +367,6 @@ require_once 'verificar_sesion_guest.php';
             border-bottom-right-radius: 12px;
         }
 
-        .footer {
-            width: 100%;
-            left: 0;
-            right: 0;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            bottom: 0;
-            color: black;
-            font-size: 15px;
-            background: white;
-            text-align: center;
-            position: fixed;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            margin: 0;
-        }
-
-        .footer i {
-            font-size: 2em;
-        }
-
-        .footer input[type="radio"] {
-            display: none;
-        }
-
-        .footer-item {
-            height: 60px;
-        }
-
-        .footer-label {
-            display: block;
-            padding: 5px 0;
-            cursor: pointer;
-        }
-
-        .footer-link {
-            display: block;
-            text-decoration: none;
-            color: black;
-            transition: all 0.3s ease;
-            padding: 5px 0;
-        }
-
-        .footer-link:hover {
-            transform: translateY(-7px);
-        }
-
-        .footer-icon {
-            margin-bottom: 3px;
-        }
-
-        #marcado {
-            color: #81ba18;
-        }
-
-        .footer .row {
-            margin: 0;
-            width: 100%;
-        }
-
         .img-container {
             position: relative;
             overflow: hidden;
@@ -478,41 +416,8 @@ require_once 'verificar_sesion_guest.php';
             </div>
         </div>
 
-        <div class="footer">
-            <div class="row g-0">
-                <input type="radio" name="footer" id="exp">
-                <input type="radio" name="footer" id="res">
-                <input type="radio" name="footer" id="per">
-                <div class="col-4 text-center footer-item">
-                    <label for="exp" id="lbl_exp" class="w-100 h-100 footer-label">
-                        <a href="nomada_explorar.php" class="footer-link">
-                            <div class="footer-icon"><i class="fas fa-search-location"></i></div>
-                            <div class="fw-bold">Explorar</div>
-                        </a>
-                    </label>
-                </div>
-
-                <div class="col-4 text-center footer-item">
-                    <label for="res" id="lbl_res" class="w-100 h-100 footer-label">
-                        <a href="" class="footer-link" id="marcado">
-                            <div class="footer-icon"><i class="fas fa-book"></i></div>
-                            <div class="fw-bold">Reservas</div>
-                        </a>
-                    </label>
-                </div>
-
-                <div class="col-4 text-center footer-item">
-                    <label for="per" id="lbl_per" class="w-100 h-100 footer-label">
-                        <a href="nomada_perfil.php" class="footer-link">
-                            <div class="footer-icon"><i class="fas fa-user-tie"></i></div>
-                            <div class="fw-bold">Perfil</div>
-                        </a>
-                    </label>
-                </div>
-            </div>
-        </div>
-
     </div>
+     <?php include 'footerNomada.php'; ?>
 
 </body>
 
