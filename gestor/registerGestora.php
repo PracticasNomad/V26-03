@@ -150,11 +150,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteError === '' && is_array($in
     $direccion = sanitizeField('direccion');
     $localidad = sanitizeField('localidad');
     $provincia = sanitizeField('provincia');
+    // CAPTURAMOS LA NUEVA VARIABLE DE RAZÓN SOCIAL
+    $razon_social = sanitizeField('razon_social');
     $password = (string) ($_POST['password'] ?? '');
     $passwordConfirm = (string) ($_POST['password_confirm'] ?? '');
 
-    if ($nombre === '' || $direccion === '' || $localidad === '' || $provincia === '') {
-        $formError = 'Nombre, direccion, localidad y provincia son obligatorios.';
+    // AÑADIDO RAZÓN SOCIAL A LA VALIDACIÓN
+    if ($nombre === '' || $razon_social === '' || $direccion === '' || $localidad === '' || $provincia === '') {
+        $formError = 'Nombre, razón social, direccion, localidad y provincia son obligatorios.';
     } elseif ($password === '' || strlen($password) < 8) {
         $formError = 'La contraseña debe tener al menos 8 caracteres.';
     } elseif ($password !== $passwordConfirm) {
@@ -208,6 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteError === '' && is_array($in
                 'localidad' => $localidad,
                 'provincia' => $provincia,
                 'plan' => 'Basico',
+                'razon_social' => $razon_social,
             ];
 
             $gestorResponse = apiRequestRegisterGestora('/gestor', 'POST', $gestorPayload);
@@ -505,12 +509,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteError === '' && is_array($in
     <div class="page-shell">
         <section class="hero">
             <h1><i class="fas fa-user-tie me-2"></i>Completa el alta de tu gestora</h1>
-            <p>Configura tus datos de acceso, revisa la zona inicial asignada y elige el plan con el que quieres arrancar la operativa.</p>
+            <p>Configura tus datos de acceso, revisa la zona inicial asignada y elige el plan con el que quieres
+                arrancar la operativa.</p>
             <?php if (is_array($inviteData) && $inviteError === ''): ?>
                 <div class="hero-meta">
-                    <span class="hero-chip"><i class="fas fa-envelope"></i><?php echo htmlspecialchars((string) ($inviteData['email'] ?? '')); ?></span>
-                    <span class="hero-chip"><i class="fas fa-map-pin"></i>CP <?php echo htmlspecialchars((string) ($inviteData['codigo_postal'] ?? 'Sin asignar')); ?></span>
-                    <span class="hero-chip"><i class="fas fa-layer-group"></i>Plan sugerido: <?php echo htmlspecialchars($selectedPlan); ?></span>
+                    <span class="hero-chip"><i
+                            class="fas fa-envelope"></i><?php echo htmlspecialchars((string) ($inviteData['email'] ?? '')); ?></span>
+                    <span class="hero-chip"><i class="fas fa-map-pin"></i>CP
+                        <?php echo htmlspecialchars((string) ($inviteData['codigo_postal'] ?? 'Sin asignar')); ?></span>
+                    <span class="hero-chip"><i class="fas fa-layer-group"></i>Plan sugerido:
+                        <?php echo htmlspecialchars($selectedPlan); ?></span>
                 </div>
             <?php endif; ?>
         </section>
@@ -536,56 +544,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteError === '' && is_array($in
                     <section class="panel">
                         <div class="panel-head">
                             <h2 class="panel-title">Datos del perfil</h2>
-                            <p class="panel-subtitle">Estos datos completan el alta y se guardan en el perfil de la gestora.</p>
+                            <p class="panel-subtitle">Estos datos completan el alta y se guardan en el perfil de la gestora.
+                            </p>
                         </div>
                         <div class="panel-body">
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="nombre" class="form-label fw-bold">Nombre completo</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars((string) ($_POST['nombre'] ?? $inviteData['nombre'] ?? '')); ?>" required>
+                                    <input type="text" class="form-control" id="nombre" name="nombre"
+                                        value="<?php echo htmlspecialchars((string) ($_POST['nombre'] ?? $inviteData['nombre'] ?? '')); ?>"
+                                        required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="telefono" class="form-label fw-bold">Telefono</label>
-                                    <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars((string) ($_POST['telefono'] ?? '')); ?>">
+                                    <input type="text" class="form-control" id="telefono" name="telefono"
+                                        value="<?php echo htmlspecialchars((string) ($_POST['telefono'] ?? '')); ?>">
                                 </div>
+
+                                <div class="col-12">
+                                    <label for="razon_social" class="form-label fw-bold">Razón Social</label>
+                                    <input type="text" class="form-control" id="razon_social" name="razon_social"
+                                        value="<?php echo htmlspecialchars((string) ($_POST['razon_social'] ?? '')); ?>"
+                                        required>
+                                </div>
+
                                 <div class="col-md-6">
                                     <label for="password" class="form-label fw-bold">Contraseña</label>
-                                    <input type="password" class="form-control" id="password" name="password" minlength="8" required>
+                                    <input type="password" class="form-control" id="password" name="password" minlength="8"
+                                        required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="password_confirm" class="form-label fw-bold">Repite la contraseña</label>
-                                    <input type="password" class="form-control" id="password_confirm" name="password_confirm" minlength="8" required>
+                                    <input type="password" class="form-control" id="password_confirm"
+                                        name="password_confirm" minlength="8" required>
                                 </div>
                                 <div class="col-12">
                                     <label for="direccion" class="form-label fw-bold">Direccion</label>
-                                    <input type="text" class="form-control" id="direccion" name="direccion" value="<?php echo htmlspecialchars((string) ($_POST['direccion'] ?? '')); ?>" required>
+                                    <input type="text" class="form-control" id="direccion" name="direccion"
+                                        value="<?php echo htmlspecialchars((string) ($_POST['direccion'] ?? '')); ?>"
+                                        required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="localidad" class="form-label fw-bold">Localidad</label>
-                                    <input type="text" class="form-control" id="localidad" name="localidad" value="<?php echo htmlspecialchars((string) ($_POST['localidad'] ?? '')); ?>" required>
+                                    <input type="text" class="form-control" id="localidad" name="localidad"
+                                        value="<?php echo htmlspecialchars((string) ($_POST['localidad'] ?? '')); ?>"
+                                        required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="provincia" class="form-label fw-bold">Provincia</label>
-                                    <input type="text" class="form-control" id="provincia" name="provincia" value="<?php echo htmlspecialchars((string) ($_POST['provincia'] ?? '')); ?>" required>
+                                    <input type="text" class="form-control" id="provincia" name="provincia"
+                                        value="<?php echo htmlspecialchars((string) ($_POST['provincia'] ?? '')); ?>"
+                                        required>
                                 </div>
                             </div>
 
                             <div class="summary-list">
                                 <div class="summary-item">
                                     <div class="summary-label">Correo de acceso</div>
-                                    <div class="summary-value"><?php echo htmlspecialchars((string) ($inviteData['email'] ?? '')); ?></div>
+                                    <div class="summary-value">
+                                        <?php echo htmlspecialchars((string) ($inviteData['email'] ?? '')); ?>
+                                    </div>
                                 </div>
                                 <div class="summary-item">
                                     <div class="summary-label">Empresa</div>
-                                    <div class="summary-value"><?php echo htmlspecialchars((string) ($inviteData['empresa'] ?? 'Sin empresa indicada')); ?></div>
+                                    <div class="summary-value">
+                                        <?php echo htmlspecialchars((string) ($inviteData['empresa'] ?? 'Sin empresa indicada')); ?>
+                                    </div>
                                 </div>
                                 <div class="summary-item">
                                     <div class="summary-label">CIF</div>
-                                    <div class="summary-value"><?php echo htmlspecialchars((string) ($inviteData['cif'] ?? 'No indicado')); ?></div>
+                                    <div class="summary-value">
+                                        <?php echo htmlspecialchars((string) ($inviteData['cif'] ?? 'No indicado')); ?>
+                                    </div>
                                 </div>
                                 <div class="summary-item">
                                     <div class="summary-label">Codigo postal inicial</div>
-                                    <div class="summary-value"><?php echo htmlspecialchars((string) ($inviteData['codigo_postal'] ?? 'Sin asignar')); ?></div>
+                                    <div class="summary-value">
+                                        <?php echo htmlspecialchars((string) ($inviteData['codigo_postal'] ?? 'Sin asignar')); ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -594,11 +630,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteError === '' && is_array($in
                     <aside class="panel">
                         <div class="panel-head">
                             <h2 class="panel-title">Ultima pantalla: planes de suscripcion</h2>
-                            <p class="panel-subtitle">Selecciona el plan con el que quieres arrancar. Si eliges Pro o Premium, continuaras con la pasarela de pago al terminar el alta.</p>
+                            <p class="panel-subtitle">Selecciona el plan con el que quieres arrancar. Si eliges Pro o
+                                Premium, continuaras con la pasarela de pago al terminar el alta.</p>
                         </div>
                         <div class="panel-body">
                             <div class="plans-grid">
-                                <article class="plan-card <?php echo $selectedPlan === 'Basico' ? 'selected' : ''; ?>" data-plan="Basico">
+                                <article class="plan-card <?php echo $selectedPlan === 'Basico' ? 'selected' : ''; ?>"
+                                    data-plan="Basico">
                                     <div class="plan-name">Basico</div>
                                     <div class="plan-price">EUR 0</div>
                                     <div class="plan-note">Entrada directa al panel</div>
@@ -609,25 +647,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteError === '' && is_array($in
                                     </ul>
                                 </article>
 
-                                <article class="plan-card popular <?php echo $selectedPlan === 'Pro' ? 'selected' : ''; ?>" data-plan="Pro">
+                                <article class="plan-card popular <?php echo $selectedPlan === 'Pro' ? 'selected' : ''; ?>"
+                                    data-plan="Pro">
                                     <div class="plan-name">Pro</div>
                                     <div class="plan-price">EUR 1.900</div>
                                     <div class="plan-note">Mensual. Anual desde EUR 20.900</div>
                                     <ul class="plan-features">
-                                        <li><i class="fas fa-check"></i><span>Mas capacidad operativa para zonas activas</span></li>
-                                        <li><i class="fas fa-check"></i><span>Escalado pensado para gestoras medianas</span></li>
-                                        <li><i class="fas fa-check"></i><span>Tras el alta continuaras con el resumen de pago</span></li>
+                                        <li><i class="fas fa-check"></i><span>Mas capacidad operativa para zonas
+                                                activas</span></li>
+                                        <li><i class="fas fa-check"></i><span>Escalado pensado para gestoras medianas</span>
+                                        </li>
+                                        <li><i class="fas fa-check"></i><span>Tras el alta continuaras con el resumen de
+                                                pago</span></li>
                                     </ul>
                                 </article>
 
-                                <article class="plan-card <?php echo $selectedPlan === 'Premium' ? 'selected' : ''; ?>" data-plan="Premium">
+                                <article class="plan-card <?php echo $selectedPlan === 'Premium' ? 'selected' : ''; ?>"
+                                    data-plan="Premium">
                                     <div class="plan-name">Premium</div>
                                     <div class="plan-price">EUR 2.850</div>
                                     <div class="plan-note">Mensual. Anual desde EUR 31.350</div>
                                     <ul class="plan-features">
-                                        <li><i class="fas fa-check"></i><span>Acceso al nivel mas alto del plan gestor</span></li>
-                                        <li><i class="fas fa-check"></i><span>Pensado para despliegues de gran volumen</span></li>
-                                        <li><i class="fas fa-check"></i><span>Continua despues del alta con la confirmacion del pago</span></li>
+                                        <li><i class="fas fa-check"></i><span>Acceso al nivel mas alto del plan
+                                                gestor</span></li>
+                                        <li><i class="fas fa-check"></i><span>Pensado para despliegues de gran
+                                                volumen</span></li>
+                                        <li><i class="fas fa-check"></i><span>Continua despues del alta con la confirmacion
+                                                del pago</span></li>
                                     </ul>
                                 </article>
                             </div>

@@ -269,7 +269,7 @@ function buildStatsByPostalCode(array $gestores)
         }
 
         if (!empty($est['host_id'])) {
-            $hostIdsByCp[$cp][(string)$est['host_id']] = true;
+            $hostIdsByCp[$cp][(string) $est['host_id']] = true;
         }
 
         if (!empty($est['space']) && is_array($est['space'])) {
@@ -349,6 +349,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = sanitizeText('invite_email');
         $empresa = sanitizeText('invite_empresa');
         $cif = strtoupper(sanitizeText('invite_cif'));
+        // CAPTURAMOS LA RAZÓN SOCIAL
+        $razon_social = sanitizeText('invite_razon_social');
         $codigoPostal = sanitizeText('invite_codigo_postal');
         $plan = normalizeInvitePlan($_POST['invite_plan'] ?? 'Basico');
 
@@ -371,11 +373,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
+        // AÑADIMOS LA RAZÓN SOCIAL AL TOKEN
         $token = createGestoraInvitationToken([
             'email' => $email,
             'nombre' => $nombre,
             'empresa' => $empresa,
             'cif' => $cif,
+            'razon_social' => $razon_social,
             'codigo_postal' => $codigoPostal,
             'plan' => $plan,
             'rol' => 'gestora',
@@ -1079,7 +1083,8 @@ $postalCoverage = count($activePostalCodes);
                         <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right"
                             title="Lista, filtra y administra las gestiones activas. Cada tarjeta resume la zona asignada por codigo postal y permite editar datos, reasignar cobertura, ver estadisticas y eliminar el perfil.">?</span>
                     </div>
-                    <div class="hero-pill"><i class="fas fa-map-marked-alt"></i> Cobertura activa en <?php echo $postalCoverage; ?> codigos postales</div>
+                    <div class="hero-pill"><i class="fas fa-map-marked-alt"></i> Cobertura activa en
+                        <?php echo $postalCoverage; ?> codigos postales</div>
                 </div>
                 <div class="hero-actions">
                     <button type="button" class="btn btn-hero-primary" id="openInviteGestora">
@@ -1125,19 +1130,23 @@ $postalCoverage = count($activePostalCodes);
         </section>
 
         <section class="toolbar">
-            <label for="gestor-search" class="toolbar-label"><i class="fas fa-search me-2"></i>Buscar por nombre, CIF o codigo postal</label>
+            <label for="gestor-search" class="toolbar-label"><i class="fas fa-search me-2"></i>Buscar por nombre, CIF o
+                codigo postal</label>
             <div class="search-wrap">
                 <i class="fas fa-magnifying-glass search-icon"></i>
-                <input id="gestor-search" type="search" class="form-control search-input" placeholder="Ejemplo: Marta, B12345678 o 28001">
+                <input id="gestor-search" type="search" class="form-control search-input"
+                    placeholder="Ejemplo: Marta, B12345678 o 28001">
             </div>
-            <div class="toolbar-meta"><span id="result-count"><?php echo $totalGestores; ?></span> gestores visibles</div>
+            <div class="toolbar-meta"><span id="result-count"><?php echo $totalGestores; ?></span> gestores visibles
+            </div>
         </section>
 
         <?php if (!$errorDb && empty($gestores)): ?>
             <section class="empty-state">
                 <div class="display-6 mb-3"><i class="fas fa-user-slash"></i></div>
                 <h2 class="h4 fw-bold">No hay gestores registrados</h2>
-                <p class="mb-0">Cuando existan perfiles en la tabla gestor apareceran aqui con sus acciones administrativas.</p>
+                <p class="mb-0">Cuando existan perfiles en la tabla gestor apareceran aqui con sus acciones administrativas.
+                </p>
             </section>
         <?php else: ?>
             <section id="gestores-grid" class="gestores-grid">
@@ -1157,13 +1166,15 @@ $postalCoverage = count($activePostalCodes);
                                 <div class="avatar-shell"><?php echo htmlspecialchars($gestor['initials']); ?></div>
                                 <div class="flex-grow-1">
                                     <h2 class="card-name"><?php echo htmlspecialchars($gestor['name'] ?? 'Sin nombre'); ?></h2>
-                                    <div class="card-company"><?php echo htmlspecialchars($gestor['empresa'] ?? 'Sin empresa'); ?></div>
+                                    <div class="card-company">
+                                        <?php echo htmlspecialchars($gestor['empresa'] ?? 'Sin empresa'); ?></div>
                                 </div>
                             </div>
                             <div class="plan-badge <?php echo htmlspecialchars($gestor['plan_class']); ?>">
                                 <i class="fas fa-layer-group"></i>
                                 <?php echo htmlspecialchars($gestor['plan_label']); ?>
-                                <span class="opacity-75">· hasta <?php echo htmlspecialchars($gestor['plan_end_label']); ?></span>
+                                <span class="opacity-75">· hasta
+                                    <?php echo htmlspecialchars($gestor['plan_end_label']); ?></span>
                             </div>
                         </div>
 
@@ -1173,62 +1184,75 @@ $postalCoverage = count($activePostalCodes);
                                     <div class="info-icon"><i class="fas fa-envelope"></i></div>
                                     <div>
                                         <span class="info-label">Correo</span>
-                                        <div class="info-value"><?php echo htmlspecialchars($gestor['email'] ?? 'Sin correo'); ?></div>
+                                        <div class="info-value">
+                                            <?php echo htmlspecialchars($gestor['email'] ?? 'Sin correo'); ?></div>
                                     </div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-icon"><i class="fas fa-id-card"></i></div>
                                     <div>
                                         <span class="info-label">CIF</span>
-                                        <div class="info-value"><?php echo htmlspecialchars($gestor['cif'] ?? 'No indicado'); ?></div>
+                                        <div class="info-value"><?php echo htmlspecialchars($gestor['cif'] ?? 'No indicado'); ?>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-icon"><i class="fas fa-phone"></i></div>
                                     <div>
                                         <span class="info-label">Telefono</span>
-                                        <div class="info-value"><?php echo htmlspecialchars($gestor['phone'] ?? 'No indicado'); ?></div>
+                                        <div class="info-value">
+                                            <?php echo htmlspecialchars($gestor['phone'] ?? 'No indicado'); ?></div>
                                     </div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-icon"><i class="fas fa-map-pin"></i></div>
                                     <div>
                                         <span class="info-label">Codigo postal asignado</span>
-                                        <div class="info-value"><?php echo htmlspecialchars($gestor['codigo_postal'] !== '' ? $gestor['codigo_postal'] : 'Sin asignar'); ?></div>
+                                        <div class="info-value">
+                                            <?php echo htmlspecialchars($gestor['codigo_postal'] !== '' ? $gestor['codigo_postal'] : 'Sin asignar'); ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="stats-strip">
                                 <div class="stat-chip">
-                                    <span class="stat-chip-value"><?php echo (int) $gestor['estadisticas']['establecimientos']; ?></span>
+                                    <span
+                                        class="stat-chip-value"><?php echo (int) $gestor['estadisticas']['establecimientos']; ?></span>
                                     <span class="stat-chip-label">Establec.</span>
                                 </div>
                                 <div class="stat-chip">
-                                    <span class="stat-chip-value"><?php echo (int) $gestor['estadisticas']['espacios']; ?></span>
+                                    <span
+                                        class="stat-chip-value"><?php echo (int) $gestor['estadisticas']['espacios']; ?></span>
                                     <span class="stat-chip-label">Espacios</span>
                                 </div>
                                 <div class="stat-chip">
-                                    <span class="stat-chip-value"><?php echo (int) $gestor['estadisticas']['reservas']; ?></span>
+                                    <span
+                                        class="stat-chip-value"><?php echo (int) $gestor['estadisticas']['reservas']; ?></span>
                                     <span class="stat-chip-label">Reservas</span>
                                 </div>
                                 <div class="stat-chip">
-                                    <span class="stat-chip-value"><?php echo (int) $gestor['estadisticas']['anfitriones']; ?></span>
+                                    <span
+                                        class="stat-chip-value"><?php echo (int) $gestor['estadisticas']['anfitriones']; ?></span>
                                     <span class="stat-chip-label">Anfitr.</span>
                                 </div>
                             </div>
 
                             <div class="actions-row">
-                                <button type="button" class="btn btn-soft btn-soft-primary js-open-edit" data-id="<?php echo htmlspecialchars($gestor['id']); ?>">
+                                <button type="button" class="btn btn-soft btn-soft-primary js-open-edit"
+                                    data-id="<?php echo htmlspecialchars($gestor['id']); ?>">
                                     <i class="fas fa-pen-to-square me-1"></i>Modificar
                                 </button>
-                                <button type="button" class="btn btn-soft btn-soft-dark js-open-stats" data-id="<?php echo htmlspecialchars($gestor['id']); ?>">
+                                <button type="button" class="btn btn-soft btn-soft-dark js-open-stats"
+                                    data-id="<?php echo htmlspecialchars($gestor['id']); ?>">
                                     <i class="fas fa-chart-column me-1"></i>Estadisticas
                                 </button>
-                                <button type="button" class="btn btn-soft btn-soft-success js-open-cp" data-id="<?php echo htmlspecialchars($gestor['id']); ?>">
+                                <button type="button" class="btn btn-soft btn-soft-success js-open-cp"
+                                    data-id="<?php echo htmlspecialchars($gestor['id']); ?>">
                                     <i class="fas fa-location-crosshairs me-1"></i>Reasignar CP
                                 </button>
-                                <button type="button" class="btn btn-soft btn-soft-danger js-open-delete" data-id="<?php echo htmlspecialchars($gestor['id']); ?>">
+                                <button type="button" class="btn btn-soft btn-soft-danger js-open-delete"
+                                    data-id="<?php echo htmlspecialchars($gestor['id']); ?>">
                                     <i class="fas fa-trash-can me-1"></i>Eliminar
                                 </button>
                             </div>
@@ -1250,7 +1274,8 @@ $postalCoverage = count($activePostalCodes);
             <div class="modal-content">
                 <div class="modal-header modal-header-brand">
                     <h5 class="modal-title"><i class="fas fa-user-pen me-2"></i>Modificar gestor</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <form method="POST">
                     <div class="modal-body p-4">
@@ -1301,7 +1326,8 @@ $postalCoverage = count($activePostalCodes);
                         </div>
                     </div>
                     <div class="modal-footer px-4 pb-4 border-0">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-danger rounded-pill px-4">Guardar cambios</button>
                     </div>
                 </form>
@@ -1314,7 +1340,8 @@ $postalCoverage = count($activePostalCodes);
             <div class="modal-content">
                 <div class="modal-header modal-header-brand">
                     <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>Enviar invitacion de gestora</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <form method="POST">
                     <div class="modal-body p-4">
@@ -1337,8 +1364,16 @@ $postalCoverage = count($activePostalCodes);
                                 <input type="text" class="form-control" id="invite_cif" name="invite_cif">
                             </div>
                             <div class="col-md-6">
-                                <label for="invite_codigo_postal" class="form-label fw-bold">Codigo postal inicial</label>
-                                <input type="text" class="form-control" id="invite_codigo_postal" name="invite_codigo_postal" maxlength="5" pattern="[0-9]{5}" inputmode="numeric" required>
+                                <label for="invite_razon_social" class="form-label fw-bold">Razón Social</label>
+                                <input type="text" class="form-control" id="invite_razon_social"
+                                    name="invite_razon_social">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="invite_codigo_postal" class="form-label fw-bold">Codigo postal
+                                    inicial</label>
+                                <input type="text" class="form-control" id="invite_codigo_postal"
+                                    name="invite_codigo_postal" maxlength="5" pattern="[0-9]{5}" inputmode="numeric"
+                                    required>
                             </div>
                             <div class="col-md-6">
                                 <label for="invite_plan" class="form-label fw-bold">Plan sugerido</label>
@@ -1349,12 +1384,14 @@ $postalCoverage = count($activePostalCodes);
                                 </select>
                             </div>
                             <div class="col-12">
-                                <div class="form-text">Se enviara un enlace firmado para completar el alta y elegir el plan final de suscripcion de la gestora.</div>
+                                <div class="form-text">Se enviara un enlace firmado para completar el alta y elegir el
+                                    plan final de suscripcion de la gestora.</div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer px-4 pb-4 border-0">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-danger rounded-pill px-4">Enviar invitacion</button>
                     </div>
                 </form>
@@ -1367,19 +1404,27 @@ $postalCoverage = count($activePostalCodes);
             <div class="modal-content">
                 <div class="modal-header modal-header-neutral">
                     <h5 class="modal-title"><i class="fas fa-chart-pie me-2"></i>Estadisticas de zona</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <h3 class="h5 fw-bold mb-1" id="stats_nombre"></h3>
                     <p class="text-muted mb-4">Codigo postal gestionado: <strong id="stats_cp"></strong></p>
                     <div class="modal-stat-grid">
-                        <div class="modal-stat-card"><span class="text-muted">Establecimientos</span><strong id="stats_establecimientos">0</strong></div>
-                        <div class="modal-stat-card"><span class="text-muted">Espacios</span><strong id="stats_espacios">0</strong></div>
-                        <div class="modal-stat-card"><span class="text-muted">Reservas</span><strong id="stats_reservas">0</strong></div>
-                        <div class="modal-stat-card"><span class="text-muted">Anfitriones unicos</span><strong id="stats_anfitriones">0</strong></div>
-                        <div class="modal-stat-card"><span class="text-muted">Validados</span><strong id="stats_aprobados">0</strong></div>
-                        <div class="modal-stat-card"><span class="text-muted">Pendientes</span><strong id="stats_pendientes">0</strong></div>
-                        <div class="modal-stat-card"><span class="text-muted">Rechazados</span><strong id="stats_rechazados">0</strong></div>
+                        <div class="modal-stat-card"><span class="text-muted">Establecimientos</span><strong
+                                id="stats_establecimientos">0</strong></div>
+                        <div class="modal-stat-card"><span class="text-muted">Espacios</span><strong
+                                id="stats_espacios">0</strong></div>
+                        <div class="modal-stat-card"><span class="text-muted">Reservas</span><strong
+                                id="stats_reservas">0</strong></div>
+                        <div class="modal-stat-card"><span class="text-muted">Anfitriones unicos</span><strong
+                                id="stats_anfitriones">0</strong></div>
+                        <div class="modal-stat-card"><span class="text-muted">Validados</span><strong
+                                id="stats_aprobados">0</strong></div>
+                        <div class="modal-stat-card"><span class="text-muted">Pendientes</span><strong
+                                id="stats_pendientes">0</strong></div>
+                        <div class="modal-stat-card"><span class="text-muted">Rechazados</span><strong
+                                id="stats_rechazados">0</strong></div>
                     </div>
                 </div>
             </div>
@@ -1391,7 +1436,8 @@ $postalCoverage = count($activePostalCodes);
             <div class="modal-content">
                 <div class="modal-header modal-header-brand">
                     <h5 class="modal-title"><i class="fas fa-route me-2"></i>Reasignar codigo postal</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <form method="POST">
                     <div class="modal-body p-4">
@@ -1404,12 +1450,15 @@ $postalCoverage = count($activePostalCodes);
                         </div>
                         <div class="mb-0">
                             <label for="cp_nuevo" class="form-label fw-bold">Nuevo codigo postal</label>
-                            <input type="text" class="form-control" id="cp_nuevo" name="codigo_postal" maxlength="5" pattern="[0-9]{5}" inputmode="numeric" required>
-                            <div class="form-text">El gestor heredara las estadisticas y la operativa de la nueva zona.</div>
+                            <input type="text" class="form-control" id="cp_nuevo" name="codigo_postal" maxlength="5"
+                                pattern="[0-9]{5}" inputmode="numeric" required>
+                            <div class="form-text">El gestor heredara las estadisticas y la operativa de la nueva zona.
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer px-4 pb-4 border-0">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-danger rounded-pill px-4">Guardar reasignacion</button>
                     </div>
                 </form>
@@ -1422,17 +1471,20 @@ $postalCoverage = count($activePostalCodes);
             <div class="modal-content">
                 <div class="modal-header modal-header-neutral">
                     <h5 class="modal-title"><i class="fas fa-trash-can me-2"></i>Eliminar gestor</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <form method="POST">
                     <div class="modal-body p-4">
                         <input type="hidden" name="action" value="eliminar_gestor">
                         <input type="hidden" name="gestor_id" id="delete_gestor_id">
                         <p class="mb-2">Se eliminara el perfil de <strong id="delete_nombre"></strong>.</p>
-                        <p class="text-muted mb-0">Esta accion quitara el acceso del gestor al sistema. Las entidades de negocio asociadas por codigo postal no se borran automaticamente.</p>
+                        <p class="text-muted mb-0">Esta accion quitara el acceso del gestor al sistema. Las entidades de
+                            negocio asociadas por codigo postal no se borran automaticamente.</p>
                     </div>
                     <div class="modal-footer px-4 pb-4 border-0">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-danger rounded-pill px-4">Eliminar</button>
                     </div>
                 </form>
