@@ -531,24 +531,6 @@ if (!empty($establecimientos)) {
             padding-bottom: 15%;
         }
 
-        .footer {
-            color: black;
-            background-color: white;
-            width: 100%;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            bottom: 0;
-            font-size: 15px;
-            background: #E3E1E1;
-            text-align: center;
-            position: fixed;
-        }
-
-        .footer input[type="radio"] {
-            display: none;
-        }
-
         label,
         .form-check input[type=checkbox] {
             position: static;
@@ -583,27 +565,6 @@ if (!empty($establecimientos)) {
 
         .spinner-border {
             color: #1976d2;
-        }
-
-        .footer-container {
-            background-color: white;
-            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-            padding-top: 1px !important;
-            padding-bottom: 1px !important;
-            height: auto;
-        }
-
-        .footer-item {
-            padding: 8px 0;
-        }
-
-        .icon-container {
-            transition: transform 0.3s ease;
-            padding: 5px 0;
-        }
-
-        .footer-item:hover .icon-container {
-            transform: translateY(-7px);
         }
 
         .mensaje-limite {
@@ -835,54 +796,8 @@ if (!empty($establecimientos)) {
             </div>
         </div>
     </div>
-    <div class="container-fluid footer mt-5 p-3">
-        <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-            <input type="radio" name="footer" id="res">
-            <input type="radio" name="footer" id="his" checked>
-            <input type="radio" name="footer" id="esp">
-            <input type="radio" name="footer" id="per">
-            <label for="res" id="lbl_res" class="col-3 text-center footer-item">
-                <div class="row">
-                    <a href="tusReservas.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-book-open p-1 m-0"></i>
-                            <div>Reservas</div>
-                        </div>
-                    </a>
-                </div>
-            </label>
-            <label for="his" id="lbl_his" class="col-3 text-center footer-item">
-                <div class="row">
-                    <a href="verEstablecimientos.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-building p-1 m-0"></i>
-                            <div>Establecimientos</div>
-                        </div>
-                    </a>
-                </div>
-            </label>
-            <label for="esp" id="lbl_esp" class="col-3 text-center footer-item">
-                <div class="row">
-                    <a href="tusEspacios.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-chair p-1 m-0"></i>
-                            <div>Espacios</div>
-                        </div>
-                    </a>
-                </div>
-            </label>
-            <label for="per" id="lbl_per" class="col-3 text-center footer-item">
-                <div class="row">
-                    <a href="tuPerfil.php">
-                        <div class="col-12 icon-container">
-                            <i class="h2 fas fa-user-tie p-1 m-0"></i>
-                            <div>Perfil</div>
-                        </div>
-                    </a>
-                </div>
-            </label>
-        </div>
-    </div>
+    
+   <?php include 'footerAnfitrion.php'; ?>
 
     <script>
         const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg";
