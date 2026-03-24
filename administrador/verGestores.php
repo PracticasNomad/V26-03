@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'verificar_sesion_admin.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
     header('Location: inicio_sesion_admin.php');

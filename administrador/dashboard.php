@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'verificar_sesion_admin.php';
 
 // Verificación de sesión igual que en el resto del admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
@@ -223,10 +223,23 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            borderDash: [5, 5]
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
                 }
             }
         });
@@ -249,7 +262,9 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
                 maintainAspectRatio: false,
                 cutout: '75%',
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: {
+                        position: 'bottom'
+                    }
                 }
             }
         });

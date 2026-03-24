@@ -107,7 +107,8 @@ if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
         :root {
             --brand-ink: #1f2933;
             --brand-deep: #0f4c5c;
-            --brand-accent: #dc3545; /* Rojo admin */
+            --brand-accent: #dc3545;
+            /* Rojo admin */
             --brand-soft: #f3f5f7;
             --card-radius: 16px;
             --primary-color: #dc3545;
@@ -361,11 +362,11 @@ if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
         function abrirModalEditar(plan) {
             // Rellenar datos ocultos e informativos
             document.getElementById('edit-id').value = plan.id;
-            
+
             // Etiqueta visual para distinguir si es de Gestor o Anfitrión
             let tipoVisual = plan.tipo_usuario === 'host' ? '(Anfitrión)' : '(Gestor)';
             document.getElementById('etiqueta-tipo').innerText = tipoVisual;
-            
+
             // Textos y precios a editar
             document.getElementById('edit-nombre').value = plan.nombre; // Editable
             document.getElementById('edit-descripcion').value = plan.descripcion || '';

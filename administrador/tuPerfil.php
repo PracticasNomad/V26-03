@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'verificar_sesion_admin.php';
 
 // Verificamos que el usuario está logueado y es administrador
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['token']) || $_SESSION['rol'] !== 'administrador') {
@@ -295,7 +295,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         </div>
     </div>
 
-     <?php include 'footerAdmin.php'; ?>
+    <?php include 'footerAdmin.php'; ?>
 
     <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
