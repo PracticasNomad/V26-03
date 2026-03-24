@@ -119,10 +119,7 @@ if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
 
         body {
             font-family: 'Nunito', sans-serif;
-            background:
-                radial-gradient(circle at 0% 0%, rgba(196, 69, 54, 0.12), transparent 32%),
-                radial-gradient(circle at 100% 5%, rgba(43, 86, 140, 0.1), transparent 28%),
-                linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+            background: #eef2f5;
             padding-bottom: 120px;
             color: var(--brand-ink);
         }
