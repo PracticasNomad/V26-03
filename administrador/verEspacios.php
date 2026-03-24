@@ -538,7 +538,9 @@ if ($err || $httpCode >= 300) {
         </div>
     </div>
 
-    <div class="container-fluid footer mt-5 p-3">
+    <?php include 'footerAdmin.php'; ?>
+
+    <!-- <div class="container-fluid footer mt-5 p-3">
         <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
             <a href="dashboard.php" class="col-2 text-center footer-item">
                 <div class="row">
@@ -584,7 +586,7 @@ if ($err || $httpCode >= 300) {
                 </div>
             </a>
         </div>
-    </div>
+    </div> -->
 
     <script>
         $(document).ready(function() {

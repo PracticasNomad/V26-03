@@ -92,7 +92,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </a>
         <a href="verEstablecimientos.php" class="col footer-item">
             <div class="row">
-                <div class="col-12 icon-container <?php echo $currentPage == 'verEstablecimientos.php' ? 'active-icon' : ''; ?>">
+                <div class="col-12 icon-container <?php echo $currentPage == 'verEstablecimientos.php' || $currentPage == 'verEspacios.php' ? 'active-icon' : ''; ?>">
                     <i class="h3 fas fa-building p-1 m-0"></i>
                     <div class="footer-text">Establecimientos</div>
                 </div>
@@ -100,7 +100,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </a>
         <a href="verValidar.php" class="col footer-item">
             <div class="row">
-                <div class="col-12 icon-container <?php echo $currentPage == 'verValidar.php' ? 'active-icon' : ''; ?>">
+                <div class="col-12 icon-container <?php echo $currentPage == 'verValidar.php' || $currentPage == 'validar.php' ? 'active-icon' : ''; ?>">
                     <i class="h3 fas fa-check-circle p-1 m-0"></i>
                     <div class="footer-text">Validar</div>
                 </div>
