@@ -219,11 +219,17 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             --brand-soft: #f3f5f7;
             --card-radius: 16px;
             --primary-color: #dc3545;
+            --bg: #f4f7fb;
+            --accent-dark: #8c1c13;
+            --accent-mid: #c44536;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
-            background: #eef2f5;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(196, 69, 54, 0.12), transparent 32%),
+                radial-gradient(circle at 100% 5%, rgba(43, 86, 140, 0.1), transparent 28%),
+                linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
             padding-bottom: 120px;
             color: var(--brand-ink);
         }
@@ -456,14 +462,15 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
 
         .page-hero-inner {
             border-radius: 20px;
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%);
             color: #ffffff;
             padding: 1.1rem 1.2rem;
-            box-shadow: 0 14px 30px rgba(220, 53, 69, 0.25);
+            box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
         .page-hero-title {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 800;
             letter-spacing: 0.2px;
         }
@@ -472,6 +479,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .stats-grid .card {
@@ -602,7 +610,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
     <section class="page-hero">
         <div class="page-hero-inner">
             <div class="hero-title-row">
-                <div class="page-hero-title">Gestión Global de Establecimientos</div>
+                <div class="page-hero-title"><i class="fas fa-building me-2"></i>Gestión Global de Establecimientos</div>
             </div>
         </div>
     </section>

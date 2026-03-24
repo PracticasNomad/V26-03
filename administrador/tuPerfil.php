@@ -67,31 +67,69 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             --border-radius-lg: 15px;
             --border-radius-md: 10px;
             --border-radius-sm: 8px;
+            --bg: #f4f7fb;
+            --ink: #1f2933;
+            --line: #d8e1ea;
+            --accent-dark: #8c1c13;
+            --accent-mid: #c44536;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--dark-text);
-            padding-bottom: 100px;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(196, 69, 54, 0.12), transparent 32%),
+                radial-gradient(circle at 100% 5%, rgba(43, 86, 140, 0.1), transparent 28%),
+                linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+            color: var(--ink);
+            padding-bottom: 120px;
+        }
+
+        .page-shell {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 22px 16px 0;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%);
+            color: #fff;
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            margin-bottom: 18px;
+        }
+
+        .hero-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 0.2px;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .contenedorPerfil {
             background-color: var(--white);
-            border-radius: var(--border-radius-lg);
+            border-radius: 20px;
             padding: 40px 30px;
-            margin: 30px auto;
-            max-width: 900px;
+            margin: 0 auto;
+            max-width: 980px;
             min-height: 600px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: flex-start;
-            border-top: 5px solid var(--primary-color);
+            border: 1px solid var(--line);
         }
 
         .sombra {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+            box-shadow: 0 18px 36px rgba(31, 41, 51, 0.12);
         }
 
         .fotoPerfilMovil {
@@ -198,7 +236,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         }
 
         .badge-admin {
-            background-color: var(--primary-color);
+            background-color: var(--accent-mid);
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
@@ -208,6 +246,19 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         }
 
         @media (max-width: 768px) {
+            .page-shell {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .hero {
+                padding: 18px;
+            }
+
+            .hero-title {
+                font-size: 1.2rem;
+            }
+
             .contenedorPerfil {
                 flex-direction: column;
                 align-items: center;
@@ -243,7 +294,14 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
 </head>
 
 <body>
-    <div class="contenedorPerfil sombra fw-bold mt-5">
+    <div class="page-shell">
+        <section class="hero">
+            <div class="title-row">
+                <h1 class="hero-title"><i class="fas fa-user-cog me-2"></i>Perfil Global de Administrador</h1>
+            </div>
+        </section>
+
+        <div class="contenedorPerfil sombra fw-bold mt-3">
 
         <div class="fotoPerfilMovil centrar">
             <span class="badge-admin fw-bold"><i class="fas fa-shield-alt"></i> Panel Global</span>
@@ -292,6 +350,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             <div id="codigoPostal" class="info-item">Código Postal: <?= htmlspecialchars($admin['codigo_postal'] ?? '') ?></div>
 
             <input type="hidden" id="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
+        </div>
         </div>
     </div>
 

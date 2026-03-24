@@ -80,13 +80,49 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
         :root {
             --primary-color: #dc3545;
             /* Rojo admin */
+            --bg: #f4f7fb;
+            --ink: #1f2933;
+            --accent-dark: #8c1c13;
+            --accent-mid: #c44536;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f8f9fa;
-            padding-bottom: 15%;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(196, 69, 54, 0.12), transparent 32%),
+                radial-gradient(circle at 100% 5%, rgba(43, 86, 140, 0.1), transparent 28%),
+                linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+            color: var(--ink);
+            padding-bottom: 120px;
             /* Espacio para el footer */
+        }
+
+        .page-hero {
+            max-width: 1400px;
+            margin: 1.2rem auto 0.5rem;
+            padding: 0 15px;
+        }
+
+        .page-hero-inner {
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%);
+            color: #ffffff;
+            padding: 1.1rem 1.2rem;
+            box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .page-hero-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .hero-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .card {
@@ -120,15 +156,13 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
 
 <body>
 
-    <header>
-        <div class="container-fluid info text-center">
-            <div class="row">
-                <div class="col color-white h2 fw-bold pt-3 pb-2">
-                    Estadísticas Plataforma
-                </div>
+    <section class="page-hero">
+        <div class="page-hero-inner">
+            <div class="hero-title-row">
+                <div class="page-hero-title"><i class="fas fa-chart-line me-2"></i>Estadísticas Plataforma</div>
             </div>
         </div>
-    </header>
+    </section>
 
     <div class="container mt-4">
         <div class="row g-4 mb-4">
