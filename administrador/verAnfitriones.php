@@ -122,10 +122,18 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
             --accent-soft: #fce8e5;
         }
 
-        .page-hero {
+        .page-shell {
             max-width: 1400px;
-            margin: 1.2rem auto 0.5rem;
+            margin: 0 auto;
             padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .page-hero {
+            max-width: 100%;
+            margin: 1.2rem 0 0.5rem;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .page-hero-inner {
@@ -158,34 +166,56 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
         }
 
         .contenedor-principal {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 15px;
+            max-width: 100%;
+            margin: 2rem 0 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .select-container {
             width: 100%;
-            max-width: 650px;
+            max-width: 980px;
             margin: 0 auto 30px auto;
-            background-color: white;
-            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.92);
+            padding: 20px 22px;
             border-radius: 18px;
-            box-shadow: 0 12px 24px rgba(31, 41, 51, 0.08);
+            box-shadow: 0 14px 28px rgba(31, 41, 51, 0.1);
             border: 1px solid rgba(216, 225, 234, 0.8);
+            backdrop-filter: blur(8px);
+        }
+
+        .select-toolbar-title {
+            font-size: 1.05rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .select-toolbar-subtitle {
+            margin-bottom: 0.9rem;
+            color: #5f6d79;
+            font-size: 0.92rem;
+            font-weight: 600;
         }
 
         /* Ajustes para que Select2 se vea bien con Bootstrap */
         .select2-container .select2-selection--single {
-            height: 45px !important;
-            padding: 8px 15px;
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            height: 50px !important;
+            padding: 10px 15px;
+            border: 1px solid #d7dfe8;
+            border-radius: 12px;
+            font-size: 1rem;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+            background-color: #fff;
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 43px !important;
+            height: 48px !important;
             right: 15px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #2f3c4a;
+            line-height: 30px;
+            font-weight: 600;
         }
 
         .anfitrion-card {
@@ -196,7 +226,7 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
             overflow: hidden;
             transition: all 0.3s;
             width: 100%;
-            max-width: 650px;
+            max-width: 980px;
             margin: 0 auto;
             border: 1px solid var(--line);
         }
@@ -279,101 +309,105 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
 </head>
 
 <body>
+    <div class="page-shell">
 
-    <section class="page-hero">
-        <div class="page-hero-inner">
-            <div class="hero-title-row">
-                <div class="page-hero-title"><i class="fas fa-users me-2"></i>Todos los Anfitriones</div>
-            </div>
-        </div>
-    </section>
-
-    <div class="contenedor-principal">
-        <?php if ($error_db): ?>
-            <div class="alert alert-danger text-center shadow-sm rounded-pill mb-4">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <?php echo $error_db; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($mensaje_exito): ?>
-            <div class="alert alert-success text-center shadow-sm rounded-pill mb-4">
-                <i class="fas fa-check-circle me-2"></i>
-                <?php echo $mensaje_exito; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if (!$error_db && empty($anfitriones)): ?>
-            <div class="alert alert-info text-center shadow-sm rounded-pill mb-4">
-                <i class="fas fa-info-circle me-2"></i> No hay anfitriones registrados en el sistema.
-            </div>
-        <?php endif; ?>
-
-        <div class="select-container">
-            <label for="select-anfitrion" class="form-label fw-bold mb-3 h5">
-                <i class="fas fa-search me-2"></i>Buscar y seleccionar anfitrión:
-            </label>
-            <select id="select-anfitrion" class="form-select form-select-lg" <?php echo empty($anfitriones) ? 'disabled' : ''; ?>>
-                <option value=""></option>
-                <?php foreach ($anfitriones as $anf): ?>
-                    <option value="<?php echo htmlspecialchars($anf['id']); ?>"
-                        data-nombre="<?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?>"
-                        data-email="<?php echo htmlspecialchars($anf['email'] ?? 'Sin email'); ?>"
-                        data-telefono="<?php echo htmlspecialchars($anf['phone'] ?? ''); ?>">
-                        <?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?> -
-                        <?php echo htmlspecialchars($anf['email'] ?? ''); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <div id="detalles-anfitrion" style="display: none;">
-            <div class="anfitrion-card">
-                <div class="card-header-custom">
-                    <i class="fas fa-user-circle icon-profile"></i>
-                    <h3 class="fw-bold m-0" id="card-nombre">Nombre Apellidos</h3>
-                    <span class="badge bg-light text-dark mt-2">Perfil Anfitrión</span>
+        <section class="page-hero">
+            <div class="page-hero-inner">
+                <div class="hero-title-row">
+                    <div class="page-hero-title"><i class="fas fa-users me-2"></i>Todos los Anfitriones</div>
                 </div>
+            </div>
+        </section>
 
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                        <div>
-                            <strong>Email:</strong><br>
-                            <span id="card-email" class="text-muted">correo@ejemplo.com</span>
-                        </div>
+        <div class="contenedor-principal">
+            <?php if ($error_db): ?>
+                <div class="alert alert-danger text-center shadow-sm rounded-pill mb-4">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <?php echo $error_db; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($mensaje_exito): ?>
+                <div class="alert alert-success text-center shadow-sm rounded-pill mb-4">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <?php echo $mensaje_exito; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!$error_db && empty($anfitriones)): ?>
+                <div class="alert alert-info text-center shadow-sm rounded-pill mb-4">
+                    <i class="fas fa-info-circle me-2"></i> No hay anfitriones registrados en el sistema.
+                </div>
+            <?php endif; ?>
+
+            <div class="select-container">
+                <label for="select-anfitrion" class="form-label fw-bold select-toolbar-title">
+                    <i class="fas fa-search me-2"></i>Buscar y seleccionar anfitrión:
+                </label>
+                <p class="select-toolbar-subtitle">Elige un perfil para ver sus datos y acceder a sus acciones de gestión.</p>
+                <select id="select-anfitrion" class="form-select form-select-lg" <?php echo empty($anfitriones) ? 'disabled' : ''; ?>>
+                    <option value=""></option>
+                    <?php foreach ($anfitriones as $anf): ?>
+                        <option value="<?php echo htmlspecialchars($anf['id']); ?>"
+                            data-nombre="<?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?>"
+                            data-email="<?php echo htmlspecialchars($anf['email'] ?? 'Sin email'); ?>"
+                            data-telefono="<?php echo htmlspecialchars($anf['phone'] ?? ''); ?>">
+                            <?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?> -
+                            <?php echo htmlspecialchars($anf['email'] ?? ''); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div id="detalles-anfitrion" style="display: none;">
+                <div class="anfitrion-card">
+                    <div class="card-header-custom">
+                        <i class="fas fa-user-circle icon-profile"></i>
+                        <h3 class="fw-bold m-0" id="card-nombre">Nombre Apellidos</h3>
+                        <span class="badge bg-light text-dark mt-2">Perfil Anfitrión</span>
                     </div>
 
-                    <div class="info-row">
-                        <div class="info-icon"><i class="fas fa-phone"></i></div>
-                        <div>
-                            <strong>Teléfono:</strong><br>
-                            <span id="card-telefono" class="text-muted">+34 000 000 000</span>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <strong>Email:</strong><br>
+                                <span id="card-email" class="text-muted">correo@ejemplo.com</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="info-row">
-                        <div class="info-icon"><i class="fas fa-id-card"></i></div>
-                        <div>
-                            <strong>ID Interno:</strong><br>
-                            <span id="card-id" class="text-muted">#</span>
+                        <div class="info-row">
+                            <div class="info-icon"><i class="fas fa-phone"></i></div>
+                            <div>
+                                <strong>Teléfono:</strong><br>
+                                <span id="card-telefono" class="text-muted">+34 000 000 000</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="btn-actions mt-4">
-                        <a href="#" id="btn-view-est" class="btn btn-action btn-view-est">
-                            <i class="fas fa-building"></i> Ver Establecimientos
-                        </a>
-                        <button type="button" class="btn btn-action btn-edit-data" data-bs-toggle="modal"
-                            data-bs-target="#modalEditarAnfitrion">
-                            <i class="fas fa-user-edit"></i> Editar Datos
-                        </button>
+                        <div class="info-row">
+                            <div class="info-icon"><i class="fas fa-id-card"></i></div>
+                            <div>
+                                <strong>ID Interno:</strong><br>
+                                <span id="card-id" class="text-muted">#</span>
+                            </div>
+                        </div>
+
+                        <div class="btn-actions mt-4">
+                            <a href="#" id="btn-view-est" class="btn btn-action btn-view-est">
+                                <i class="fas fa-building"></i> Ver Establecimientos
+                            </a>
+                            <button type="button" class="btn btn-action btn-edit-data" data-bs-toggle="modal"
+                                data-bs-target="#modalEditarAnfitrion">
+                                <i class="fas fa-user-edit"></i> Editar Datos
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <?php include 'footerAdmin.php'; ?>
     <div class="modal fade" id="modalEditarAnfitrion" tabindex="-1" aria-labelledby="modalEditarAnfitrionLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -454,7 +488,6 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
         });
     </script>
 
-    <?php include 'footerAdmin.php'; ?>
 </body>
 
 </html>

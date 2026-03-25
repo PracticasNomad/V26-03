@@ -84,6 +84,7 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
             --ink: #1f2933;
             --accent-dark: #8c1c13;
             --accent-mid: #c44536;
+
         }
 
         body {
@@ -94,10 +95,24 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
             /* Espacio para el footer */
         }
 
-        .page-hero {
+        .page-shell {
             max-width: 1400px;
-            margin: 1.2rem auto 0.5rem;
+            margin: 0 auto;
             padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .page-hero {
+            width: 100%;
+            margin: 1.2rem 0 0.5rem;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .contenedorDashboard {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 1rem;
         }
 
         .page-hero-inner {
@@ -152,76 +167,78 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
 </head>
 
 <body>
-
-    <section class="page-hero">
-        <div class="page-hero-inner">
-            <div class="hero-title-row">
-                <div class="page-hero-title"><i class="fas fa-chart-line me-2"></i>Estadísticas Plataforma</div>
+    <div class="page-shell">
+        <section class="page-hero">
+            <div class="page-hero-inner">
+                <div class="hero-title-row">
+                    <div class="page-hero-title"><i class="fas fa-chart-line me-2"></i>Estadísticas Plataforma</div>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <div class="container mt-4">
-        <div class="row g-4 mb-4">
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-primary text-white p-3 h-100 position-relative">
-                    <div class="card-body p-2">
-                        <h6 class="text-uppercase fw-bold opacity-75 mb-1">Total Nómadas</h6>
-                        <h1 class="display-4 fw-bold mb-0"><?php echo $totalNomadas; ?></h1>
-                        <i class="fas fa-users icon-box"></i>
+
+        <div class="contenedorDashboard mt-4">
+            <div class="row g-4 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-primary text-white p-3 h-100 position-relative">
+                        <div class="card-body p-2">
+                            <h6 class="text-uppercase fw-bold opacity-75 mb-1">Total Nómadas</h6>
+                            <h1 class="display-4 fw-bold mb-0"><?php echo $totalNomadas; ?></h1>
+                            <i class="fas fa-users icon-box"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-success text-white p-3 h-100 position-relative">
+                        <div class="card-body p-2">
+                            <h6 class="text-uppercase fw-bold opacity-75 mb-1">Proveedores Activos</h6>
+                            <h1 class="display-4 fw-bold mb-0"><?php echo ($totalAnfitriones + $totalGestores); ?></h1>
+                            <small><?php echo $totalAnfitriones; ?> Anfitriones | <?php echo $totalGestores; ?>
+                                Gestores</small>
+                            <i class="fas fa-user-tie icon-box"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-warning text-dark p-3 h-100 position-relative">
+                        <div class="card-body p-2">
+                            <h6 class="text-uppercase fw-bold opacity-75 mb-1">Establecimientos</h6>
+                            <h1 class="display-4 fw-bold mb-0"><?php echo $totalEstablecimientos; ?></h1>
+                            <i class="fas fa-store icon-box text-white"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-danger text-white p-3 h-100 position-relative">
+                        <div class="card-body p-2">
+                            <h6 class="text-uppercase fw-bold opacity-75 mb-1">Reservas Emitidas</h6>
+                            <h1 class="display-4 fw-bold mb-0"><?php echo $totalReservas; ?></h1>
+                            <i class="fas fa-calendar-check icon-box"></i>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-success text-white p-3 h-100 position-relative">
-                    <div class="card-body p-2">
-                        <h6 class="text-uppercase fw-bold opacity-75 mb-1">Proveedores Activos</h6>
-                        <h1 class="display-4 fw-bold mb-0"><?php echo ($totalAnfitriones + $totalGestores); ?></h1>
-                        <small><?php echo $totalAnfitriones; ?> Anfitriones | <?php echo $totalGestores; ?>
-                            Gestores</small>
-                        <i class="fas fa-user-tie icon-box"></i>
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card p-4 h-100">
+                        <h5 class="fw-bold mb-4 text-secondary">Evolución de Crecimiento (Reservas)</h5>
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="graficoReservas"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-warning text-dark p-3 h-100 position-relative">
-                    <div class="card-body p-2">
-                        <h6 class="text-uppercase fw-bold opacity-75 mb-1">Establecimientos</h6>
-                        <h1 class="display-4 fw-bold mb-0"><?php echo $totalEstablecimientos; ?></h1>
-                        <i class="fas fa-store icon-box text-white"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-danger text-white p-3 h-100 position-relative">
-                    <div class="card-body p-2">
-                        <h6 class="text-uppercase fw-bold opacity-75 mb-1">Reservas Emitidas</h6>
-                        <h1 class="display-4 fw-bold mb-0"><?php echo $totalReservas; ?></h1>
-                        <i class="fas fa-calendar-check icon-box"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-lg-8">
-                <div class="card p-4 h-100">
-                    <h5 class="fw-bold mb-4 text-secondary">Evolución de Crecimiento (Reservas)</h5>
-                    <div style="position: relative; height: 300px; width: 100%;">
-                        <canvas id="graficoReservas"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="card p-4 h-100">
-                    <h5 class="fw-bold mb-4 text-secondary">Distribución de Usuarios</h5>
-                    <div
-                        style="position: relative; height: 300px; width: 100%; display: flex; justify-content: center;">
-                        <canvas id="graficoUsuarios"></canvas>
+                <div class="col-lg-4">
+                    <div class="card p-4 h-100">
+                        <h5 class="fw-bold mb-4 text-secondary">Distribución de Usuarios</h5>
+                        <div
+                            style="position: relative; height: 300px; width: 100%; display: flex; justify-content: center;">
+                            <canvas id="graficoUsuarios"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
