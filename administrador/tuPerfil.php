@@ -28,6 +28,23 @@ $resultado = curl_exec($ch);
 curl_close($ch);
 
 $datosAdmin = json_decode($resultado, true);
+$informacionLegal = <<<HTML
+<div class="legal-rich-content">
+    <h6>Aviso Legal</h6>
+    <p>
+        En cumplimiento del articulo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad
+        de la Informacion y Comercio Electronico, el titular expone sus datos identificativos:
+    </p>
+    <ul>
+        <li><strong>Titular:</strong> Smartable IoT SLU</li>
+        <li><strong>NIF:</strong> B54985536</li>
+        <li><strong>Registro mercantil:</strong> Alicante, tomo 4012, folio 101, hoja A-153784</li>
+        <li><strong>Domicilio:</strong> Rambla Mendez Nunez, 39 - 2o, 03002 Alicante, Espana</li>
+        <li><strong>Correo electronico:</strong> <a href="mailto:hola@smartable.es">hola@smartable.es</a></li>
+        <li><strong>Sitio web:</strong> <a href="https://yonomad.app" target="_blank" rel="noopener noreferrer">https://yonomad.app</a></li>
+    </ul>
+</div>
+HTML;
 
 // Si existe en la BD, recogemos sus datos. Si no, redirigimos al login (algo fue mal)
 if (is_array($datosAdmin) && count($datosAdmin) > 0) {
@@ -82,7 +99,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         }
 
         .page-shell {
-            max-width: 980px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 22px 16px 0;
         }
@@ -95,6 +112,8 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
             border: 1px solid rgba(255, 255, 255, 0.18);
             margin-bottom: 18px;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         .hero-title {
@@ -116,13 +135,15 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             border-radius: 20px;
             padding: 40px 30px;
             margin: 0 auto;
-            max-width: 980px;
+            max-width: none;
+            width: 100%;
             min-height: 600px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: flex-start;
             border: 1px solid var(--line);
+            box-sizing: border-box;
         }
 
         .sombra {
@@ -242,6 +263,65 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             display: inline-block;
         }
 
+        .legal-info-wrapper {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .legal-info-label {
+            display: block;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .legal-info-box {
+            max-width: 520px;
+            margin: 0 auto;
+            background-color: var(--light-bg);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: #495057;
+            text-align: left;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .legal-rich-content h6 {
+            margin-bottom: 8px;
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .legal-rich-content p {
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 0.92rem;
+            line-height: 1.4;
+        }
+
+        .legal-rich-content ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .legal-rich-content li {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            line-height: 1.35;
+        }
+
+        .legal-rich-content a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .legal-rich-content a:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .page-shell {
                 padding-left: 12px;
@@ -349,7 +429,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             <input type="hidden" id="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
         </div>
         </div>
-    </div>
+    
 
     <?php include 'footerAdmin.php'; ?>
 
@@ -413,6 +493,10 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                     </form>
                 </div>
                 <div class="modal-footer">
+                    <div class="legal-info-wrapper">
+                        <span class="legal-info-label">Información Legal</span>
+                        <div class="legal-info-box" id="legalInfoDisplay"><?php echo $informacionLegal ?? '<span>Sin informacion legal registrada</span>'; ?></div>
+                    </div>
                     <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarCambios">Guardar cambios</button>
                 </div>
@@ -447,6 +531,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
