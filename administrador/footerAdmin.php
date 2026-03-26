@@ -74,11 +74,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 </div>
             </div>
         </a>
-        <a href="verGestores.php" class="col footer-item">
+        <a href="verGestoras.php" class="col footer-item">
             <div class="row">
-                <div class="col-12 icon-container <?php echo $currentPage == 'verGestores.php' ? 'active-icon' : ''; ?>">
+                <div class="col-12 icon-container <?php echo $currentPage == 'verGestoras.php' ? 'active-icon' : ''; ?>">
                     <i class="h3 fas fa-user-tie p-1 m-0"></i>
-                    <div class="footer-text">Gestores</div>
+                    <div class="footer-text">Gestoras</div>
                 </div>
             </div>
         </a>
