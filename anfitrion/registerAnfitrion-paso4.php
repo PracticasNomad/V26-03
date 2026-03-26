@@ -8,18 +8,13 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
-
-
 $formError = '';
 $formSuccess = '';
 
-// Verificar si ya tenemos coordenadas guardadas del paso 3
 if (isset($_SESSION['establecimiento']['lat']) && isset($_SESSION['establecimiento']['lng'])) {
-    // Usar las coordenadas ya guardadas
     $lat = $_SESSION['establecimiento']['lat'];
     $lng = $_SESSION['establecimiento']['lng'];
 } else {
-    // Si no hay coordenadas guardadas, obtenerlas del código postal usando Mapbox
     $codigo_postal = $_SESSION['establecimiento']['codigo_postal'];
     $mapboxToken = $_ENV['MAPBOX_APIKEY'];
     $query = urlencode($codigo_postal);
@@ -34,11 +29,9 @@ if (isset($_SESSION['establecimiento']['lat']) && isset($_SESSION['establecimien
         $lng = $coordinates[0];
         $lat = $coordinates[1];
 
-        // Guardar en la sesión para futuros usos
         $_SESSION['establecimiento']['lat'] = $lat;
         $_SESSION['establecimiento']['lng'] = $lng;
     } else {
-        // Coordenadas por defecto (Madrid)
         $lat = 40.41678;
         $lng = -3.70379;
 
@@ -48,7 +41,6 @@ if (isset($_SESSION['establecimiento']['lat']) && isset($_SESSION['establecimien
 }
 $_SESSION['establecimiento']['latitud'] = $lat;
 $_SESSION['establecimiento']['longitud'] = $lng;
-
 
 function guardarImagen($file, $upload_dir = 'uploads/establecimientos/')
 {
@@ -70,7 +62,6 @@ function guardarImagen($file, $upload_dir = 'uploads/establecimientos/')
             'tamano' => $file['size']
         ];
     }
-
     return false;
 }
 
@@ -82,7 +73,6 @@ function subirImagenAMinio($tmpName, $fileName, $fileType)
 
         $minioUrl = $minioHost . '/' . $minioBucket . '/' . $fileName;
 
-        // Verificar que el archivo temporal existe y es legible
         if (!file_exists($tmpName) || !is_readable($tmpName)) {
             error_log("Archivo temporal no existe o no es legible: $tmpName");
             return false;
@@ -101,14 +91,14 @@ function subirImagenAMinio($tmpName, $fileName, $fileType)
             CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_POSTFIELDS => $fileContent,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 30, // 30 segundos de timeout
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: ' . $fileType,
                 'Content-Length: ' . strlen($fileContent)
             ],
-            CURLOPT_VERBOSE => false, // Cambiar a true para debug
+            CURLOPT_VERBOSE => false,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYPEER => false, // Solo para desarrollo
+            CURLOPT_SSL_VERIFYPEER => false,
         ]);
 
         $resultado = curl_exec($ch);
@@ -149,12 +139,10 @@ if (isset($_POST['siguiente'])) {
         $errors[] = 'La longitud es obligatoria y debe ser un valor numérico.';
     }
 
-    // Verificar si hay archivos subidos
     $fotos_subidas = false;
     $archivos_validos = [];
 
     if (isset($_FILES['fotos']['name']) && is_array($_FILES['fotos']['name'])) {
-        // Reorganizar el array de archivos para facilitar el procesamiento
         $archivos = [];
         $totalArchivos = count($_FILES['fotos']['name']);
 
@@ -176,7 +164,6 @@ if (isset($_POST['siguiente'])) {
         }
     }
 
-    // También verificar archivos ocultos como fallback
     if (!$fotos_subidas && isset($_FILES['fotos_hidden']) && is_array($_FILES['fotos_hidden']['name'])) {
         $archivos = [];
         $totalArchivos = count($_FILES['fotos_hidden']['name']);
@@ -208,12 +195,10 @@ if (isset($_POST['siguiente'])) {
 
     if (empty($errors) && $fotos_subidas) {
         $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
-        $max_size = 5 * 1024 * 1024; // 5MB
+        $max_size = 5 * 1024 * 1024;
 
-        // Limpiar rutas previas
         unset($_SESSION['rutas']);
 
-        // Procesar cada archivo
         foreach ($archivos_validos as $i => $archivo) {
             $nombre = $archivo['name'];
             $tipo = $archivo['type'];
@@ -221,39 +206,32 @@ if (isset($_POST['siguiente'])) {
             $tmp_name = $archivo['tmp_name'];
             $error = $archivo['error'];
 
-            // Validar tipo de archivo
             if (!in_array($tipo, $allowed_types)) {
                 $errors[] = "El formato de la imagen '$nombre' no es válido. Use JPG o PNG.";
                 continue;
             }
 
-            // Validar tamaño
             if ($tamano > $max_size) {
                 $errors[] = "La imagen '$nombre' excede el tamaño máximo permitido (5MB).";
                 continue;
             }
 
-            // Verificar que no hay errores de subida
             if ($error !== UPLOAD_ERR_OK) {
                 $errors[] = "Error al subir la imagen '$nombre'. Código de error: $error";
                 continue;
             }
 
-            // Verificar que el archivo temporal existe
             if (!file_exists($tmp_name)) {
                 $errors[] = "El archivo temporal para '$nombre' no existe.";
                 continue;
             }
 
-            // Generar nombre único para Minio
             $extension = pathinfo($nombre, PATHINFO_EXTENSION);
             $nombreArchivo = 'establecimiento_' . uniqid('', true) . '_' . time() . '_' . $i . '.' . $extension;
 
-            // Subir a Minio
             $urlMinio = subirImagenAMinio($tmp_name, $nombreArchivo, $tipo);
 
             if ($urlMinio) {
-                // Guardar también localmente (como backup)
                 $imagen_guardada = guardarImagen([
                     'name' => $nombre,
                     'type' => $tipo,
@@ -263,23 +241,17 @@ if (isset($_POST['siguiente'])) {
 
                 if ($imagen_guardada) {
                     $fotos_data[] = $imagen_guardada;
-
-                    // Extraer solo la parte sin http:// para la sesión
                     $rutaSinHttp = str_replace('http://', '', $urlMinio);
                     $rutas_minio[] = $rutaSinHttp;
-
                     error_log("Imagen subida exitosamente: $nombre -> $urlMinio");
                 } else {
                     $errors[] = "Error al guardar la imagen '$nombre' localmente.";
-                    error_log("Error guardando localmente: $nombre");
                 }
             } else {
                 $errors[] = "Error al subir la imagen '$nombre' al repositorio.";
-                error_log("Error subiendo a Minio: $nombre");
             }
         }
 
-        // Verificar que al menos una imagen se subió correctamente
         if (empty($rutas_minio) && empty($errors)) {
             $errors[] = "No se pudo subir ninguna imagen. Inténtelo de nuevo.";
         }
@@ -293,6 +265,27 @@ if (isset($_POST['siguiente'])) {
         $_SESSION['establecimiento']['longitud'] = $longitud;
         $_SESSION['establecimiento']['fotos'] = $fotos_data;
         $_SESSION['rutas'] = $rutas_minio;
+
+        // --- ACTUALIZAR BORRADOR EN BASE DE DATOS ---
+        if (isset($_SESSION['host']['email'])) {
+            $emailUpd = $_SESSION['host']['email'];
+            $urlUpd = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados?email=eq.' . urlencode($emailUpd);
+            $chUpd = curl_init($urlUpd);
+            $dataUpd = [
+                'paso' => 5,
+                'datos_sesion' => json_encode($_SESSION)
+            ];
+            curl_setopt($chUpd, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            curl_setopt($chUpd, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($chUpd, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'apikey: ' . $_ENV['DATABASE_APIKEY']
+            ]);
+            curl_setopt($chUpd, CURLOPT_POSTFIELDS, json_encode($dataUpd));
+            curl_exec($chUpd);
+            curl_close($chUpd);
+        }
+        // --- FIN ACTUALIZAR BORRADOR ---
 
         $formSuccess = "Datos guardados correctamente. Redirigiendo...";
 

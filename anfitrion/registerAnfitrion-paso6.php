@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-// Añadimos el autoload y Dotenv para poder conectarnos a Supabase
 require '../vendor/autoload.php';
+
 use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
@@ -10,12 +10,32 @@ $dotenv->safeLoad();
 
 $formSuccess = '';
 
-// Si el usuario envía el formulario con el botón Terminar
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
     $_SESSION['plan_seleccionado'] = $_POST['plan'];
+
+    // --- ACTUALIZAR BORRADOR EN BASE DE DATOS ---
+    if (isset($_SESSION['host']['email'])) {
+        $emailUpd = $_SESSION['host']['email'];
+        $urlUpd = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados?email=eq.' . urlencode($emailUpd);
+        $chUpd = curl_init($urlUpd);
+        $dataUpd = [
+            'paso' => 7, // El 7 representa el paso de 'Verificar'
+            'datos_sesion' => json_encode($_SESSION)
+        ];
+        curl_setopt($chUpd, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        curl_setopt($chUpd, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($chUpd, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'apikey: ' . $_ENV['DATABASE_APIKEY']
+        ]);
+        curl_setopt($chUpd, CURLOPT_POSTFIELDS, json_encode($dataUpd));
+        curl_exec($chUpd);
+        curl_close($chUpd);
+    }
+    // --- FIN ACTUALIZAR BORRADOR ---
+
     $formSuccess = "Plan seleccionado y datos guardados correctamente. Redirigiendo...";
 
-    // Aquí hacemos la redirección con JavaScript para que dé tiempo a ver el mensaje
     echo "<script>
         setTimeout(function() {
             window.location.href = 'registerAnfitrion-pasoVerificar.php';
@@ -42,7 +62,6 @@ $resultadoPlanes = curl_exec($chPlanes);
 curl_close($chPlanes);
 $planesObtenidos = json_decode($resultadoPlanes, true);
 
-// Valores por defecto (Salvavidas según tus precios)
 $precioMensualPro = 9.99;
 $precioAnualPro = 99.99;
 $precioMensualPremium = 19.99;
@@ -60,19 +79,18 @@ if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
     }
 }
 
-// Calculamos el ahorro automáticamente
 $ahorroPro = ($precioMensualPro * 12) - $precioAnualPro;
 $ahorroPremium = ($precioMensualPremium * 12) - $precioAnualPremium;
 
-// Función para separar los euros de los céntimos para el diseño HTML (<small>)
-function getWholeAndDecimal($price) {
+function getWholeAndDecimal($price)
+{
     $parts = explode('.', number_format($price, 2, '.', ''));
     return ['whole' => $parts[0], 'decimal' => $parts[1]];
 }
 $proPriceParts = getWholeAndDecimal($precioMensualPro);
 $premiumPriceParts = getWholeAndDecimal($precioMensualPremium);
-// ---------------------------------------------------------
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -438,7 +456,7 @@ $premiumPriceParts = getWholeAndDecimal($precioMensualPremium);
 
             // Quitar la clase 'selected' de todas las tarjetas
             var tarjetas = document.querySelectorAll('.plan-card');
-            tarjetas.forEach(function (tarjeta) {
+            tarjetas.forEach(function(tarjeta) {
                 tarjeta.classList.remove('selected');
             });
 

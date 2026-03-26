@@ -69,7 +69,31 @@ if (isset($_POST['siguiente'])) {
             'horarios' => $horarios
         ];
 
-        // Guardamos el mensaje para el Toast y hacemos la redirección con retardo
+        // --- ACTUALIZAR BORRADOR EN BASE DE DATOS ---
+        if (isset($_SESSION['host']['email'])) {
+            require_once '../vendor/autoload.php';
+            $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+            $dotenv->safeLoad();
+
+            $emailUpd = $_SESSION['host']['email'];
+            $urlUpd = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados?email=eq.' . urlencode($emailUpd);
+            $chUpd = curl_init($urlUpd);
+            $dataUpd = [
+                'paso' => 6,
+                'datos_sesion' => json_encode($_SESSION)
+            ];
+            curl_setopt($chUpd, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            curl_setopt($chUpd, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($chUpd, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'apikey: ' . $_ENV['DATABASE_APIKEY']
+            ]);
+            curl_setopt($chUpd, CURLOPT_POSTFIELDS, json_encode($dataUpd));
+            curl_exec($chUpd);
+            curl_close($chUpd);
+        }
+        // --- FIN ACTUALIZAR BORRADOR ---
+
         $formSuccess = "Espacio de trabajo guardado correctamente.";
 
         echo "<script>
@@ -77,7 +101,6 @@ if (isset($_POST['siguiente'])) {
                 window.location.href = 'registerAnfitrion-paso6.php';
             }, 1500);
         </script>";
-
     } else {
         $formError = implode(' ', $errors);
     }
@@ -453,7 +476,7 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                                                 $nombres_dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
                                                 foreach ($dias_semana as $i => $dia_codigo):
                                                     $checked = in_array($dia_codigo, $horario['dias']) ? 'checked' : '';
-                                                    ?>
+                                                ?>
                                                     <div class="day-checkbox">
                                                         <input type="checkbox"
                                                             id="dia_<?php echo $h_index; ?>_<?php echo $dia_codigo; ?>"
@@ -685,15 +708,17 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
     </template>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let horarioCount = $('.horario-container').length;
 
             // Mostrar el Toast flotante si hay un mensaje de éxito desde PHP
-        <?php if (!empty($formSuccess)): ?>
-            const toastEl = document.getElementById('toastExitoPaso5');
-            const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
-            toast.show();
-        <?php endif; ?>
+            <?php if (!empty($formSuccess)): ?>
+                const toastEl = document.getElementById('toastExitoPaso5');
+                const toast = new bootstrap.Toast(toastEl, {
+                    delay: 2000
+                });
+                toast.show();
+            <?php endif; ?>
 
             function updateNoHorariosMessage() {
                 if ($('.horario-container').length > 0) {
@@ -704,12 +729,12 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
             }
 
             function updateHorarioNumbers() {
-                $('.horario-container').each(function (index) {
+                $('.horario-container').each(function(index) {
                     $(this).find('.horario-num').text(index + 1);
                 });
             }
 
-            $('#add-horario').click(function () {
+            $('#add-horario').click(function() {
                 const template = document.getElementById('horario-template').content.cloneNode(true);
                 const horarioIndex = horarioCount++;
 
@@ -722,13 +747,13 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                 updateNoHorariosMessage();
             });
 
-            $(document).on('click', '.remove-horario', function () {
+            $(document).on('click', '.remove-horario', function() {
                 $(this).closest('.horario-container').remove();
                 updateHorarioNumbers();
                 updateNoHorariosMessage();
             });
 
-            $(document).on('click', '.add-servicio', function () {
+            $(document).on('click', '.add-servicio', function() {
                 const horarioIndex = $(this).data('horario');
                 const serviciosContainer = $(this).closest('.servicios-container').find('.servicios-list');
                 const servicioIndex = serviciosContainer.children().length;
@@ -741,11 +766,11 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                 serviciosContainer.append(templateHTML);
             });
 
-            $(document).on('click', '.remove-servicio', function () {
+            $(document).on('click', '.remove-servicio', function() {
                 $(this).closest('.servicio-item').remove();
             });
 
-            $('#espacioTrabajoForm').submit(function (e) {
+            $('#espacioTrabajoForm').submit(function(e) {
                 let valid = true;
                 let errorMessages = [];
 
@@ -753,7 +778,7 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
                     valid = false;
                     errorMessages.push('Debe agregar al menos un horario para el espacio de trabajo.');
                 } else {
-                    $('.horario-container').each(function (index) {
+                    $('.horario-container').each(function(index) {
                         const diasSeleccionados = $(this).find('input[type="checkbox"]:checked').length;
                         if (diasSeleccionados === 0) {
                             valid = false;

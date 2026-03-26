@@ -139,6 +139,32 @@ if (isset($_POST['siguiente'])) {
             $_SESSION['host']['fact_localidad'] = $fact_localidad;
             $_SESSION['host']['fact_provincia'] = $fact_provincia;
         }
+
+        // --- ACTUALIZAR BORRADOR EN BASE DE DATOS ---
+        if (isset($_SESSION['host']['email'])) {
+            require_once '../vendor/autoload.php';
+            $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+            $dotenv->safeLoad();
+
+            $emailUpd = $_SESSION['host']['email'];
+            $urlUpd = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados?email=eq.' . urlencode($emailUpd);
+            $chUpd = curl_init($urlUpd);
+            $dataUpd = [
+                'paso' => 4,
+                'datos_sesion' => json_encode($_SESSION)
+            ];
+            curl_setopt($chUpd, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            curl_setopt($chUpd, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($chUpd, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'apikey: ' . $_ENV['DATABASE_APIKEY']
+            ]);
+            curl_setopt($chUpd, CURLOPT_POSTFIELDS, json_encode($dataUpd));
+            curl_exec($chUpd);
+            curl_close($chUpd);
+        }
+        // --- FIN ACTUALIZAR BORRADOR ---
+
         header("Location: registerAnfitrion-paso4.php");
         exit();
     }
@@ -168,13 +194,11 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Datos de tu establecimiento</title>
     <style>
-        /* Estilos generales del body */
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #f8f9fa;
         }
 
-        /* Contenedor principal del formulario */
         .contenedorAlta {
             max-width: 700px;
             margin: 2rem auto;
@@ -184,7 +208,6 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             padding: 1rem;
         }
 
-        /* Estilos para controles de formulario */
         .form-control {
             border-radius: 10px;
             padding: 0.75rem;
@@ -197,7 +220,6 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
-        /* Botón de éxito */
         .btn-success {
             background-color: #28a745;
             border: none;
@@ -205,7 +227,6 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             padding: 0.75rem 2rem;
         }
 
-        /* Botón de cancelar */
         .btn-cancel {
             background-color: #f8f9fa;
             border: 1px solid #ced4da;
@@ -214,7 +235,6 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             padding: 0.75rem 2rem;
         }
 
-        /* Contenedor de barra de progreso */
         .progress-container {
             width: 100%;
             height: 5px;
@@ -224,14 +244,12 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             margin: 1rem 0;
         }
 
-        /* Barra de progreso */
         .progress-bar {
             height: 100%;
             width: 40%;
             background-color: #28a745;
         }
 
-        /* Estilos para alertas */
         .alert {
             border-radius: 10px;
             padding: 0.75rem;
@@ -239,7 +257,6 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             display: none;
         }
 
-        /* Contenedor del logo */
         .logo-container {
             background-color: #f8f9fa;
             border-radius: 50%;
@@ -251,13 +268,11 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             margin: 0 auto;
         }
 
-        /* Contenedor del tooltip */
         .tooltip-container {
             position: relative;
             display: inline-block;
         }
 
-        /* Texto del tooltip */
         .tooltip-text {
             visibility: hidden;
             opacity: 0;
@@ -279,7 +294,6 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             font-weight: normal;
         }
 
-        /* Flecha del tooltip */
         .tooltip-text::after {
             content: "";
             position: absolute;
@@ -291,13 +305,11 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             border-color: transparent transparent #333 transparent;
         }
 
-        /* Tooltip visible */
         .tooltip-text.visible {
             visibility: visible;
             opacity: 1;
         }
 
-        /* Icono de información */
         #imgInfo {
             cursor: pointer;
             transition: transform 0.2s;
@@ -308,20 +320,17 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             transform: scale(1.1);
         }
 
-        /* Mostrar tooltip al hacer hover */
         .tooltip-container:hover .tooltip-text {
             visibility: visible;
             opacity: 1;
         }
 
-        /* Spinner de carga */
         .loading-spinner {
             display: none;
             margin-left: 10px;
             vertical-align: middle;
         }
 
-        /* Indicador de éxito */
         .success-indicator {
             display: none;
             color: #28a745;
@@ -329,7 +338,6 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             vertical-align: middle;
         }
 
-        /* Indicador de error */
         .error-indicator {
             display: none;
             color: #dc3545;
@@ -337,7 +345,6 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             vertical-align: middle;
         }
 
-        /* Media queries para dispositivos móviles */
         @media (max-width: 768px) {
             .tooltip-text {
                 width: 350px;
@@ -390,6 +397,7 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
             </div>
         </div>
         <div class="col-12 text-center h4 mb-4 fw-bold">Datos del establecimiento</div>
+
         <div class="alert alert-danger" id="error-message" <?php echo !empty($formError) ? 'style="display:block"' : ''; ?>><i class="fas fa-exclamation-circle me-2"></i> <span id="error-text"><?php echo $formError; ?></span>
         </div>
         <form method="post" action="" class="container" id="establecimientoForm">

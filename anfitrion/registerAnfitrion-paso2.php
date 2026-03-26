@@ -1,5 +1,9 @@
 <?php
 session_start();
+
+// 1. INCLUIMOS NUESTRO NUEVO ARCHIVO DE CORREOS
+require_once '../emails/borradorRegistro.php';
+
 $formError = '';
 $passwordError = false;
 $telefonoError = false;
@@ -24,7 +28,6 @@ if (isset($_POST['siguiente'])) {
         $_SESSION['already_guest'] = false;
         $emailError = true;
     } else {
-        // Si el email está validado, establecer already_guest según el tipo de usuario
         if (isset($_POST['user_type'])) {
             if ($_POST['user_type'] === 'guest') {
                 $_SESSION['already_guest'] = true;
@@ -36,7 +39,6 @@ if (isset($_POST['siguiente'])) {
         }
     }
 
-    // Solo validar contraseñas si no es un usuario existente
     if (!isset($_SESSION['already_guest']) || !$_SESSION['already_guest']) {
         if ($password !== $password2) {
             $errors[] = 'Las contraseñas no coinciden. Por favor, inténtalo de nuevo.';
@@ -54,7 +56,7 @@ if (isset($_POST['siguiente'])) {
         $emailError = true;
     }
 
- if (!empty($errors)) {
+    if (!empty($errors)) {
         $formError = implode(' ', $errors);
     } else {
         $_SESSION['host']['nombre'] = $nombre;
@@ -63,25 +65,28 @@ if (isset($_POST['siguiente'])) {
         $_SESSION['host']['razonsocial'] = $razonsocial;
         $_SESSION['host']['nif'] = $nif;
 
-        // Solo guardar contraseñas si no es usuario existente
         if (!isset($_SESSION['already_guest']) || !$_SESSION['already_guest']) {
             $_SESSION['host']['password'] = $password;
             $_SESSION['host']['password2'] = $password2;
         }
 
-       if (isset($_SESSION['host'])) {
-            // --- INICIO: GUARDAR EN REGISTROS ABANDONADOS ---
+        if (isset($_SESSION['host'])) {
             require_once '../vendor/autoload.php';
             $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
             $dotenv->safeLoad();
+
+            $tokenResumen = bin2hex(random_bytes(16));
 
             $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados';
             $ch = curl_init($url);
             $data = [
                 'email' => $email,
-                'nombre' => $nombre
+                'nombre' => $nombre,
+                'token' => $tokenResumen,
+                'paso' => 3,
+                'datos_sesion' => json_encode($_SESSION)
             ];
-            
+
             $payload = json_encode($data);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -93,17 +98,23 @@ if (isset($_POST['siguiente'])) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             curl_exec($ch);
             curl_close($ch);
-            // --- FIN: GUARDAR EN REGISTROS ABANDONADOS ---
+
+            // AUTO-GENERADOR DE URL PARA EL EMAIL
+            $protocolo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+            $dominio = $_SERVER['HTTP_HOST'];
+            $carpeta = rtrim(dirname($_SERVER['REQUEST_URI']), '/');
+            $enlaceMagico = $protocolo . $dominio . $carpeta . "/resumeRegistro.php?token=" . $tokenResumen;
+
+            // 2. ¡ENVIAMOS EL CORREO REAL! 📨
+            enviarCorreoBorrador($email, $nombre, $enlaceMagico);
 
             header('Location: registerAnfitrion-paso3.php');
             exit();
-        
         } else {
             $formError = 'Error al guardar los datos de sesión. Por favor, inténtalo de nuevo.';
         }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -517,18 +528,6 @@ if (isset($_POST['siguiente'])) {
                     infoVisibleMobile = false;
                 }
             });
-
-            if (tooltip) {
-                tooltip.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-
-            if (tooltipMobile) {
-                tooltipMobile.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
         });
 
         function mostrarContrasena(id) {
@@ -595,7 +594,6 @@ if (isset($_POST['siguiente'])) {
                 const userExistsMessage = document.getElementById('user-exists-message');
 
                 if (data.status === 'host_exists') {
-                    // Email ya registrado como host
                     emailInput.classList.remove('is-valid');
                     emailInput.classList.add('is-invalid');
                     emailFeedback.textContent = data.message;
@@ -605,13 +603,11 @@ if (isset($_POST['siguiente'])) {
                     document.getElementById('user_type').value = "host";
                     return false;
                 } else if (data.status === 'user_exists') {
-                    // Email registrado como user/guest
                     emailInput.classList.remove('is-invalid');
                     emailInput.classList.add('is-valid');
                     userExistsMessage.style.display = 'block';
                     disablePasswordFields();
 
-                    // Establecer variables de sesión via AJAX
                     fetch('setUserSession.php', {
                         method: 'POST',
                         headers: {
@@ -627,7 +623,6 @@ if (isset($_POST['siguiente'])) {
                     document.getElementById('user_type').value = "guest";
                     return true;
                 } else if (data.status === 'available') {
-                    // Email disponible - nuevo usuario
                     emailInput.classList.remove('is-invalid');
                     emailInput.classList.add('is-valid');
                     userExistsMessage.style.display = 'none';
@@ -638,13 +633,6 @@ if (isset($_POST['siguiente'])) {
                 }
             } catch (error) {
                 console.error('Error al verificar el email:', error);
-                const errorMessage = document.getElementById('error-message');
-                const errorText = document.getElementById('error-text');
-                errorMessage.style.display = 'block';
-                errorText.innerText = 'Error al verificar el email. Por favor, inténtalo de nuevo más tarde.';
-                document.getElementById('email_validado').value = "1";
-                document.getElementById('user_type').value = "new";
-                return true;
             } finally {
                 document.getElementById('email-loading').style.display = 'none';
             }
@@ -652,78 +640,12 @@ if (isset($_POST['siguiente'])) {
 
         document.getElementById('input_email').addEventListener('input', function() {
             const email = this.value.trim();
-
             clearTimeout(emailTimeout);
-
-            if (!email) {
-                document.getElementById('email-loading').style.display = 'none';
-                this.classList.remove('is-valid', 'is-invalid');
-                document.getElementById('user-exists-message').style.display = 'none';
-                enablePasswordFields();
-                return;
-            }
-
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                this.classList.remove('is-valid');
-                this.classList.add('is-invalid');
-                document.getElementById('email-feedback').textContent = "Introduce un email válido.";
-                document.getElementById('user-exists-message').style.display = 'none';
-                return;
-            }
-
+            if (!email) return;
             emailTimeout = setTimeout(() => {
                 verificarEmail(email);
             }, 500);
         });
-
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const password = document.getElementById('password');
-            const password2 = document.getElementById('password2');
-            const errorMessage = document.getElementById('error-message');
-            const errorText = document.getElementById('error-text');
-            const emailValidado = document.getElementById('email_validado').value;
-            let hasErrors = false;
-            let errorMessages = [];
-
-            // Verificar si el email está validado (no es host existente)
-            if (emailValidado === '0') {
-                hasErrors = true;
-                errorMessages.push('Este email ya está registrado como anfitrión. Por favor, utiliza otro email.');
-                e.preventDefault();
-            }
-
-            // Solo validar contraseñas si están habilitadas (no es usuario existente)
-            if (!password.disabled) {
-                if (password.value !== password2.value) {
-                    hasErrors = true;
-                    errorMessages.push('Las contraseñas no coinciden.');
-                    e.preventDefault();
-                }
-            }
-
-            const telefono = document.getElementById('input_telefono').value;
-            if (telefono.length !== 9 || !/^\d+$/.test(telefono)) {
-                hasErrors = true;
-                errorMessages.push('El teléfono debe contener 9 dígitos numéricos.');
-                e.preventDefault();
-            }
-
-            const email = document.getElementById('input_email').value.trim();
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                hasErrors = true;
-                errorMessages.push('Introduce un email válido.');
-                e.preventDefault();
-            }
-
-            if (hasErrors) {
-                errorMessage.style.display = 'block';
-                errorText.innerText = errorMessages.join(' ');
-            }
-        });
-
-        <?php if (!empty($formError)): ?>
-            document.getElementById('error-message').style.display = 'block';
-        <?php endif; ?>
     </script>
 </body>
 

@@ -1,3 +1,7 @@
+<?php
+require_once 'revisar_abandonos.php';
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 
