@@ -347,10 +347,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'enviar_invitacion_gestora') {
         $nombre = sanitizeText('invite_nombre');
         $email = sanitizeText('invite_email');
+        $telefono = sanitizeText('invite_telefono');
         $empresa = sanitizeText('invite_empresa');
-        $cif = strtoupper(sanitizeText('invite_cif'));
-        // CAPTURAMOS LA RAZÓN SOCIAL
-        $razon_social = sanitizeText('invite_razon_social');
         $codigoPostal = sanitizeText('invite_codigo_postal');
         $plan = normalizeInvitePlan($_POST['invite_plan'] ?? 'Basico');
 
@@ -373,13 +371,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
-        // AÑADIMOS LA RAZÓN SOCIAL AL TOKEN
         $token = createGestoraInvitationToken([
             'email' => $email,
             'nombre' => $nombre,
+            'telefono' => $telefono,
             'empresa' => $empresa,
-            'cif' => $cif,
-            'razon_social' => $razon_social,
             'codigo_postal' => $codigoPostal,
             'plan' => $plan,
             'rol' => 'gestora',
@@ -1167,7 +1163,7 @@ $postalCoverage = count($activePostalCodes);
                                 <div class="flex-grow-1">
                                     <h2 class="card-name"><?php echo htmlspecialchars($gestor['name'] ?? 'Sin nombre'); ?></h2>
                                     <div class="card-company">
-                                        <?php echo htmlspecialchars($gestor['empresa'] ?? 'Sin empresa'); ?></div>
+                                        <?php echo htmlspecialchars($gestor['empresa'] ?? 'Sin entidad'); ?></div>
                                 </div>
                             </div>
                             <div class="plan-badge <?php echo htmlspecialchars($gestor['plan_class']); ?>">
@@ -1295,7 +1291,7 @@ $postalCoverage = count($activePostalCodes);
                                 <input type="text" class="form-control" id="edit_telefono" name="telefono">
                             </div>
                             <div class="col-md-6">
-                                <label for="edit_empresa" class="form-label fw-bold">Empresa</label>
+                                <label for="edit_empresa" class="form-label fw-bold">Entidad</label>
                                 <input type="text" class="form-control" id="edit_empresa" name="empresa">
                             </div>
                             <div class="col-md-6">
@@ -1356,23 +1352,18 @@ $postalCoverage = count($activePostalCodes);
                                 <input type="email" class="form-control" id="invite_email" name="invite_email" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="invite_empresa" class="form-label fw-bold">Empresa</label>
+                                <label for="invite_telefono" class="form-label fw-bold">Telefono</label>
+                                <input type="text" class="form-control" id="invite_telefono" name="invite_telefono">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="invite_empresa" class="form-label fw-bold">Entidad</label>
                                 <input type="text" class="form-control" id="invite_empresa" name="invite_empresa">
                             </div>
                             <div class="col-md-6">
-                                <label for="invite_cif" class="form-label fw-bold">CIF</label>
-                                <input type="text" class="form-control" id="invite_cif" name="invite_cif">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="invite_razon_social" class="form-label fw-bold">Razón Social</label>
-                                <input type="text" class="form-control" id="invite_razon_social"
-                                    name="invite_razon_social">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="invite_codigo_postal" class="form-label fw-bold">Codigo postal
-                                    inicial</label>
+                                <label for="invite_codigo_postal" class="form-label fw-bold">Codigo postal</label>
                                 <input type="text" class="form-control" id="invite_codigo_postal"
                                     name="invite_codigo_postal" maxlength="5" pattern="[0-9]{5}" inputmode="numeric"
+                                    placeholder="Ej: 28001"
                                     required>
                             </div>
                             <div class="col-md-6">
