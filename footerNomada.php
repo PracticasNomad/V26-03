@@ -62,13 +62,27 @@ $reservaActive = ($currentPage == 'nomada_reservas.php' || $currentPage == 'noma
 
     .footer-text {
         font-weight: 700;
-        font-size: 0.85rem;
+        font-size: 1rem;
         margin-top: 2px;
     }
     
     .footer-icon-size {
         font-size: 1.5rem;
         margin-bottom: 2px;
+    }
+
+     /* Adaptación para móviles: ocultar texto */
+    @media (max-width: 400px) {
+        .footer-text {
+            display: none;
+        }
+        .icon-container i {
+            font-size: 1.5rem !important;
+            margin-bottom: 0 !important;
+        }
+        .footer-item {
+            padding: 12px 0;
+        }
     }
 </style>
 

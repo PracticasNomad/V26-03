@@ -68,8 +68,22 @@ $reservaActive = ($currentPage == 'tusReservas.php' || $currentPage == 'tusHisto
     }
     
     .footer-icon-size {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         margin-bottom: 2px;
+    }
+
+     /* Adaptación para móviles: ocultar texto para que quepan */
+    @media (max-width: 400px) {
+        .footer-text {
+            display: none;
+        }
+        .icon-container i {
+            font-size: 1.5rem !important;
+            margin-bottom: 0 !important;
+        }
+        .footer-item {
+            padding: 12px 0;
+        }
     }
 </style>
 

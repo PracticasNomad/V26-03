@@ -1,85 +1,136 @@
 <?php $paginaActual = basename($_SERVER['PHP_SELF']); ?>
 
 <style>
-    /* Estado activo unificado para el footer compartido */
-    .footer-container .footer-item.active,
-    .footer-container .footer-item.active a,
-    .footer-container .footer-item.active a:visited,
-    .footer-container .footer-item.active a:active {
-        color: #00B7CF !important;
+    /* GESTOR / ADMIN FOOTER */
+    .footer {
+        color: black;
+        background-color: white;
+        width: 100%;
+        -webkit-user-select: none;
+        user-select: none;
+        bottom: 0;
+        font-size: 15px;
+        background: #E3E1E1;
+        text-align: center;
+        position: fixed;
+        z-index: 1000;
+        margin: 0;
     }
 
-    .footer-container .footer-item.active .icon-container i {
+    .footer-container {
+        background-color: white;
+        box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+        padding-top: 1px !important;
+        padding-bottom: 1px !important;
+        height: auto;
+        margin: 0;
+        width: 100%;
+    }
+
+    /* Usamos col para que se ajusten solos sin importar cuántos sean */
+    .footer-item {
+        padding: 8px 0;
+        text-decoration: none !important;
+        color: #6c757d;
+        font-size: 0.8rem;
+        display: block;
+    }
+
+    .icon-container {
+        transition: transform 0.3s ease, color 0.3s ease;
+        padding: 5px 0;
+        color: #000000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Hover: Animación al pasar el ratón */
+    .footer-item:hover .icon-container {
+        transform: translateY(-7px);
+        color: #007bff; /* Azul Gestor */
+    }
+
+    /* Estado activo unificado */
+    .footer-item.active .icon-container {
         color: #007bff !important;
+    }
+    
+    .footer-item.active .footer-text {
+        color: #007bff !important;
+    }
+
+    .footer-text {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-top: 2px;
+        color: #6c757d;
+    }
+
+    .icon-container i {
+        font-size: 1.5rem !important; /* Tamaño reducido de Admin */
+        margin-bottom: 2px;
+    }
+
+    /* Adaptación para móviles: ocultar texto para que quepan 6 botones */
+    @media (max-width: 400px) {
+        .footer-text {
+            display: none;
+        }
+        .icon-container i {
+            font-size: 1.5rem !important;
+            margin-bottom: 0 !important;
+        }
+        .footer-item {
+            padding: 12px 0;
+        }
     }
 </style>
 
-<div class="container-fluid footer mt-5 p-3">
-    <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
-        <label for="anf" id="lbl_anf" class="col-2 text-center footer-item <?php if ($paginaActual == 'Anfitriones.php') echo 'active'; ?>">
-            <div class="row">
-                <a href="Anfitriones.php">
-                    <div class="col-12 icon-container">
-                        <i class="h2 fas fa-users p-1 m-0"></i>
-                        <div>Anfitriones</div>
-                    </div>
-                </a>
+<div class="container-fluid footer p-0">
+    <div class="row text-center fixed-bottom bg-white footer-container">
+        
+        <a href="Anfitriones.php" class="col text-center footer-item <?php if ($paginaActual == 'Anfitriones.php') echo 'active'; ?>">
+            <div class="icon-container">
+                <i class="fas fa-users"></i>
+                <div class="footer-text">Anfitriones</div>
             </div>
-        </label>
+        </a>
 
-        <label for="val" id="lbl_val" class="col-2 text-center footer-item <?php if ($paginaActual == 'verValidar.php') echo 'active'; ?>">
-            <div class="row">
-                <a href="verValidar.php">
-                    <div class="col-12 icon-container">
-                        <i class="h2 fas fa-check-circle p-1 m-0"></i>
-                        <div>Validar</div>
-                    </div>
-                </a>
+        <a href="verValidar.php" class="col text-center footer-item <?php if ($paginaActual == 'verValidar.php') echo 'active'; ?>">
+            <div class="icon-container">
+                <i class="fas fa-check-circle"></i>
+                <div class="footer-text">Validar</div>
             </div>
-        </label>
+        </a>
 
-        <label for="res" id="lbl_res" class="col-2 text-center footer-item <?php if ($paginaActual == 'verReservas.php') echo 'active'; ?>">
-            <div class="row">
-                <a href="verReservas.php">
-                    <div class="col-12 icon-container">
-                        <i class="h2 fas fa-book-open p-1 m-0"></i>
-                        <div>Reservas</div>
-                    </div>
-                </a>
+        <a href="verReservas.php" class="col text-center footer-item <?php if ($paginaActual == 'verReservas.php') echo 'active'; ?>">
+            <div class="icon-container">
+                <i class="fas fa-book-open"></i>
+                <div class="footer-text">Reservas</div>
             </div>
-        </label>
+        </a>
 
-        <label for="his" id="lbl_his" class="col-2 text-center footer-item <?php if ($paginaActual == 'verEstablecimientos.php') echo 'active'; ?>">
-            <div class="row">
-                <a href="verEstablecimientos.php">
-                    <div class="col-12 icon-container">
-                        <i class="h2 fas fa-building p-1 m-0"></i>
-                        <div>Establecimientos</div>
-                    </div>
-                </a>
+        <a href="verEstablecimientos.php" class="col text-center footer-item <?php if ($paginaActual == 'verEstablecimientos.php') echo 'active'; ?>">
+            <div class="icon-container">
+                <i class="fas fa-building"></i>
+                <div class="footer-text">Locales</div>
             </div>
-        </label>
+        </a>
 
-        <label for="esp" id="lbl_esp" class="col-2 text-center footer-item <?php if ($paginaActual == 'verEspacios.php') echo 'active'; ?>">
-            <div class="row">
-                <a href="verEspacios.php">
-                    <div class="col-12 icon-container">
-                        <i class="h2 fas fa-chair p-1 m-0"></i>
-                        <div>Espacios</div>
-                    </div>
-                </a>
+        <a href="verEspacios.php" class="col text-center footer-item <?php if ($paginaActual == 'verEspacios.php') echo 'active'; ?>">
+            <div class="icon-container">
+                <i class="fas fa-chair"></i>
+                <div class="footer-text">Espacios</div>
             </div>
-        </label>
+        </a>
 
-        <label for="per" id="lbl_per" class="col-2 text-center footer-item <?php if ($paginaActual == 'tuPerfil.php') echo 'active'; ?>">
-            <div class="row">
-                <a href="tuPerfil.php">
-                    <div class="col-12 icon-container">
-                        <i class="h2 fas fa-user-tie p-1 m-0"></i>
-                        <div>Perfil</div>
-                    </div>
-                </a>
+        <a href="tuPerfil.php" class="col text-center footer-item <?php if ($paginaActual == 'tuPerfil.php') echo 'active'; ?>">
+            <div class="icon-container">
+                <i class="fas fa-user-tie"></i>
+                <div class="footer-text">Perfil</div>
             </div>
-        </label>
+        </a>
+
     </div>
 </div>
