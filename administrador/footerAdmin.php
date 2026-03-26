@@ -78,7 +78,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <div class="row">
                 <div class="col-12 icon-container <?php echo $currentPage == 'verGestores.php' ? 'active-icon' : ''; ?>">
                     <i class="h3 fas fa-user-tie p-1 m-0"></i>
-                    <div class="footer-text">Gestores</div>
+                    <div class="footer-text">Gestoras</div>
                 </div>
             </div>
         </a>

@@ -51,7 +51,7 @@ $totalEstablecimientos = getCountFromApi('establecimiento');
 $totalReservas = getCountFromApi('reserva');
 
 // Distribución para el gráfico circular
-$distribucionNombres = ['Nómadas', 'Anfitriones', 'Gestores'];
+$distribucionNombres = ['Nómadas', 'Anfitriones', 'Gestoras'];
 $distribucionCantidades = [$totalNomadas, $totalAnfitriones, $totalGestores];
 
 // Datos para el gráfico de barras (simulados por ahora para evitar saturar la BD)
@@ -179,7 +179,7 @@ $cantidadesGrafico = [12, 18, 25, 30, 45, $totalReservas];
                         <h6 class="text-uppercase fw-bold opacity-75 mb-1">Proveedores Activos</h6>
                         <h1 class="display-4 fw-bold mb-0"><?php echo ($totalAnfitriones + $totalGestores); ?></h1>
                         <small><?php echo $totalAnfitriones; ?> Anfitriones | <?php echo $totalGestores; ?>
-                            Gestores</small>
+                            Gestoras</small>
                         <i class="fas fa-user-tie icon-box"></i>
                     </div>
                 </div>

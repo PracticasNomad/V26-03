@@ -204,7 +204,7 @@ function fetchGestores(&$errorDb = null)
         }
     }
 
-    $errorDb = 'No se pudieron cargar los gestores desde la base de datos.';
+    $errorDb = 'No se pudieron cargar las gestoras desde la base de datos.';
 
     return [];
 }
@@ -579,7 +579,7 @@ $postalCoverage = count($activePostalCodes);
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
-    <title>Gestion de Gestores</title>
+    <title>Gestion de Gestoras</title>
     <style>
         :root {
             --bg: #f4f7fb;
@@ -1079,7 +1079,7 @@ $postalCoverage = count($activePostalCodes);
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
                 <div>
                     <div class="title-row">
-                        <h1 class="hero-title"><i class="fas fa-user-tie me-2"></i>Vista Global de Gestores</h1>
+                        <h1 class="hero-title"><i class="fas fa-user-tie me-2"></i>Vista Global de Gestoras</h1>
                         <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right"
                             title="Lista, filtra y administra las gestiones activas. Cada tarjeta resume la zona asignada por codigo postal y permite editar datos, reasignar cobertura, ver estadisticas y eliminar el perfil.">?</span>
                     </div>
@@ -1108,7 +1108,7 @@ $postalCoverage = count($activePostalCodes);
 
         <section class="summary-grid">
             <article class="summary-card">
-                <div class="summary-label">Gestores</div>
+                <div class="summary-label">Gestoras</div>
                 <div class="summary-value"><?php echo $totalGestores; ?></div>
                 <div class="summary-meta">Perfiles listados en esta vista</div>
             </article>
@@ -1137,14 +1137,14 @@ $postalCoverage = count($activePostalCodes);
                 <input id="gestor-search" type="search" class="form-control search-input"
                     placeholder="Ejemplo: Marta, B12345678 o 28001">
             </div>
-            <div class="toolbar-meta"><span id="result-count"><?php echo $totalGestores; ?></span> gestores visibles
+            <div class="toolbar-meta"><span id="result-count"><?php echo $totalGestores; ?></span> gestoras visibles
             </div>
         </section>
 
         <?php if (!$errorDb && empty($gestores)): ?>
             <section class="empty-state">
                 <div class="display-6 mb-3"><i class="fas fa-user-slash"></i></div>
-                <h2 class="h4 fw-bold">No hay gestores registrados</h2>
+                <h2 class="h4 fw-bold">No hay gestoras registradas</h2>
                 <p class="mb-0">Cuando existan perfiles en la tabla gestor apareceran aqui con sus acciones administrativas.
                 </p>
             </section>
@@ -1264,7 +1264,7 @@ $postalCoverage = count($activePostalCodes);
             <section id="empty-filter-state" class="empty-state mt-3" style="display:none;">
                 <div class="display-6 mb-3"><i class="fas fa-filter-circle-xmark"></i></div>
                 <h2 class="h4 fw-bold">No hay coincidencias</h2>
-                <p class="mb-0">Ajusta la busqueda para ver gestores por nombre, CIF o codigo postal.</p>
+                <p class="mb-0">Ajusta la busqueda para ver gestoras por nombre, CIF o codigo postal.</p>
             </section>
         <?php endif; ?>
     </div>
