@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Verificación de sesión
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
     header('Location: inicio_sesion_admin.php');
     exit();
@@ -14,7 +13,6 @@ $dotenv->load();
 
 $apiBase = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1';
 
-// Función para peticiones a la API
 function getApiData($endpoint)
 {
     global $apiBase;
@@ -37,10 +35,9 @@ function getApiData($endpoint)
     return [];
 }
 
-// 1. OBTENER DATOS BÁSICOS (Conteos)
 $nomadas = getApiData('user?select=id,created_at');
 $totalNomadas = is_array($nomadas) ? count($nomadas) : 0;
-$nomadasNuevos = intval($totalNomadas * 0.15); // Simulado: 15% de nómadas en el último mes
+$nomadasNuevos = intval($totalNomadas * 0.15);
 
 $anfitriones = getApiData('host?select=id,plan');
 $totalAnfitriones = is_array($anfitriones) ? count($anfitriones) : 0;
@@ -51,34 +48,26 @@ $totalGestoras = is_array($gestoras) ? count($gestoras) : 0;
 $subsGestoras = is_array($gestoras) ? count(array_filter($gestoras, fn($g) => strtolower($g['plan'] ?? '') === 'pro' || strtolower($g['plan'] ?? '') === 'premium')) : 0;
 
 
-// ==========================================
-// 2. CÁLCULOS FINANCIEROS REALES (Reservas)
-// ==========================================
 $reservas = getApiData('reserva?select=id,precio_total');
 $totalReservas = is_array($reservas) ? count($reservas) : 0;
 
 $volumenReservas = 0;
 if (is_array($reservas)) {
     foreach ($reservas as $res) {
-        // Sumamos el valor de la columna 'precio_total' de tu base de datos
         $volumenReservas += floatval($res['precio_total'] ?? 0);
     }
 }
 
-// Calculamos el ticket medio real
 $gastoPromedio = $totalReservas > 0 ? ($volumenReservas / $totalReservas) : 0;
 
-// Suscripciones (Mantenemos la simulación temporal de los planes hasta que tengas la tabla de cobros Stripe)
-$ingresosSubsHost = $subsAnfitriones * 49.99; // Simulado: Plan de 50€/mes
-$ingresosSubsGestoras = $subsGestoras * 1900; // Simulado: Plan de 1900€ Gestoras
+$ingresosSubsHost = $subsAnfitriones * 49.99;
+$ingresosSubsGestoras = $subsGestoras * 1900;
 $ingresosTotales = $ingresosSubsHost + $ingresosSubsGestoras + $volumenReservas;
 
 
-// Datos Mapa de Calor (Simulado por Ciudades)
-$ciudadesTop = ['Madrid', 'Barcelona', 'Valencia', 'Málaga', 'Sevilla'];
+$ciudadesTop = ['Madrid', 'Alicante', 'Valencia', 'Elche', 'Murcia'];
 $ingresosCiudades = [4500, 3200, 1800, 1500, 900];
 
-// Top Establecimientos (Simulado para la UI)
 $topEstablecimientos = [
     ['nombre' => 'Coworking Centro', 'visitas' => 145, 'tiempo_medio' => '4h', 'ingresos' => 1250],
     ['nombre' => 'Cafetería Work&Coffee', 'visitas' => 89, 'tiempo_medio' => '1.5h', 'ingresos' => 680],
@@ -268,8 +257,8 @@ $topEstablecimientos = [
                 <div class="d-flex align-items-center gap-3">
                     <img src="../img/logo.jpg" alt="Nomadapp" style="height: 45px; border-radius: 10px;">
                     <div>
-                        <h4 class="mb-0 fw-bold">Business Intelligence</h4>
-                        <small class="text-white-50">Análisis financiero y métricas de plataforma</small>
+                        <h4 class="mb-0 fw-bold">Dashboard TheNomadapp</h4>
+                        <small class="text-white-50">Estadísticas </small>
                     </div>
                 </div>
                 <a href="cerrarSesion.php" class="btn btn-outline-light btn-sm rounded-pill px-3"><i
@@ -568,7 +557,6 @@ $topEstablecimientos = [
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 1. Gráfico Mapa de Calor (Simulado con Barras Horizontales por Ciudad)
         new Chart(document.getElementById('mapaCalorChart').getContext('2d'), {
             type: 'bar',
             data: {
@@ -586,7 +574,6 @@ $topEstablecimientos = [
             }
         });
 
-        // 2. Gráfico Desglose Ingresos (Usa Variables Reales Calculadas)
         new Chart(document.getElementById('ingresosDoughnut').getContext('2d'), {
             type: 'doughnut',
             data: {
@@ -600,7 +587,6 @@ $topEstablecimientos = [
             options: { responsive: true, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
         });
 
-        // 3. Gráfico Espacios Hosts
         new Chart(document.getElementById('espaciosHostChart').getContext('2d'), {
             type: 'bar',
             data: {
@@ -614,7 +600,6 @@ $topEstablecimientos = [
             options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
 
-        // 4. Gráfico Rentabilidad Gestoras
         new Chart(document.getElementById('rentabilidadGestorasChart').getContext('2d'), {
             type: 'line',
             data: {
