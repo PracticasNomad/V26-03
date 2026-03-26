@@ -349,9 +349,10 @@ $topEstablecimientos = [
                                 <div>
                                     <div class="kpi-label">Usuarios Activos</div>
                                     <div class="kpi-value">
-                                        
 
-                                                                            <?php echo ($totalNomadas + $totalAnfitriones + $totalGestoras); ?></div>
+
+                                        <?php echo ($totalNomadas + $totalAnfitriones + $totalGestoras); ?>
+                                    </div>
                                     <small class="text-muted">En todo el ecosistema</small>
                                 </div>
                                 <div class="kpi-icon icon-red"><i class="fas fa-users"></i></div>
@@ -416,8 +417,8 @@ $topEstablecimientos = [
                                     <th>Pasta Dejada (Ingresos)</th>
                                 </tr>
                             </thead>
-                                <tbody>
-                            <?php foreach ($topEstablecimientos as $est): ?>
+                            <tbody>
+                                <?php foreach ($topEstablecimientos as $est): ?>
                                     <tr>
                                         <td><i class="fas fa-store text-muted me-2"></i> <?php echo $est['nombre']; ?></td>
                                         <td><span
@@ -427,7 +428,7 @@ $topEstablecimientos = [
                                         </td>
                                         <td class="text-success fw-bold">€<?php echo number_format($est['ingresos'], 2); ?>
                                         </td>
-                                            </tr>
+                                    </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
@@ -459,7 +460,7 @@ $topEstablecimientos = [
                     <div class="col-md-3">
                         <div class="kpi-card">
                             <div class="kpi-label">Aportación Global</div>
-                                <div class="kpi-value text-info">
+                            <div class="kpi-value text-info">
                                 <?php echo $ingresosTotales > 0 ? round(($ingresosSubsHost / $ingresosTotales) * 100) : 0; ?>%
                             </div>
                             <small class="text-muted">Del revenue de la plataforma</small>
@@ -498,6 +499,7 @@ $topEstablecimientos = [
                             <div class="kpi-value">124</div> <small class="text-muted">Promedio de rentabilidad:
                                 Alta</small>
                         </div>
+                        >>>>>>> f3b346ec444b9b85ee7ae26a906ddd4a919f6dd6
                     </div>
                 </div>
 

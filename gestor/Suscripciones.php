@@ -98,7 +98,7 @@ $ahorroPremium = ($precioMensualPremium * 12) - $precioAnualPremium;
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
-    <title>Planes de Suscripción - Gestores</title>
+    <title>Planes de Suscripción - Gestoras</title>
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -351,7 +351,7 @@ $ahorroPremium = ($precioMensualPremium * 12) - $precioAnualPremium;
             .plan-card.popular { transform: none; }
         }
 
-        /* Estilos del footer (adaptado a gestores) */
+        /* Estilos del footer (adaptado a gestoras) */
         .footer-container {
             background-color: white;
             box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);

@@ -286,7 +286,7 @@ if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
             <?php endforeach; ?>
         </div>
 
-        <h3 class="section-header mt-5"><i class="fas fa-user-tie text-danger"></i> Planes para Gestores</h3>
+        <h3 class="section-header mt-5"><i class="fas fa-user-tie text-danger"></i> Planes para Gestoras</h3>
         <div class="row g-4">
             <?php foreach ($planesGestor as $plan): ?>
                 <div class="col-md-6 col-xl-4">
