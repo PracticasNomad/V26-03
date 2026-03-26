@@ -11,7 +11,7 @@ $dotenv->load();
 
 if (isset($_POST['email']) && isset($_POST['password'])) {
 
-    $email = $_POST['email'];
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
 
     $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/auth/v1/token?grant_type=password';
@@ -34,74 +34,95 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     ]);
 
     $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $result = json_decode($result, true);
     curl_close($ch);
 
-    if (isset($result['access_token'])) {
-        $_SESSION["token"] = $result['access_token'];
+    // Si el login en Auth fue correcto
+    if ($httpCode === 200 && isset($result['access_token'])) {
+        
+        $userId = $result['user']['id'];
+        $token = $result['access_token'];
+
+        // Asignamos variables base
+        $_SESSION["token"] = $token;
         $_SESSION["email"] = $email;
-        $_SESSION["user_id"] = $result['user']['id'];
+        $_SESSION["user_id"] = $userId;
 
-        // ✅ PRIMERO buscamos en la tabla "gestor"
-        $urlGestor = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/gestor?id=eq." . $_SESSION["user_id"];
+        // ===============================================================
+        // 1. VERIFICAR SI ES ADMINISTRADOR (Fusión Oculta)
+        // ===============================================================
+        // Buscamos tanto en "admin" como en "administrador" para evitar fallos de nombres
+        $tablasAdmin = ['admin', 'administrador'];
+        $esAdmin = false;
 
-        $ch = curl_init($urlGestor);
-        curl_setopt_array($ch, array(
+        foreach ($tablasAdmin as $tabla) {
+            $urlAdmin = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/" . $tabla . "?id=eq." . urlencode($userId) . "&select=id";
+            $chAdmin = curl_init($urlAdmin);
+            curl_setopt_array($chAdmin, [
+                CURLOPT_CUSTOMREQUEST => "GET",
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+                    'apikey: ' . $_ENV['SERVICE_APIKEY']
+                ],
+                CURLOPT_RETURNTRANSFER => true
+            ]);
+            $resAdmin = curl_exec($chAdmin);
+            $codeAdmin = curl_getinfo($chAdmin, CURLINFO_HTTP_CODE);
+            curl_close($chAdmin);
+
+            $datosAdmin = json_decode($resAdmin, true);
+
+            // Si devuelve 200 y encuentra datos, es que está en esta tabla
+            if ($codeAdmin === 200 && is_array($datosAdmin) && count($datosAdmin) > 0) {
+                $esAdmin = true;
+                break; // Lo hemos encontrado, dejamos de buscar
+            }
+        }
+
+        if ($esAdmin) {
+            // 🎉 ES ADMINISTRADOR: Le damos el rol y lo redirigimos a su panel oculto
+            $_SESSION["rol"] = "administrador";
+            header('Location: ../administrador/tuPerfil.php');
+            exit();
+        }
+
+        // ===============================================================
+        // 2. SI NO ES ADMIN, VERIFICAMOS SI ES GESTOR NORMAL
+        // ===============================================================
+        $urlGestor = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/gestor?id=eq." . urlencode($userId);
+
+        $chGestor = curl_init($urlGestor);
+        curl_setopt_array($chGestor, [
             CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                // CAMBIAMOS ESTAS DOS LÍNEAS PARA USAR LA SERVICE KEY:
+            CURLOPT_HTTPHEADER => [
                 'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
                 'apikey: ' . $_ENV['SERVICE_APIKEY']
-            ),
+            ],
             CURLOPT_RETURNTRANSFER => true,
-        ));
+        ]);
 
-        $resultadoGestor = curl_exec($ch);
-        $codigoGestor = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        $resGestor = curl_exec($chGestor);
+        $codeGestor = curl_getinfo($chGestor, CURLINFO_HTTP_CODE);
+        curl_close($chGestor);
 
-        if ($codigoGestor === 200) {
-            $datosGestor = json_decode($resultadoGestor, true);
-            if (count($datosGestor) > 0) {
-                // ✅ Es un gestor
-                header('Location: tuPerfil.php');
-                exit();
-            }
+        $datosGestor = json_decode($resGestor, true);
+
+        if ($codeGestor === 200 && is_array($datosGestor) && count($datosGestor) > 0) {
+            // 🎉 ES GESTOR: Limpiamos rol admin por si acaso y entra a su panel
+            unset($_SESSION["rol"]); 
+            header('Location: tuPerfil.php');
+            exit();
         }
 
-        // 🧑‍💼 Si no es gestor, buscamos en la tabla "administrador"
-        $urlAdmin = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/administrador?id=eq." . $_SESSION["user_id"];
-
-        $ch = curl_init($urlAdmin);
-        curl_setopt_array($ch, array(
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $_SESSION["token"],
-                'apikey: ' . $supabaseKey
-            ),
-            CURLOPT_RETURNTRANSFER => true,
-        ));
-
-        $resultadoAdmin = curl_exec($ch);
-        $codigoAdmin = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($codigoAdmin === 200) {
-            $datosAdmin = json_decode($resultadoAdmin, true);
-            if (count($datosAdmin) > 0) {
-                // ✅ Es un administrador
-                header('Location: ../administrador/tuPerfil.php');
-                exit();
-            }
-        }
-
-        // ❌ No es ni gestor ni administrador
+        // ===============================================================
+        // 3. SI NO ES NADA (Ej: Un nómada o un anfitrión intentando colarse)
+        // ===============================================================
         unset($_SESSION["token"]);
         unset($_SESSION["email"]);
         unset($_SESSION["user_id"]);
-        $error = 'No tienes un rol asignado (ni gestor ni administrador)';
+        $error = 'Acceso denegado: Tu cuenta no tiene permisos de gestión.';
+
     } else {
         $error = 'Correo o contraseña incorrectos';
     }
@@ -122,7 +143,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
-    <title>Inicio sesión Anfitrion</title>
+    <title>Inicio sesión</title>
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -134,6 +155,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
 
         .login-container {
@@ -144,7 +166,6 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             max-width: 500px;
             width: 100%;
             text-align: center;
-            margin: 35px auto;
         }
 
         .login-logo {
@@ -183,6 +204,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             border-radius: 30px;
             font-weight: 600;
             transition: all 0.3s ease;
+            width: 100%;
         }
 
         .btn-custom:hover {
@@ -190,15 +212,13 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .forgot-password,
-        .register-link {
+        .forgot-password {
             color: #28a745;
             text-decoration: none;
             font-weight: 600;
         }
 
-        .forgot-password:hover,
-        .register-link:hover {
+        .forgot-password:hover {
             text-decoration: underline;
         }
 
@@ -223,7 +243,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 <img src="../../img/antena.png" alt="Establecimiento" class="login-logo">
 
                 <h2 class="login-title">Inicia sesión</h2>
-                <h3 class="login-subtitle">¿Tienes una cuenta de gestion asociada a yonomadapp?</h3>
+                <h3 class="login-subtitle">Acceso a tu panel de gestión de TheNomadApp</h3>
 
                 <div class="row">
                     <label for="email" class="form-label">
@@ -240,14 +260,14 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 </div>
 
                 <?php if (!empty($error)): ?>
-                    <div class="alert alert-danger text-center" role="alert">
-                        <?= $error ?>
+                    <div class="alert alert-danger text-center" role="alert" style="border-radius: 15px;">
+                        <i class="fas fa-exclamation-circle me-1"></i> <?= $error ?>
                     </div>
                 <?php endif; ?>
 
-                <div class="d-flex justify-content-center mb-3">
+                <div class="d-flex justify-content-center mb-3 mt-4">
                     <button class="btn btn-success btn-custom" type="submit">
-                        Entrar
+                        Entrar al Panel
                     </button>
                 </div>
 
@@ -255,13 +275,6 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                     <a href="recuperar_password.php" class="forgot-password">He olvidado mi contraseña</a>
                 </div>
 
-                <div class="mt-4 pt-3 border-top">
-                    <p class="text-muted small mb-2">Atajo de desarrollo:</p>
-                    <a href="../administrador/inicio_sesion_admin.php" class="btn btn-outline-danger btn-sm"
-                        style="border-radius: 20px; font-weight: 600;">
-                        🧪 Ir a Login de Administrador
-                    </a>
-                </div>
                 <div class="powered-by">
                     Powered by <img src="../../img/smartable.png" alt="Smartable">
                 </div>

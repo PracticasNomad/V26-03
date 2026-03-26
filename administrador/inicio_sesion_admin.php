@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $authResult = json_decode($authResponse, true);
             $userId = $authResult['user']['id'];
             $token = $authResult['access_token'];
+            $refreshToken = $authResult['refresh_token']; //Añadir token de refresco para que el admin no tenga que loguearse cada 60 minutos
 
             // 2. VERIFICACIÓN DE ROL: ¿Es realmente un Administrador?
             // Buscamos su ID en la tabla 'admin' que creaste
@@ -65,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // ¡Acceso Concedido! Guardamos las variables de sesión reales
                 $_SESSION["token"] = $token;
+                $_SESSION["refresh_token"] = $refreshToken; // ← GUARDAR REFRESH TOKEN
                 $_SESSION["email"] = $email;
                 $_SESSION["user_id"] = $userId;
                 $_SESSION["rol"] = "administrador"; // Muy útil para luego proteger vistas

@@ -7,6 +7,45 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
+//Función para renovar el token si expiró
+function renewTokenIfExpired() {
+    if (!isset($_SESSION['refresh_token'])) {
+        return $_SESSION['token'] ?? null;
+    }
+
+    $refreshTokenUrl = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT']
+        . '/auth/v1/token?grant_type=refresh_token';
+    
+    $ch = curl_init($refreshTokenUrl);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['refresh_token' => $_SESSION['refresh_token']]));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . $_ENV['DATABASE_APIKEY'],
+        'Content-Type: application/json'
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200) {
+        $result = json_decode($response, true);
+        if (isset($result['access_token'])) {
+            $_SESSION['token'] = $result['access_token'];
+            if (isset($result['refresh_token'])) {
+                $_SESSION['refresh_token'] = $result['refresh_token'];
+            }
+            return $result['access_token'];
+        }
+    }
+
+    return $_SESSION['token'] ?? null;
+}
+
+// Renovar token antes de hacer peticiones
+$validToken = renewTokenIfExpired();
+
 $establecimientos = [];
 $establecimientosRechazados = [];
 $establecimientosValidados = [];
@@ -68,15 +107,15 @@ $ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_HTTPHEADER => [
-        'apikey: ' . $_ENV['DATABASE_APIKEY'],
-        'Authorization: Bearer ' . ($_SESSION['token'] ?? ''),
+        'apikey: ' . $_ENV['SERVICE_APIKEY'],
+        'Authorization: Bearer ' . $validToken,
     ],
 ]);
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-if ($httpCode === 200) {
+if ($httpCode >= 200 && $httpCode < 300) {
     $data = json_decode($response, true);
     if (is_array($data)) {
         $ids = [];
@@ -102,8 +141,8 @@ if ($httpCode === 200) {
             curl_setopt_array($chGallery, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HTTPHEADER => [
-                    'apikey: ' . $_ENV['DATABASE_APIKEY'],
-                    'Authorization: Bearer ' . ($_SESSION['token'] ?? ''),
+                    'apikey: ' . $_ENV['SERVICE_APIKEY'],
+                    'Authorization: Bearer ' . $validToken,
                 ],
             ]);
 

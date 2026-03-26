@@ -380,158 +380,158 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
 
         <div class="contenedorPerfil sombra fw-bold mt-3">
 
-        <div class="fotoPerfilMovil centrar">
-            <span class="badge-admin fw-bold"><i class="fas fa-shield-alt"></i> Panel Global</span>
-            <div class="profile-image-container sombra mb-3">
-                <img id="fotoPerfilMovil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
-            </div>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
-                <i class="fas fa-camera"></i> Cambiar imágen
-            </button>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
-                <i class="fas fa-edit"></i> Información legal
-            </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </button>
-        </div>
-
-        <div class="perfilFotoBotones">
-            <span class="badge-admin fw-bold"><i class="fas fa-shield-alt"></i> Administrador Global</span>
-            <div class="profile-image-container sombra mb-3">
-                <img id="fotoPerfil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
-            </div>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
-                <i class="fas fa-camera"></i> Cambiar imágen
-            </button>
-            <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
-                <i class="fas fa-edit"></i> Información legal
-            </button>
-            <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </button>
-        </div>
-
-        <div class="perfilInfo">
-            <p class="h5 fw-bold mb-3"><u>Información Legal Global:</u></p>
-
-            <div id="nombre" class="info-item">Nombre: <?= htmlspecialchars($admin['name'] ?? '') ?></div>
-            <div id="email" class="info-item">E-mail: <?= htmlspecialchars($admin['email'] ?? '') ?></div>
-            <div id="telefono" class="info-item">Teléfono: <?= htmlspecialchars($admin['phone'] ?? '') ?></div>
-            <div id="empresa" class="info-item">Empresa: <?= htmlspecialchars($admin['empresa'] ?? '') ?></div>
-            <div id="cif" class="info-item">CIF/NIF: <?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? '') ?></div>
-
-            <div id="direccion" class="info-item">Dirección: <?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? '') ?></div>
-            <div id="localidad" class="info-item">Localidad: <?= htmlspecialchars($admin['localidad'] ?? '') ?></div>
-            <div id="provincia" class="info-item">Provincia: <?= htmlspecialchars($admin['provincia'] ?? '') ?></div>
-            <div id="codigoPostal" class="info-item">Código Postal: <?= htmlspecialchars($admin['codigo_postal'] ?? '') ?></div>
-
-            <input type="hidden" id="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
-        </div>
-        </div>
-    
-
-    <?php include 'footerAdmin.php'; ?>
-
-    <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Editar información legal (Administrador)</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="fotoPerfilMovil centrar">
+                <span class="badge-admin fw-bold"><i class="fas fa-shield-alt"></i> Panel Global</span>
+                <div class="profile-image-container sombra mb-3">
+                    <img id="fotoPerfilMovil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
                 </div>
-                <div class="modal-body">
-                    <form id="formEditarPerfil">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nombre del Administrador:</label>
-                                <input type="text" class="form-control" id="editNombre" name="nombre">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">E-mail de contacto:</label>
-                                <input disabled type="email" class="form-control" id="editEmail">
-                            </div>
-                        </div>
+                <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+                    <i class="fas fa-camera"></i> Cambiar imágen
+                </button>
+                <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                    <i class="fas fa-edit"></i> Información legal
+                </button>
+                <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
+            </div>
 
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Empresa / Razón Social:</label>
-                                <input type="text" class="form-control" id="editEmpresa" name="empresa">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">CIF/NIF:</label>
-                                <input type="text" class="form-control" id="editCIF" name="cif">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Teléfono Legal:</label>
-                                <input type="text" class="form-control" id="editTelefono" name="telefono">
-                            </div>
-                        </div>
-
-                        <hr>
-                        <h6 class="fw-bold mb-3 text-danger"><i class="fas fa-map-marker-alt me-1"></i> Dirección de Facturación Global</h6>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Dirección Completa:</label>
-                            <input type="text" class="form-control" id="editDireccion" name="domicilio_social">
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Provincia:</label>
-                                <input type="text" class="form-control" id="editProvincia" name="provincia">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Localidad:</label>
-                                <input type="text" class="form-control" id="editLocalidad" name="localidad">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Código Postal:</label>
-                                <input type="text" class="form-control" id="editCodigoPostal" name="codigo_postal">
-                            </div>
-                        </div>
-                    </form>
+            <div class="perfilFotoBotones">
+                <span class="badge-admin fw-bold"><i class="fas fa-shield-alt"></i> Administrador Global</span>
+                <div class="profile-image-container sombra mb-3">
+                    <img id="fotoPerfil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
                 </div>
-                <div class="modal-footer">
-                    <div class="legal-info-wrapper">
-                        <span class="legal-info-label">Información Legal</span>
-                        <div class="legal-info-box" id="legalInfoDisplay"><?php echo $informacionLegal ?? '<span>Sin informacion legal registrada</span>'; ?></div>
+                <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+                    <i class="fas fa-camera"></i> Cambiar imágen
+                </button>
+                <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                    <i class="fas fa-edit"></i> Información legal
+                </button>
+                <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
+            </div>
+
+            <div class="perfilInfo">
+                <p class="h5 fw-bold mb-3"><u>Información Legal Global:</u></p>
+
+                <div id="nombre" class="info-item">Nombre: <?= htmlspecialchars($admin['name'] ?? '') ?></div>
+                <div id="email" class="info-item">E-mail: <?= htmlspecialchars($admin['email'] ?? '') ?></div>
+                <div id="telefono" class="info-item">Teléfono: <?= htmlspecialchars($admin['phone'] ?? '') ?></div>
+                <div id="empresa" class="info-item">Empresa: <?= htmlspecialchars($admin['empresa'] ?? '') ?></div>
+                <div id="cif" class="info-item">CIF/NIF: <?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? '') ?></div>
+
+                <div id="direccion" class="info-item">Dirección: <?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? '') ?></div>
+                <div id="localidad" class="info-item">Localidad: <?= htmlspecialchars($admin['localidad'] ?? '') ?></div>
+                <div id="provincia" class="info-item">Provincia: <?= htmlspecialchars($admin['provincia'] ?? '') ?></div>
+                <div id="codigoPostal" class="info-item">Código Postal: <?= htmlspecialchars($admin['codigo_postal'] ?? '') ?></div>
+
+                <input type="hidden" id="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
+            </div>
+        </div>
+
+
+        <?php include 'footerAdmin.php'; ?>
+
+        <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Editar información legal (Administrador)</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarCambios">Guardar cambios</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="cambiarImagenModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Cambiar imagen de administrador</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formCambiarImagen">
-                        <div class="text-center mb-4">
-                            <div class="profile-image-container mx-auto">
-                                <img id="previewImagen" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Imagen de administrador">
+                    <div class="modal-body">
+                        <form id="formEditarPerfil">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Nombre del Administrador:</label>
+                                    <input type="text" class="form-control" id="editNombre" name="nombre">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">E-mail de contacto:</label>
+                                    <input disabled type="email" class="form-control" id="editEmail">
+                                </div>
                             </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Empresa / Razón Social:</label>
+                                    <input type="text" class="form-control" id="editEmpresa" name="empresa">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">CIF/NIF:</label>
+                                    <input type="text" class="form-control" id="editCIF" name="cif">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Teléfono Legal:</label>
+                                    <input type="text" class="form-control" id="editTelefono" name="telefono">
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h6 class="fw-bold mb-3 text-danger"><i class="fas fa-map-marker-alt me-1"></i> Dirección de Facturación Global</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Dirección Completa:</label>
+                                <input type="text" class="form-control" id="editDireccion" name="domicilio_social">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Provincia:</label>
+                                    <input type="text" class="form-control" id="editProvincia" name="provincia">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Localidad:</label>
+                                    <input type="text" class="form-control" id="editLocalidad" name="localidad">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Código Postal:</label>
+                                    <input type="text" class="form-control" id="editCodigoPostal" name="codigo_postal">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="legal-info-wrapper">
+                            <span class="legal-info-label">Información Legal</span>
+                            <div class="legal-info-box" id="legalInfoDisplay"><?php echo $informacionLegal ?? '<span>Sin informacion legal registrada</span>'; ?></div>
                         </div>
-                        <div class="mb-3">
-                            <label for="inputImagen" class="form-label fw-bold">Seleccionar nueva imagen:</label>
-                            <input type="file" class="form-control" id="inputImagen" name="imagen" accept="image/*">
-                            <input type="hidden" id="imagenAdminId" name="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarImagen">Guardar cambios</button>
+                        <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarCambios">Guardar cambios</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <div class="modal fade" id="cambiarImagenModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Cambiar imagen de administrador</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formCambiarImagen">
+                            <div class="text-center mb-4">
+                                <div class="profile-image-container mx-auto">
+                                    <img id="previewImagen" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Imagen de administrador">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="inputImagen" class="form-label fw-bold">Seleccionar nueva imagen:</label>
+                                <input type="file" class="form-control" id="inputImagen" name="imagen" accept="image/*">
+                                <input type="hidden" id="imagenAdminId" name="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-cancel rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGuardarImagen">Guardar cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
