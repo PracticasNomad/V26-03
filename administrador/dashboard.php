@@ -528,10 +528,10 @@ $topEstablecimientos = [
                     </div>
                 </div>
             </a>
-            <a href="verGestores.php" class="col-2 text-center footer-item">
+            <a href="verGestoras.php" class="col-2 text-center footer-item">
                 <div class="row">
                     <div class="col-12 icon-container"><i class="h3 fas fa-user-tie p-1 m-0"></i>
-                        <div>Gestores</div>
+                        <div>Gestoras</div>
                     </div>
                 </div>
             </a>
