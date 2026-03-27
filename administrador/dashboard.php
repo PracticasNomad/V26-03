@@ -403,7 +403,7 @@ $topEstablecimientos = [
                                     <th>Establecimiento Más Utilizado</th>
                                     <th>Visitas Totales</th>
                                     <th>Tiempo Medio Estancia</th>
-                                    <th>Pasta Dejada (Ingresos)</th>
+                                    <th>Ingresos</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -488,7 +488,6 @@ $topEstablecimientos = [
                             <div class="kpi-value">124</div> <small class="text-muted">Promedio de rentabilidad:
                                 Alta</small>
                         </div>
-                        >>>>>>> f3b346ec444b9b85ee7ae26a906ddd4a919f6dd6
                     </div>
                 </div>
 
