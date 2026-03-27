@@ -1,13 +1,10 @@
 <?php
-session_start();
-
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['token'])) {
-    header('Location: inicio_sesion_admin.php');
-    exit();
-}
+require_once 'verificar_sesion_admin.php';
 
 require '../vendor/autoload.php';
+
 use Dotenv\Dotenv;
+
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
@@ -88,6 +85,10 @@ $topEstablecimientos = [
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
 
     <style>
         :root {
@@ -568,8 +569,25 @@ $topEstablecimientos = [
                 }]
             },
             options: {
-                indexAxis: 'y', responsive: true, plugins: { legend: { display: false } },
-                scales: { x: { grid: { display: false } }, y: { grid: { display: false } } }
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
             }
         });
 
@@ -580,10 +598,19 @@ $topEstablecimientos = [
                 datasets: [{
                     data: [<?php echo $ingresosSubsHost; ?>, <?php echo $ingresosSubsGestoras; ?>, <?php echo $volumenReservas; ?>],
                     backgroundColor: ['#0d6efd', '#198754', '#ffc107'],
-                    borderWidth: 0, hoverOffset: 10
+                    borderWidth: 0,
+                    hoverOffset: 10
                 }]
             },
-            options: { responsive: true, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
         });
 
         new Chart(document.getElementById('espaciosHostChart').getContext('2d'), {
@@ -593,30 +620,49 @@ $topEstablecimientos = [
                 datasets: [{
                     label: 'Cantidad Ofrecida por Hosts',
                     data: [350, 120, 85, 40],
-                    backgroundColor: '#0d6efd', borderRadius: 5
+                    backgroundColor: '#0d6efd',
+                    borderRadius: 5
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
         });
 
         new Chart(document.getElementById('rentabilidadGestorasChart').getContext('2d'), {
             type: 'line',
             data: {
                 labels: ['Gestora Norte', 'Gestora Sur', 'Gestora Centro', 'Gestora Costa', 'Gestora Este'],
-                datasets: [
-                    {
+                datasets: [{
                         label: 'Suscripción que pagan',
                         data: [1900, 1900, 2850, 1900, 0],
-                        borderColor: '#dc3545', backgroundColor: '#dc3545', tension: 0.4
+                        borderColor: '#dc3545',
+                        backgroundColor: '#dc3545',
+                        tension: 0.4
                     },
                     {
                         label: 'Volumen Reservas Generado',
                         data: [4500, 3200, 8100, 2100, 800],
-                        borderColor: '#198754', backgroundColor: 'rgba(25, 135, 84, 0.1)', fill: true, tension: 0.4
+                        borderColor: '#198754',
+                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                        fill: true,
+                        tension: 0.4
                     }
                 ]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true
+            }
         });
     </script>
 

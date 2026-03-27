@@ -1,88 +1,82 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
-use Dotenv\Dotenv;
-use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-if (!function_exists('enviarCorreoInvitacionGestora')) {
-    function enviarCorreoInvitacionGestora($destiny, $inviteLink, $empresa = '', $codigoPostal = '', $plan = 'Basico')
-    {
-        $dotenv = Dotenv::createImmutable(dirname(__DIR__));
-        $dotenv->load();
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-        $mail = new PHPMailer(true);
-        $empresaLabel = trim((string) $empresa) !== '' ? htmlspecialchars((string) $empresa) : 'tu nueva gestora';
-        $codigoPostalLabel = trim((string) $codigoPostal) !== '' ? htmlspecialchars((string) $codigoPostal) : 'sin zona asignada';
-        $planLabel = htmlspecialchars((string) $plan);
+function enviarCorreoInvitacionGestora($emailDestino, $enlaceMagico, $empresa = '', $codigoPostal = '', $plan = '')
+{
+    $mail = new PHPMailer(true);
 
-        $emailBody = '
-        <div style="font-family: Nunito, Arial, sans-serif; color: #1f2933; line-height: 1.6;">
-            {{ICONO_EMPRESA}}
-            <p>Hola,</p>
-            <p>Has recibido una invitacion para completar el alta de una gestora en TheNomadapp.</p>
-            <div style="background: #f6f9fc; border: 1px solid #d8e1ea; border-radius: 14px; padding: 18px; margin: 20px 0;">
-                <p style="margin: 0 0 8px;"><strong>Empresa:</strong> ' . $empresaLabel . '</p>
-                <p style="margin: 0 0 8px;"><strong>Zona inicial:</strong> ' . $codigoPostalLabel . '</p>
-                <p style="margin: 0;"><strong>Plan sugerido:</strong> ' . $planLabel . '</p>
-            </div>
-            <p>Utiliza este enlace para terminar el registro y crear tus credenciales:</p>
-            <p style="margin: 24px 0;">
-                <a href="' . htmlspecialchars($inviteLink) . '" style="display: inline-block; background: linear-gradient(135deg, #0f4c5c 0%, #1a6d85 100%); color: #ffffff; text-decoration: none; padding: 14px 22px; border-radius: 999px; font-weight: 700;">Completar registro de gestora</a>
-            </p>
-            <p style="font-size: 14px; color: #66788a;">Si el boton no funciona, copia y pega este enlace en tu navegador:<br>' . htmlspecialchars($inviteLink) . '</p>
-            <p style="font-size: 14px; color: #66788a;">Este acceso caduca en 7 dias. Si no esperabas este correo, puedes ignorarlo.</p>
-            <p>Atentamente,<br>Equipo de TheNomadapp</p>
-        </div>';
+    // Si hay empresa, la mostramos. Si no, no mostramos el bloque gris.
+    $bloqueEmpresa = "";
+    if (!empty($empresa)) {
+        $bloqueEmpresa = "
+        <div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;'>
+            <strong>Empresa vinculada:</strong> $empresa
+        </div>";
+    }
 
-        try {
-            $mail->isSMTP();
-            $mail->CharSet = 'UTF-8';
-            $mail->Encoding = 'base64';
-            $mail->Host = $_ENV['SMTP_HOST'];
-            $mail->SMTPAuth = true;
-            $mail->Username = $_ENV['SMTP_USERNAME'];
-            $mail->Password = $_ENV['SMTP_PASSWORD'];
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = $_ENV['EMAIL_PORT'];
+    $emailBody = "
+    Hola,<br><br>
+    Has recibido una invitación para completar el alta de una gestora en <strong>TheNomadapp</strong>.<br><br>
+    $bloqueEmpresa
+    Para terminar el registro, crear tus credenciales de acceso, configurar tu zona de trabajo inicial y elegir tu plan de suscripción, haz clic en el siguiente botón:<br><br>
+    <div style='margin: 30px 0;'>
+        <a href='$enlaceMagico' style='background-color: #0f4c5c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>Completar registro de gestora</a>
+    </div>
+    <em>Si el botón no funciona, copia y pega esta dirección en tu navegador:</em><br>
+    <a href='$enlaceMagico' style='color: #007bff; font-size: 0.9em; word-break: break-all;'>$enlaceMagico</a><br><br>
+    Este acceso caduca en 7 días. Si no esperabas este correo, puedes ignorarlo.<br><br>
+    Atentamente,<br>
+    Equipo de TheNomadApp<br><br>
+    <img src='cid:logo' alt='TheNomadapp Logo' style='width: 120px; margin-top: 20px;'><br><br>
 
-            $mail->setFrom('noreply@yonomad.app', 'TheNomadapp');
-            $mail->addAddress($destiny);
+    <div style='display: flex; gap: 10px; align-items: center;'>
+        <a href='https://www.facebook.com/profile.php?id=100067482289201' target='_blank'>
+            <img src='cid:facebook' style='width: 50px; margin-right: 10px;'>
+        </a>
+        <a href='https://x.com/The_Nomadapp' target='_blank'>
+            <img src='cid:twitter' style='width: 50px; margin-right: 10px'>
+        </a>
+        <a href='https://www.linkedin.com/showcase/the-nomadapp/' target='_blank'>
+            <img src='cid:linkedin' style='width: 50px; margin-right: 10px'>
+        </a>
+        <a href='https://www.instagram.com/yonomadapp/' target='_blank'>
+            <img src='cid:instagram' style='width: 50px;'>
+        </a>
+    </div>
+    ";
 
-            $iconMarkup = '';
-            $iconPath = dirname(__DIR__) . '/favicon-color.png';
-            if (!file_exists($iconPath)) {
-                $iconPath = dirname(__DIR__) . '/img/antena.png';
-            }
+    try {
+        $mail->isSMTP();
+        $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
+        $mail->Host = $_ENV['SMTP_HOST'];
+        $mail->SMTPAuth = true;
+        $mail->Username = $_ENV['SMTP_USERNAME'];
+        $mail->Password = $_ENV['SMTP_PASSWORD'];
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = $_ENV['EMAIL_PORT'];
 
-            if (file_exists($iconPath)) {
-                $mail->AddEmbeddedImage($iconPath, 'company_icon', basename($iconPath));
-                $iconMarkup = '<div style="margin-bottom: 12px;"><img src="cid:company_icon" alt="Icono de empresa" style="width: 56px; height: 56px; border-radius: 14px; display: inline-block; object-fit: contain; background: #ffffff; border: 1px solid #d8e1ea; padding: 8px;"></div>';
-            }
+        $mail->setFrom('noreply@yonomad.app', 'TheNomadApp');
+        $mail->addAddress($emailDestino);
 
-            $emailBody = str_replace('{{ICONO_EMPRESA}}', $iconMarkup, $emailBody);
+        $baseImgDir = dirname(__DIR__) . '/img/';
+        $mail->AddEmbeddedImage($baseImgDir . 'logo.jpg', 'logo', 'logo.jpg');
+        $mail->AddEmbeddedImage($baseImgDir . 'facebook.png', 'facebook', 'facebook.png');
+        $mail->AddEmbeddedImage($baseImgDir . 'twitter.png', 'twitter', 'twitter.png');
+        $mail->AddEmbeddedImage($baseImgDir . 'linkedin.png', 'linkedin', 'linkedin.png');
+        $mail->AddEmbeddedImage($baseImgDir . 'instagram.png', 'instagram', 'instagram.png');
 
-            $logoPath = dirname(__DIR__) . '/img/logo.jpg';
-            if (file_exists($logoPath)) {
-                $mail->AddEmbeddedImage($logoPath, 'logo', 'logo.jpg');
-                $emailBody .= '<div style="margin-top: 20px;"><img src="cid:logo" alt="TheNomadapp" style="width: 120px;"></div>';
-            }
+        $mail->isHTML(true);
+        $mail->Subject = '[TheNomadapp] Invitacion para registrar tu gestora';
+        $mail->Body = $emailBody;
 
-            $mail->isHTML(true);
-            $mail->Subject = '[TheNomadapp] Invitacion para registrar tu gestora';
-            $mail->Body = $emailBody;
-            $mail->send();
-
-            return [
-                'success' => true,
-                'message' => 'La invitacion se envio correctamente.',
-            ];
-        } catch (Exception $exception) {
-            return [
-                'success' => false,
-                'message' => 'No se pudo enviar el correo de invitacion: ' . $mail->ErrorInfo,
-            ];
-        }
+        $mail->send();
+        return ['success' => true, 'message' => 'Correo enviado'];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Error: ' . $mail->ErrorInfo];
     }
 }

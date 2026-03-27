@@ -349,17 +349,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = sanitizeText('invite_email');
         $telefono = sanitizeText('invite_telefono');
         $empresa = sanitizeText('invite_empresa');
-        $codigoPostal = sanitizeText('invite_codigo_postal');
-        $plan = normalizeInvitePlan($_POST['invite_plan'] ?? 'Basico');
+
+        // Ya no requerimos Código Postal ni Plan en el primer paso
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             setFlashMessage('danger', 'Debes indicar un correo valido para enviar la invitacion.');
-            header('Location: verGestoras.php');
-            exit();
-        }
-
-        if (!preg_match('/^[0-9]{5}$/', $codigoPostal)) {
-            setFlashMessage('danger', 'El codigo postal inicial debe contener 5 digitos.');
             header('Location: verGestoras.php');
             exit();
         }
@@ -371,21 +365,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
+        // Creamos el token solo con los datos básicos
         $token = createGestoraInvitationToken([
             'email' => $email,
             'nombre' => $nombre,
             'telefono' => $telefono,
             'empresa' => $empresa,
-            'codigo_postal' => $codigoPostal,
-            'plan' => $plan,
+            'codigo_postal' => '', // Lo rellenará ella
+            'plan' => '', // Lo elegirá ella
             'rol' => 'gestora',
         ]);
 
         $inviteLink = buildAppBaseUrl() . '/gestor/registerGestora.php?token=' . urlencode($token);
-        $mailResult = enviarCorreoInvitacionGestora($email, $inviteLink, $empresa, $codigoPostal, $plan);
+
+        // Pasamos strings vacíos para los campos que ya no usamos en el invite
+        $mailResult = enviarCorreoInvitacionGestora($email, $inviteLink, $empresa, '', '');
 
         if (!empty($mailResult['success'])) {
-            setFlashMessage('success', 'La invitacion para registrar la gestora se envio a ' . $email . '.');
+            setFlashMessage('success', 'El Magic Link para continuar el registro se envió a ' . $email . '.');
         } else {
             setFlashMessage('danger', $mailResult['message'] ?? 'No se pudo enviar la invitacion.');
         }
@@ -1335,7 +1332,7 @@ $postalCoverage = count($activePostalCodes);
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header modal-header-brand">
-                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>Enviar invitacion de gestora</h5>
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>Enviar invitacion a Gestora</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -1345,45 +1342,32 @@ $postalCoverage = count($activePostalCodes);
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="invite_nombre" class="form-label fw-bold">Nombre de contacto</label>
-                                <input type="text" class="form-control" id="invite_nombre" name="invite_nombre">
+                                <input type="text" class="form-control" id="invite_nombre" name="invite_nombre" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="invite_email" class="form-label fw-bold">Correo electronico</label>
+                                <label for="invite_email" class="form-label fw-bold">Correo electrónico</label>
                                 <input type="email" class="form-control" id="invite_email" name="invite_email" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="invite_telefono" class="form-label fw-bold">Telefono</label>
-                                <input type="text" class="form-control" id="invite_telefono" name="invite_telefono">
+                                <label for="invite_telefono" class="form-label fw-bold">Número de contacto</label>
+                                <input type="text" class="form-control" id="invite_telefono" name="invite_telefono" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="invite_empresa" class="form-label fw-bold">Entidad</label>
-                                <input type="text" class="form-control" id="invite_empresa" name="invite_empresa">
+                                <label for="invite_empresa" class="form-label fw-bold">Entidad / Empresa</label>
+                                <input type="text" class="form-control" id="invite_empresa" name="invite_empresa" required>
                             </div>
-                            <div class="col-md-6">
-                                <label for="invite_codigo_postal" class="form-label fw-bold">Codigo postal</label>
-                                <input type="text" class="form-control" id="invite_codigo_postal"
-                                    name="invite_codigo_postal" maxlength="5" pattern="[0-9]{5}" inputmode="numeric"
-                                    placeholder="Ej: 28001"
-                                    required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="invite_plan" class="form-label fw-bold">Plan sugerido</label>
-                                <select class="form-select" id="invite_plan" name="invite_plan">
-                                    <option value="Basico">Basico</option>
-                                    <option value="Pro">Pro</option>
-                                    <option value="Premium">Premium</option>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-text">Se enviara un enlace firmado para completar el alta y elegir el
-                                    plan final de suscripcion de la gestora.</div>
+                            <div class="col-12 mt-4">
+                                <div class="alert alert-info border-0 shadow-sm" style="background-color: #f8f9fa;">
+                                    <i class="fas fa-magic text-primary me-2"></i><strong>¿Qué pasará ahora?</strong><br>
+                                    Se enviará un <strong>Magic Link</strong> al correo indicado. Al hacer clic, la gestora será redirigida a la página de registro con estos datos pre-cargados, donde solo tendrá que añadir su contraseña, código postal y elegir su plan para finalizar el alta.
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer px-4 pb-4 border-0">
                         <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
                             data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger rounded-pill px-4">Enviar invitacion</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Enviar Magic Link</button>
                     </div>
                 </form>
             </div>
