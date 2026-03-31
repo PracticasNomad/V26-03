@@ -12,7 +12,7 @@ require_once 'verificar_sesion_host.php';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
     <link href="style.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
@@ -162,8 +162,53 @@ require_once 'verificar_sesion_host.php';
     </script>
 
     <style>
+        :root {
+            --host-accent: #10bfeb;
+            --host-accent-dark: #0a95b7;
+            --host-accent-soft: #e7f8fd;
+            --header-active-green: #81ba18;
+            --header-active-green-dark: #6d9e14;
+        }
+        
         body {
+            font-family: 'Nunito', sans-serif;
             padding-bottom: 15%;
+        }
+
+        .page-shell {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .page-hero {
+            max-width: 100%;
+            margin: 1.2rem 0 0.5rem;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .page-hero-inner {
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--host-accent-dark) 0%, var(--host-accent) 62%, #51cfee 100%);
+            color: #ffffff;
+            padding: 1.1rem 1.2rem;
+            box-shadow: 0 18px 40px rgba(16, 191, 235, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .page-hero-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .hero-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         label,
@@ -211,16 +256,12 @@ require_once 'verificar_sesion_host.php';
 
         .header-main {
             overflow-x: hidden;
-            margin-right: 1rem;
         }
 
         .header-tabs {
             overflow: hidden;
             border-radius: 12px;
             background-color: white;
-            margin-bottom: 1rem;
-            margin-right: 3rem;
-            margin-left: 3rem;
         }
 
         .header-tab {
@@ -254,41 +295,40 @@ require_once 'verificar_sesion_host.php';
 </head>
 
 <body>
-    <header>
-        <div class="container-fluid info text-center">
-            <div class="row">
-                <div class="col color-white h2 fw-bold pt-3 pb-2">
-                    Tus Historias
+    <div class="page-shell">
+        <header class="page-hero">
+            <div class="page-hero-inner">
+                <div class="hero-title-row">
+                    <div class="page-hero-title"><i class="fas fa-history me-2"></i>Tu Historial</div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <div class="row py-3 mb-4 header-main">
-        <div class="col-12">
-            <div class="header-tabs shadow-sm">
-                <div class="row g-0">
-                    <div class="col-6">
-                        <a href="tusReservas.php" class="header-tab-link">
-                            <div class="header-tab py-3 text-center rounded-start">
-                                <i class="fas fa-calendar-check me-2"></i>RESERVAS
+        <div class="row py-3 mb-0 header-main">
+            <div class="col-12">
+                <div class="header-tabs shadow-sm mb-0">
+                    <div class="row g-0">
+                        <div class="col-6">
+                            <a href="tusReservas.php" class="header-tab-link">
+                                <div class="header-tab py-3 text-center rounded-start">
+                                    <i class="fas fa-calendar-check me-2"></i>RESERVAS
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <div class="header-tab header-tab-active py-3 text-center rounded-end">
+                                <i class="fas fa-history me-2"></i>HISTÓRICO
                             </div>
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <div class="header-tab header-tab-active py-3 text-center rounded-end">
-                            <i class="fas fa-history me-2"></i>HISTÓRICO
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="container" id="container">
+        <div id="container" style="max-width: 100%; overflow-x: hidden; box-sizing: border-box;"></div>
     </div>
 
-   <?php include 'footerAnfitrion.php'; ?>
-   
+    <?php include 'footerAnfitrion.php'; ?>
+
 </body>
 
 </html>

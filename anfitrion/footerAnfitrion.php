@@ -30,8 +30,6 @@ $reservaActive = ($currentPage == 'tusReservas.php' || $currentPage == 'tusHisto
         box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
         padding-top: 8px !important;
         padding-bottom: 8px !important;
-        border-top-left-radius: 20px;
-        border-top-right-radius: 20px;
         height: auto;
         margin: 0;
         width: 100%;
