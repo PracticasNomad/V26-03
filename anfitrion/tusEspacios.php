@@ -93,18 +93,63 @@ if ($num_espacios >= $limites[$plan]) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Mis Espacios</title>
     <style>
+        :root {
+            --host-accent: #10bfeb;
+            --host-accent-dark: #0a95b7;
+            --host-accent-soft: #e7f8fd;
+            --header-active-green: #81ba18;
+            --header-active-green-dark: #6d9e14;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f8f9fa;
             padding-bottom: 15%;
         }
+
+        .page-shell {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .page-hero {
+            max-width: 100%;
+            margin: 1.2rem 0 0.5rem;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .page-hero-inner {
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--host-accent-dark) 0%, var(--host-accent) 62%, #51cfee 100%);
+            color: #ffffff;
+            padding: 1.1rem 1.2rem;
+            box-shadow: 0 18px 40px rgba(16, 191, 235, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .page-hero-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .hero-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
 
         .contenedorLista {
             max-width: 900px;
@@ -194,17 +239,16 @@ if ($num_espacios >= $limites[$plan]) {
         }
 
         .espacio-card {
-            border: 1px solid #ced4da;
             border-radius: 10px;
             margin-bottom: 15px;
-            box-shadow: 0 .25rem .5rem rgba(0, 0, 0, .05);
+            overflow: hidden;
         }
 
         .espacio-header {
+            border: 1px solid #ced4da;
             padding: 15px;
             background-color: #f8f9fa;
-            border-bottom: 1px solid #ced4da;
-            border-radius: 10px 10px 0 0;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -445,7 +489,7 @@ if ($num_espacios >= $limites[$plan]) {
             <div id="espacios-container">
                 <?php
                 foreach ($establecimientos as $establecimiento):
-                    ?>
+                ?>
                     <div class="establecimiento-header">
                         <i class="fas fa-building me-2"></i> <?php echo htmlspecialchars($establecimiento['nombre']); ?>
                     </div>
@@ -632,11 +676,11 @@ if ($num_espacios >= $limites[$plan]) {
         </div>
     </div>
 
-   <?php include 'footerAnfitrion.php'; ?>
+    <?php include 'footerAnfitrion.php'; ?>
 
     <script>
-        $(document).ready(function () {
-            $('.toggle-horarios').click(function () {
+        $(document).ready(function() {
+            $('.toggle-horarios').click(function() {
                 const espacioId = $(this).data('espacio-id');
                 $(`#horarios-${espacioId}`).slideToggle();
 
@@ -659,7 +703,7 @@ if ($num_espacios >= $limites[$plan]) {
             });
 
             // Lógica botón Mostrar / Ocultar Espacio
-            $('.btn-visibilidad').click(function () {
+            $('.btn-visibilidad').click(function() {
                 const btn = $(this);
                 const espacioId = btn.data('espacio-id');
                 const currentState = btn.attr('data-visible') === 'true';
@@ -669,10 +713,15 @@ if ($num_espacios >= $limites[$plan]) {
                 btn.prop('disabled', true);
 
                 fetch('toggleVisibilidadEspacio.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: espacioId, visible: newState })
-                })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: espacioId,
+                            visible: newState
+                        })
+                    })
                     .then(response => response.json())
                     .then(data => {
                         btn.prop('disabled', false);
@@ -704,13 +753,13 @@ if ($num_espacios >= $limites[$plan]) {
             });
 
             // Disparar modal de límite de espacios
-            $('#btnAvisoLimiteEspacio').click(function (e) {
+            $('#btnAvisoLimiteEspacio').click(function(e) {
                 e.preventDefault();
                 const avisoLimiteModal = new bootstrap.Modal(document.getElementById('avisoLimiteEspacioModal'));
                 avisoLimiteModal.show();
             });
 
-            $('#btnAvisoEstablecimiento').click(function (e) {
+            $('#btnAvisoEstablecimiento').click(function(e) {
                 e.preventDefault(); // Esto evita que se ponga el # en la URL
                 const avisoModal = new bootstrap.Modal(document.getElementById('avisoEstablecimientoModal'));
                 avisoModal.show();
@@ -718,7 +767,7 @@ if ($num_espacios >= $limites[$plan]) {
 
             let espacioIdAEliminar = null;
 
-            $('.btn-eliminar').click(function () {
+            $('.btn-eliminar').click(function() {
                 espacioIdAEliminar = $(this).data('espacio-id');
                 const espacioNombre = $(this).data('espacio-nombre');
 
@@ -734,7 +783,7 @@ if ($num_espacios >= $limites[$plan]) {
                 }
             });
 
-            $('#btnConfirmarEliminar').click(function () {
+            $('#btnConfirmarEliminar').click(function() {
                 if (espacioIdAEliminar) {
                     eliminarEspacio(espacioIdAEliminar);
                     if (typeof confirmModal !== 'undefined') confirmModal.hide();
@@ -749,11 +798,11 @@ if ($num_espacios >= $limites[$plan]) {
 
             function eliminarEspacio(espacioId) {
                 fetch('eliminarEspacio.php?id=' + espacioId, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
@@ -765,7 +814,7 @@ if ($num_espacios >= $limites[$plan]) {
                             const establecimientoHeader = espacioElement.prev('.establecimiento-header');
                             const nextElement = espacioElement.next();
 
-                            espacioElement.fadeOut(300, function () {
+                            espacioElement.fadeOut(300, function() {
                                 $(this).remove();
 
                                 if (!nextElement.hasClass('espacio-card')) {

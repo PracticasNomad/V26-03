@@ -135,13 +135,13 @@ if (!empty($establecimientos)) {
                 $establecimientos = [];
             }
 
-            function formatearDireccion($calle, $numero, $piso = "")
+            function formatearDireccion($direccion, $piso = "")
             {
-                $direccion = "$calle, $numero";
                 if (!empty($piso)) {
                     $direccion .= ", $piso";
                 }
                 return $direccion;
+
             }
 
             $backgroundImages = [
