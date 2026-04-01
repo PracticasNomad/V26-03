@@ -88,18 +88,87 @@ if ($cpGestor) {
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Espacios de tu Zona</title>
     <style>
+        :root {
+            --azul: #1976d2;
+            --azul-dark: #0d47a1;
+            --azul-light: #e3f0fb;
+            --azul-mid: #bbdefb;
+            --text: #1a2333;
+            --muted: #5b7088;
+            --danger: #c62828;
+            --danger-dark: #8e0000;
+            --warning: #ef6c00;
+            --warning-dark: #d84315;
+            --surface: #ffffff;
+            --surface-alt: #f8fbff;
+            --border: #d9e7f4;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f8f9fa;
+            background: linear-gradient(158deg, #e9f3fd 0%, #f5f8ff 50%, #e9f5f1 100%);
+            color: var(--text);
             padding-bottom: 15%;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            max-width: 1320px;
+            margin: 20px auto 10px;
+            padding: 0 12px;
+        }
+
+        .page-header-inner {
+            border-radius: 16px;
+            background: linear-gradient(130deg, #123b49 0%, #0f4c5c 65%, #2a4b57 120%);
+            color: #ffffff;
+            padding: 18px 20px;
+            box-shadow: 0 14px 28px rgba(15, 76, 92, 0.22);
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: 1.32rem;
+            font-weight: 800;
+            letter-spacing: 0.45px;
+            text-align: left;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .info-hint-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.45);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            background: rgba(255,255,255,0.12);
+            cursor: pointer;
+            transition: 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .info-hint-btn:hover {
+            background: rgba(255,255,255,0.22);
+            transform: translateY(-1px);
         }
 
         .contenedorLista {
             max-width: 1000px;
             margin: 2rem auto;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            background: var(--surface);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 12px 35px rgba(25, 118, 210, 0.12);
             padding: 2rem;
             position: relative;
         }
@@ -108,38 +177,84 @@ if ($cpGestor) {
             display: flex;
             justify-content: center;
             align-items: center;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 1rem;
+            gap: 0.7rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.15rem;
             margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            color: var(--text);
+            font-size: 1.12rem;
+            letter-spacing: 0.35px;
+            padding: 0.48rem 0.95rem;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #f8fbff 0%, #eef5fd 100%);
+            border: 1px solid var(--azul-mid);
+            box-shadow: 0 6px 16px rgba(25, 118, 210, 0.10);
+        }
+
+        .cp-badge {
+            margin-top: 2px;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: 1px solid #9ec7ee;
+            background: linear-gradient(180deg, #e9f3ff 0%, #ddecff 100%);
+            color: #0f4c5c;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.15px;
+            box-shadow: 0 8px 16px rgba(25, 118, 210, 0.12);
         }
 
         .espacio-card {
-            border: 1px solid #ced4da;
-            border-radius: 10px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
             margin-bottom: 1.5rem;
-            box-shadow: 0 .25rem .5rem rgba(0, 0, 0, .05);
+            box-shadow: 0 6px 20px rgba(25, 118, 210, 0.09);
             overflow: hidden;
-            background-color: white;
-            transition: opacity 0.3s;
+            background: var(--surface);
+            transition: opacity 0.3s, transform 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .espacio-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(25, 118, 210, 0.14);
         }
 
         .espacio-oculto {
-            opacity: 0.6;
-            background-color: #f1f1f1;
+            opacity: 0.72;
+            filter: saturate(0.7);
+            background-color: #f4f7fb;
         }
 
         .espacio-header {
             padding: 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #ced4da;
+            background: linear-gradient(180deg, #f9fcff 0%, #f2f8fe 100%);
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .space-title {
+            margin-bottom: 0.35rem;
+            font-weight: 800;
+            color: var(--azul-dark);
+            font-size: 1.12rem;
+        }
+
+        .space-description {
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+            max-width: 680px;
+        }
+
         .establecimiento-badge {
-            background-color: #e9ecef;
-            color: #495057;
+            background: var(--azul-light);
+            color: var(--azul-dark);
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -147,12 +262,19 @@ if ($cpGestor) {
             display: inline-flex;
             align-items: center;
             margin-bottom: 8px;
+            border: 1px solid var(--azul-mid);
         }
 
         .horarios-container {
             padding: 20px;
             display: none;
-            background-color: white;
+            background: var(--surface);
+            border-top: 1px dashed var(--border);
+        }
+
+        .horarios-title {
+            color: var(--azul-dark);
+            border-color: var(--azul-mid) !important;
         }
 
         .day-badge {
@@ -168,40 +290,135 @@ if ($cpGestor) {
         }
 
         .day-active {
-            background-color: #28a745;
+            background-color: #2e7d32;
             color: white;
         }
 
         .day-inactive {
-            background-color: #dc3545;
-            color: white;
+            background-color: #cfd8dc;
+            color: #546e7a;
+        }
+
+        .day-active,
+        .day-inactive {
+            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
         }
 
         .horario-item {
-            border: 1px solid #e9ecef;
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
-            background-color: #fdfdfd;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.06);
         }
 
         .servicio-item {
-            background-color: #f8f9fa;
+            background-color: #f8fbff;
             border-radius: 6px;
             padding: 10px;
             margin-top: 8px;
-            border-left: 3px solid #00B7CF;
+            border-left: 3px solid var(--azul);
         }
 
         .espacios-vacio {
             text-align: center;
             padding: 40px 20px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            color: #6c757d;
+            background: linear-gradient(180deg, #f8fbff 0%, #eff6fe 100%);
+            border: 1px dashed var(--azul-mid);
+            border-radius: 14px;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            color: #90a4ae;
+        }
+
+        .actions-group .btn {
+            border-radius: 9px !important;
+            font-weight: 700;
+            letter-spacing: 0.1px;
+        }
+
+        .btn-horarios {
+            border: 1px solid var(--azul);
+            color: var(--azul);
+            background: #ffffff;
+        }
+
+        .btn-horarios:hover,
+        .btn-horarios-open {
+            background: var(--azul);
+            color: #ffffff;
+        }
+
+        .btn-vis-hide {
+            background: #fff3e0;
+            border: 1px solid #ffcc80;
+            color: var(--warning-dark);
+        }
+
+        .btn-vis-hide:hover {
+            background: #ffe0b2;
+            color: var(--warning-dark);
+        }
+
+        .btn-vis-show {
+            background: #eceff1;
+            border: 1px solid #cfd8dc;
+            color: #455a64;
+        }
+
+        .btn-vis-show:hover {
+            background: #dfe5ea;
+            color: #37474f;
+        }
+
+        .btn-edit-space {
+            background: var(--azul);
+            border: 1px solid var(--azul);
+        }
+
+        .btn-edit-space:hover {
+            background: var(--azul-dark);
+            border-color: var(--azul-dark);
+        }
+
+        .btn-delete-space {
+            background: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-delete-space:hover {
+            background: var(--danger-dark);
+            border-color: var(--danger-dark);
+        }
+
+        .alert-modern {
+            border-radius: 12px;
+            border: 1px solid #ffccd1;
+            background: #fff5f6;
+            color: #8a1f2f;
+            box-shadow: 0 5px 16px rgba(198, 40, 40, 0.1);
         }
 
         @media (max-width: 768px) {
+            .page-header {
+                margin-top: 14px;
+            }
+
+            .page-header-inner {
+                padding: 14px 12px;
+            }
+
+            .page-title {
+                font-size: 1.12rem;
+            }
+
+            .title-row {
+                gap: 8px;
+            }
+
             .espacio-header {
                 flex-direction: column;
                 align-items: flex-start;
@@ -223,6 +440,11 @@ if ($cpGestor) {
             }
         }
 
+        .modal-confirm .modal-content {
+            border-radius: 16px;
+            box-shadow: 0 12px 34px rgba(17, 24, 39, 0.2);
+        }
+
         .modal-confirm .icon-box {
             width: 80px;
             height: 80px;
@@ -230,11 +452,12 @@ if ($cpGestor) {
             border-radius: 50%;
             z-index: 9;
             text-align: center;
-            border: 3px solid #f15e5e;
+            border: 3px solid #ef9a9a;
+            background: #ffebee;
         }
 
         .modal-confirm .icon-box i {
-            color: #f15e5e;
+            color: var(--danger);
             font-size: 46px;
             display: inline-block;
             margin-top: 13px;
@@ -242,71 +465,25 @@ if ($cpGestor) {
 
         .toast-container {
             position: fixed;
-            bottom: 80px;
-            right: 20px;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 1050;
         }
 
-        /* Menú Footer */
-        .footer-container {
-            background-color: white;
-            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-            padding-top: 1px !important;
-            padding-bottom: 1px !important;
-            height: auto;
-        }
-
-        .footer-item {
-            padding: 8px 0;
-            color: black;
-            text-decoration: none;
-        }
-
-        .footer-item a,
-        .footer-item a:visited,
-        .footer-item a:active {
-            color: inherit !important;
-            text-decoration: none !important;
-        }
-
-        .footer-item:hover a {
-            color: #00B7CF !important;
-        }
-
-        .icon-container {
-            transition: transform 0.3s ease;
-            padding: 5px 0;
-        }
-
-        .footer-item:hover .icon-container {
-            transform: translateY(-7px);
-            color: #007bff;
-        }
-
-        .footer-item:hover {
-            color: #00B7CF !important;
-        }
-
-        .footer {
-            background-color: white;
-            width: 100%;
-            bottom: 0;
-            font-size: 15px;
-            background: #E3E1E1;
-            text-align: center;
-            position: fixed;
-            z-index: 1000;
+        .btn-close:focus,
+        .btn:focus {
+            box-shadow: none !important;
         }
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="container-fluid info text-center" style="background-color: #00B7CF; color: white;">
-            <div class="row">
-                <div class="col h3 fw-bold pt-3 pb-2 m-0">
-                    Espacios de tu zona
-                </div>
+    <header class="page-header">
+        <div class="page-header-inner">
+            <div class="title-row">
+                <h1 class="page-title">Espacios de tu zona</h1>
+                <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right" title="Gestiona los espacios de tu zona, revisa horarios, visibilidad y acciones rápidas."><i class="fas fa-info"></i></span>
             </div>
         </div>
     </header>
@@ -314,16 +491,16 @@ if ($cpGestor) {
     <div class="contenedorLista mt-4">
 
         <div class="header-container flex-column">
-            <h4 class="m-0 fw-bold text-center">
+            <h4 class="m-0 fw-bold text-center section-title">
                 <i class="fas fa-chair me-2 text-primary"></i> Espacios Registrados
             </h4>
             <?php if ($cpGestor && !$tieneError): ?>
-                <span class="badge bg-info text-dark mt-2">Código Postal: <?php echo htmlspecialchars($cpGestor); ?></span>
+                <span class="cp-badge">Código Postal: <?php echo htmlspecialchars($cpGestor); ?></span>
             <?php endif; ?>
         </div>
 
         <?php if ($tieneError): ?>
-            <div class="alert alert-danger shadow-sm rounded-pill" role="alert">
+            <div class="alert alert-modern" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i> <?php echo $errorMsg; ?>
             </div>
         <?php else: ?>
@@ -331,7 +508,7 @@ if ($cpGestor) {
             <div id="espacios-container">
                 <?php if (empty($espacios)): ?>
                     <div class="espacios-vacio">
-                        <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+                        <i class="fas fa-box-open fa-3x mb-3 empty-icon"></i>
                         <h4>Sin espacios en tu zona</h4>
                         <p class="mb-0">Aún no hay ningún espacio registrado en los establecimientos de tu código postal.</p>
                     </div>
@@ -347,17 +524,17 @@ if ($cpGestor) {
                                         <i class="fas fa-building me-1"></i>
                                         <?php echo htmlspecialchars($espacio['establecimiento']['nombre']); ?>
                                     </div>
-                                    <h5 class="mb-1 fw-bold text-primary"><?php echo htmlspecialchars($espacio['name']); ?></h5>
-                                    <p class="mb-0 text-muted small"><?php echo htmlspecialchars($espacio['description']); ?></p>
+                                    <h5 class="space-title"><?php echo htmlspecialchars($espacio['name']); ?></h5>
+                                    <p class="space-description"><?php echo htmlspecialchars($espacio['description']); ?></p>
                                 </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-info btn-sm toggle-horarios fw-bold"
+                                <div class="btn-group actions-group">
+                                    <button class="btn btn-sm toggle-horarios btn-horarios"
                                         data-espacio-id="<?php echo $espacio['id']; ?>">
                                         <i class="fas fa-clock me-1"></i> Horarios
                                     </button>
 
                                     <button
-                                        class="btn btn-<?php echo $esVisible ? 'warning' : 'secondary'; ?> btn-sm btn-toggle-visibilidad fw-bold ms-1"
+                                        class="btn btn-sm btn-toggle-visibilidad ms-1 <?php echo $esVisible ? 'btn-vis-hide' : 'btn-vis-show'; ?>"
                                         data-espacio-id="<?php echo $espacio['id']; ?>"
                                         data-visible="<?php echo $esVisible ? 'true' : 'false'; ?>">
                                         <i class="fas fa-eye<?php echo $esVisible ? '-slash' : ''; ?> me-1"></i>
@@ -365,11 +542,11 @@ if ($cpGestor) {
                                     </button>
 
                                     <a href="editarEspacio.php?id=<?php echo $espacio['id']; ?>"
-                                        class="btn btn-primary btn-sm fw-bold ms-1">
+                                        class="btn btn-sm btn-edit-space text-white ms-1">
                                         <i class="fas fa-edit me-1"></i> Editar
                                     </a>
 
-                                    <button class="btn btn-danger btn-sm btn-eliminar fw-bold ms-1"
+                                    <button class="btn btn-sm btn-delete-space text-white btn-eliminar ms-1"
                                         data-espacio-id="<?php echo $espacio['id']; ?>"
                                         data-espacio-nombre="<?php echo htmlspecialchars($espacio['name']); ?>">
                                         <i class="fas fa-trash-alt me-1"></i> Eliminar
@@ -381,7 +558,7 @@ if ($cpGestor) {
                                 <?php if (empty($espacio['schedule'])): ?>
                                     <div class="alert alert-secondary m-0">Este espacio no tiene horarios configurados.</div>
                                 <?php else: ?>
-                                    <h6 class="fw-bold mb-3 border-bottom pb-2">Configuración de Horarios y Precios</h6>
+                                    <h6 class="fw-bold mb-3 border-bottom pb-2 horarios-title">Configuración de Horarios y Precios</h6>
                                     <div class="row">
                                         <?php foreach ($espacio['schedule'] as $horario): ?>
                                             <div class="col-12 col-md-6">
@@ -500,17 +677,22 @@ if ($cpGestor) {
 
     <script>
         $(document).ready(function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
             $('.toggle-horarios').click(function () {
                 const espacioId = $(this).data('espacio-id');
                 $(`#horarios-${espacioId}`).slideToggle();
                 const icon = $(this).find('i');
                 if (icon.hasClass('fa-clock')) {
                     icon.removeClass('fa-clock').addClass('fa-chevron-up');
-                    $(this).removeClass('btn-outline-info').addClass('btn-info text-white');
+                    $(this).addClass('btn-horarios-open');
                     $(this).html('<i class="fas fa-chevron-up me-1"></i> Ocultar');
                 } else {
                     icon.removeClass('fa-chevron-up').addClass('fa-clock');
-                    $(this).removeClass('btn-info text-white').addClass('btn-outline-info');
+                    $(this).removeClass('btn-horarios-open');
                     $(this).html('<i class="fas fa-clock me-1"></i> Horarios');
                 }
             });
@@ -533,11 +715,11 @@ if ($cpGestor) {
                     success: function (response) {
                         if (response.success) {
                             if (nuevaVisibilidad) {
-                                btn.removeClass('btn-secondary').addClass('btn-warning');
+                                btn.removeClass('btn-vis-show').addClass('btn-vis-hide');
                                 btn.html('<i class="fas fa-eye-slash me-1"></i> Ocultar');
                                 $(`#card-${espacioId}`).removeClass('espacio-oculto');
                             } else {
-                                btn.removeClass('btn-warning').addClass('btn-secondary');
+                                btn.removeClass('btn-vis-hide').addClass('btn-vis-show');
                                 btn.html('<i class="fas fa-eye me-1"></i> Mostrar');
                                 $(`#card-${espacioId}`).addClass('espacio-oculto');
                             }
