@@ -12,7 +12,7 @@ require_once 'verificar_sesion_gestor.php';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
     <link href="../style.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
@@ -80,78 +80,59 @@ require_once 'verificar_sesion_gestor.php';
                             const dia = fechaReserva.getDate();
                             const mes = meses[fechaReserva.getMonth()];
                             const anio = fechaReserva.getFullYear();
-
                             const fechaFormateada = `${diaSemana}, ${dia} de ${mes} del ${anio}`;
 
-                            var div = document.createElement("div");
-                            div.style.backgroundColor = '#f8fbff';
-                            div.style.marginTop = '20px';
-                            div.className = "row pt-3 px-4 pb-3 mb-3 border rounded shadow-sm";
-                            div.style.borderColor = '#90caf9';
-                            div.style.borderWidth = '1px';
+                            const cancelada = data[i].cancelada == true;
+
+                            var div = document.createElement('div');
+                            div.className = 'reserva-card' + (cancelada ? ' reserva-card--cancelada' : '');
                             container.appendChild(div);
 
-                            var divFecha = document.createElement("div");
-                            divFecha.className = "col-12 fecha fw-bold h5 pt-1 mb-3 text-center py-2 rounded";
-
-                            // Color grisáceo para las reservas históricas o rojo si está cancelada
-                            if (data[i].cancelada == true) {
-                                divFecha.style.backgroundColor = '#e57373';
-                                divFecha.textContent = fechaFormateada + ' (CANCELADA)';
+                            var divFecha = document.createElement('div');
+                            divFecha.className = 'reserva-fecha' + (cancelada ? ' reserva-fecha--cancelada' : '');
+                            if (cancelada) {
+                                divFecha.innerHTML = '<i class="fas fa-calendar-times me-2"></i>' + fechaFormateada +
+                                    ' <span class="badge-cancelada">CANCELADA</span>';
                             } else {
-                                divFecha.style.backgroundColor = '#506572';
-                                divFecha.textContent = fechaFormateada;
+                                divFecha.innerHTML = '<i class="fas fa-calendar-check me-2"></i>' + fechaFormateada;
                             }
-
-                            divFecha.style.color = 'white';
                             div.appendChild(divFecha);
 
-                            var divContenido = document.createElement("div");
-                            divContenido.className = "col-12";
+                            var divContenido = document.createElement('div');
+                            divContenido.className = 'reserva-body';
                             div.appendChild(divContenido);
 
-                            var divEspacio = document.createElement("div");
-                            divEspacio.className = "h6 mb-3";
-                            divEspacio.innerHTML = '<i class="fas fa-map-marker-alt me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Espacio:</strong> ' + data[i].space.name + ' (' + data[i].space.establecimiento.nombre + ')';
+                            var divEspacio = document.createElement('div');
+                            divEspacio.className = 'reserva-row';
+                            divEspacio.innerHTML = '<span class="reserva-icon"><i class="fas fa-map-marker-alt"></i></span>' +
+                                '<span><strong>Espacio:</strong> ' + data[i].space.name + ' &mdash; ' + data[i].space.establecimiento.nombre + '</span>';
                             divContenido.appendChild(divEspacio);
 
-                            var divHorario = document.createElement("div");
-                            divHorario.className = "mb-3";
-                            divHorario.innerHTML = '<i class="far fa-clock me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Horario:</strong> ' +
-                                data[i].start_time.substring(0, 5) + ' - ' + data[i].end_time.substring(0, 5);
+                            var divHorario = document.createElement('div');
+                            divHorario.className = 'reserva-row';
+                            divHorario.innerHTML = '<span class="reserva-icon"><i class="far fa-clock"></i></span>' +
+                                '<span><strong>Horario:</strong> ' + data[i].start_time.substring(0, 5) + ' &ndash; ' + data[i].end_time.substring(0, 5) + '</span>';
                             divContenido.appendChild(divHorario);
 
-                            var divUsuario = document.createElement("div");
-                            divUsuario.className = "mb-3";
                             var nombreUsuario = data[i].user ? data[i].user.name : 'Usuario Desconocido';
-                            divUsuario.innerHTML = '<i class="far fa-user me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Reservado por:</strong> ' + nombreUsuario;
+                            var divUsuario = document.createElement('div');
+                            divUsuario.className = 'reserva-row';
+                            divUsuario.innerHTML = '<span class="reserva-icon"><i class="far fa-user"></i></span>' +
+                                '<span><strong>Reservado por:</strong> ' + nombreUsuario + '</span>';
                             divContenido.appendChild(divUsuario);
 
-                            var divider = document.createElement("hr");
-                            divider.style.borderColor = '#bbdefb';
-                            divider.style.opacity = '0.5';
+                            var divider = document.createElement('hr');
+                            divider.className = 'reserva-divider';
                             divContenido.appendChild(divider);
 
-                            var divBoton = document.createElement("div");
-                            divBoton.className = "mt-3 text-end";
+                            var divBoton = document.createElement('div');
+                            divBoton.className = 'reserva-boton';
                             divContenido.appendChild(divBoton);
 
-                            var botonDetalles = document.createElement("a");
+                            var botonDetalles = document.createElement('a');
                             botonDetalles.href = 'detalles_reserva.php?id=' + data[i].id;
-                            botonDetalles.className = "btn btn-sm";
-                            botonDetalles.style.backgroundColor = '#1976d2';
-                            botonDetalles.style.color = 'white';
-                            botonDetalles.style.boxShadow = '0 2px 5px rgba(33, 150, 243, 0.3)';
-                            botonDetalles.innerHTML = '<i class="fas fa-info-circle me-1"></i>Mostrar detalles';
-
-                            botonDetalles.onmouseover = function() {
-                                this.style.backgroundColor = '#0d47a1';
-                                this.style.transition = 'background-color 0.3s';
-                            };
-                            botonDetalles.onmouseout = function() {
-                                this.style.backgroundColor = '#1976d2';
-                            };
-
+                            botonDetalles.className = 'btn-detalle' + (cancelada ? ' btn-detalle--cancelada' : '');
+                            botonDetalles.innerHTML = '<i class="fas fa-arrow-right me-1"></i>Ver detalles';
                             divBoton.appendChild(botonDetalles);
                         }
                     }
@@ -159,9 +140,9 @@ require_once 'verificar_sesion_gestor.php';
 
                 if (!historiasEncontradas) {
                     container.innerHTML = `
-                        <div class="alert alert-info mt-4" role="alert">
-                            <i class="fas fa-info-circle me-2"></i>
-                            No hay histórico de reservas para tus establecimientos.
+                        <div class="empty-state">
+                            <div class="empty-state__icon"><i class="fas fa-history"></i></div>
+                            <div class="empty-state__text">No hay histórico de reservas para tus establecimientos.</div>
                         </div>
                     `;
                 }
@@ -170,58 +151,167 @@ require_once 'verificar_sesion_gestor.php';
     </script>
 
     <style>
+        :root {
+            --azul:        #1976d2;
+            --azul-dark:   #0d47a1;
+            --azul-light:  #e3f0fb;
+            --azul-mid:    #bbdefb;
+            --slate:       #455a68;
+            --slate-dark:  #2e3f4c;
+            --slate-light: #eceff1;
+            --slate-mid:   #b0bec5;
+            --rojo:        #c62828;
+            --rojo-dark:   #8e0000;
+            --rojo-light:  #ffebee;
+            --rojo-mid:    #ef9a9a;
+            --text:        #1a2333;
+            --muted:       #546e8a;
+        }
+
         body {
             padding-bottom: 15%;
+            background: linear-gradient(160deg, #eef2f5 0%, #f5f5f5 50%, #f0f4f8 100%);
+            min-height: 100vh;
+            font-family: 'Nunito', sans-serif;
         }
 
-        .footer {
-            color: black;
-            background-color: white;
-            width: 100%;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            bottom: 0;
-            font-size: 15px;
-            opacity: 0.9;
-            background: #E3E1E1;
-            text-align: center;
-            position: fixed;
+        a, a:visited, a:active { color: black; text-decoration: none; }
+
+        .spinner-border { color: var(--azul); }
+
+        /* ── Tarjeta ── */
+        .reserva-card {
+            background: #ffffff;
+            border: 1px solid var(--slate-mid);
+            border-radius: 16px;
+            margin-bottom: 18px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(69, 90, 104, 0.10);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .reserva-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(69, 90, 104, 0.16);
+        }
+        .reserva-card--cancelada {
+            border-color: var(--rojo-mid);
+            box-shadow: 0 4px 18px rgba(198, 40, 40, 0.10);
+        }
+        .reserva-card--cancelada:hover {
+            box-shadow: 0 10px 28px rgba(198, 40, 40, 0.18);
         }
 
-        .footer input[type="radio"] {
-            display: none;
+        /* Banda de fecha */
+        .reserva-fecha {
+            background: linear-gradient(120deg, var(--slate-dark) 0%, var(--slate) 60%, #607d8b 100%);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.2px;
+        }
+        .reserva-fecha--cancelada {
+            background: linear-gradient(120deg, var(--rojo-dark) 0%, var(--rojo) 60%, #e53935 100%);
         }
 
-        label,
-        .form-check input[type=checkbox] {
-            position: static;
+        .badge-cancelada {
+            margin-left: auto;
+            background: rgba(255,255,255,0.22);
+            border: 1px solid rgba(255,255,255,0.40);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
-        a,
-        a:visited,
-        a:active {
-            color: black;
+        /* Cuerpo */
+        .reserva-body {
+            padding: 16px 20px 8px;
+        }
+
+        .reserva-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.97rem;
+            color: var(--text);
+        }
+
+        .reserva-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--slate-light);
+            color: var(--slate);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            flex-shrink: 0;
+        }
+        .reserva-card--cancelada .reserva-icon {
+            background: var(--rojo-light);
+            color: var(--rojo);
+        }
+
+        .reserva-divider {
+            border: 0;
+            border-top: 1px solid var(--slate-mid);
+            opacity: 0.5;
+            margin: 6px 0 12px;
+        }
+        .reserva-card--cancelada .reserva-divider {
+            border-color: var(--rojo-mid);
+        }
+
+        .reserva-boton { text-align: right; padding-bottom: 12px; }
+
+        .btn-detalle {
+            display: inline-block;
+            background: var(--slate);
+            color: #ffffff;
+            padding: 7px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
             text-decoration: none;
+            transition: background 0.25s ease, transform 0.2s ease;
+        }
+        .btn-detalle:hover {
+            background: var(--slate-dark);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+        .btn-detalle--cancelada { background: var(--rojo); }
+        .btn-detalle--cancelada:hover { background: var(--rojo-dark); }
+
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+        .empty-state__icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+        .empty-state__text {
+            font-size: 1.05rem;
+            font-weight: 600;
         }
 
-        .fecha {
-            border-radius: 0.5rem;
-        }
+        /* Contenedor principal */
+        .container#container { padding: 0 8px; }
 
-        .espacio {
-            border-radius: 1rem;
-            background: #f3f3f3ff;
-        }
-
-        .hora {
-            color: #00B7CF;
-        }
-
-        .spinner-border {
-            color: #1976d2;
-        }
-
+        /* Footer */
         .footer-container {
             background-color: white;
             box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
@@ -229,45 +319,29 @@ require_once 'verificar_sesion_gestor.php';
             padding-bottom: 1px !important;
             height: auto;
         }
-
-        .footer-item {
-            padding: 8px 0;
-        }
-
+        .footer-item { padding: 8px 0; }
         .icon-container {
             transition: transform 0.3s ease;
             padding: 5px 0;
             color: #000000;
         }
-
         .footer-item:hover .icon-container {
             transform: translateY(-7px);
             color: #007bff;
         }
 
-        #lbl_his:hover,
-        #lbl_per:hover,
-        #lbl_anf:hover,
-        #lbl_val:hover,
-        #lbl_res:hover,
-        #lbl_esp:hover {
-            color: #00B7CF !important;
-        }
-
-        .header-main {
-            overflow-x: hidden;
-            margin-right: 1rem;
-        }
-
+        /* Tabs */
+        .header-main { overflow-x: hidden; margin-right: 1rem; }
         .header-tabs {
             overflow: hidden;
             border-radius: 12px;
-            background-color: white;
+            background-color: #ffffff;
             margin-bottom: 1rem;
-            margin-right: 3rem;
-            margin-left: 3rem;
+            margin-left: 1.2rem;
+            margin-right: 1.2rem;
+            box-shadow: 0 2px 10px rgba(69,90,104,0.10);
+            border: 1px solid var(--slate-mid);
         }
-
         .header-tab {
             font-weight: bold;
             transition: all 0.3s ease;
@@ -277,33 +351,35 @@ require_once 'verificar_sesion_gestor.php';
             background-color: white;
             border-bottom: 3px solid transparent;
         }
-
         .header-tab-active {
             color: white;
             background-color: #81ba18;
             border-color: #BDE742;
         }
-
         .header-tab-link {
             text-decoration: none;
             display: block;
             height: 100%;
         }
-
         .header-tab:hover:not(.header-tab-active) {
             background-color: #f8f9fa;
             color: #4CCBD4;
             border-bottom: 3px solid #E3E1E1;
+        }
+
+        @media (max-width: 576px) {
+            .header-tabs { margin-left: 0.5rem; margin-right: 0.5rem; }
+            .reserva-fecha { font-size: 0.88rem; }
         }
     </style>
 </head>
 
 <body>
     <header>
-        <div class="container-fluid info text-center">
+        <div class="container-fluid text-center" style="background: linear-gradient(120deg, #2e3f4c 0%, #455a68 55%, #607d8b 100%); padding: 18px 0 14px; margin-bottom: 4px; box-shadow: 0 4px 16px rgba(46,63,76,0.18);">
             <div class="row">
-                <div class="col color-white h2 fw-bold pt-3 pb-2">
-                    Histórico de Establecimientos
+                <div class="col fw-bold pt-1 pb-1" style="color:#ffffff; font-size:1.3rem; font-family:'Nunito',sans-serif; letter-spacing:0.2px;">
+                    <i class="fas fa-history me-2"></i>Histórico de tus Establecimientos
                 </div>
             </div>
         </div>

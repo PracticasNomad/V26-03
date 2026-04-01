@@ -114,7 +114,7 @@
         <a href="verEstablecimientos.php" class="col text-center footer-item <?php if ($paginaActual == 'verEstablecimientos.php') echo 'active'; ?>">
             <div class="icon-container">
                 <i class="fas fa-building"></i>
-                <div class="footer-text">Locales</div>
+                <div class="footer-text">Establecimientos</div>
             </div>
         </a>
 

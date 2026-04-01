@@ -12,7 +12,7 @@ require_once 'verificar_sesion_gestor.php';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
     <link href="../style.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
@@ -83,18 +83,13 @@ require_once 'verificar_sesion_gestor.php';
                             const fechaFormateada = `${diaSemana}, ${dia} de ${mes} del ${anio}`;
 
                             var div = document.createElement("div");
-                            div.style.backgroundColor = '#f8fbff';
-                            div.style.marginTop = '20px';
-                            div.className = "row pt-3 px-4 pb-3 mb-3 border rounded shadow-sm";
-                            div.style.borderColor = '#90caf9';
-                            div.style.borderWidth = '1px';
+                            div.className = "reserva-card";
                             container.appendChild(div);
 
                             var divFecha = document.createElement("div");
-                            divFecha.className = "col-12 fecha fw-bold h5 pt-1 mb-3 text-center py-2 rounded";
-                            divFecha.style.backgroundColor = '#2196f3';
-                            divFecha.style.color = 'white';
-                            divFecha.textContent = fechaFormateada;
+                            divFecha.className = "reserva-fecha";
+                            divFecha.innerHTML = '<i class="fas fa-calendar-alt me-2"></i>' + fechaFormateada;
+                            div.appendChild(divFecha);
                             div.appendChild(divFecha);
 
                             var divContenido = document.createElement("div");
@@ -102,47 +97,34 @@ require_once 'verificar_sesion_gestor.php';
                             div.appendChild(divContenido);
 
                             var divEspacio = document.createElement("div");
-                            divEspacio.className = "h6 mb-3";
-                            divEspacio.innerHTML = '<i class="fas fa-map-marker-alt me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Espacio:</strong> ' + data[i].space.name + ' (' + data[i].space.establecimiento.nombre + ')';
+                            divEspacio.className = "reserva-row";
+                            divEspacio.innerHTML = '<span class="reserva-icon"><i class="fas fa-map-marker-alt"></i></span><span><strong>Espacio:</strong> ' + data[i].space.name + ' &mdash; ' + data[i].space.establecimiento.nombre + '</span>';
                             divContenido.appendChild(divEspacio);
 
                             var divHorario = document.createElement("div");
-                            divHorario.className = "mb-3";
-                            divHorario.innerHTML = '<i class="far fa-clock me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Horario:</strong> ' +
-                                data[i].start_time.substring(0, 5) + ' - ' + data[i].end_time.substring(0, 5);
+                            divHorario.className = "reserva-row";
+                            divHorario.innerHTML = '<span class="reserva-icon"><i class="far fa-clock"></i></span><span><strong>Horario:</strong> ' +
+                                data[i].start_time.substring(0, 5) + ' &ndash; ' + data[i].end_time.substring(0, 5) + '</span>';
                             divContenido.appendChild(divHorario);
 
-                            var divUsuario = document.createElement("div");
-                            divUsuario.className = "mb-3";
                             var nombreUsuario = data[i].user ? data[i].user.name : 'Usuario Desconocido';
-                            divUsuario.innerHTML = '<i class="far fa-user me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Reservado por:</strong> ' + nombreUsuario;
+                            var divUsuario = document.createElement("div");
+                            divUsuario.className = "reserva-row";
+                            divUsuario.innerHTML = '<span class="reserva-icon"><i class="far fa-user"></i></span><span><strong>Reservado por:</strong> ' + nombreUsuario + '</span>';
                             divContenido.appendChild(divUsuario);
 
                             var divider = document.createElement("hr");
-                            divider.style.borderColor = '#bbdefb';
-                            divider.style.opacity = '0.5';
+                            divider.className = "reserva-divider";
                             divContenido.appendChild(divider);
 
                             var divBoton = document.createElement("div");
-                            divBoton.className = "mt-3 text-end";
+                            divBoton.className = "reserva-boton";
                             divContenido.appendChild(divBoton);
 
                             var botonDetalles = document.createElement("a");
                             botonDetalles.href = 'detalles_reserva.php?id=' + data[i].id;
-                            botonDetalles.className = "btn btn-sm";
-                            botonDetalles.style.backgroundColor = '#1976d2';
-                            botonDetalles.style.color = 'white';
-                            botonDetalles.style.boxShadow = '0 2px 5px rgba(33, 150, 243, 0.3)';
-                            botonDetalles.innerHTML = '<i class="fas fa-info-circle me-1"></i>Mostrar detalles';
-
-                            botonDetalles.onmouseover = function () {
-                                this.style.backgroundColor = '#0d47a1';
-                                this.style.transition = 'background-color 0.3s';
-                            };
-                            botonDetalles.onmouseout = function () {
-                                this.style.backgroundColor = '#1976d2';
-                            };
-
+                            botonDetalles.className = "btn-detalle";
+                            botonDetalles.innerHTML = '<i class="fas fa-arrow-right me-1"></i>Ver detalles';
                             divBoton.appendChild(botonDetalles);
                         }
                     }
@@ -150,9 +132,9 @@ require_once 'verificar_sesion_gestor.php';
 
                 if (!reservasEncontradas) {
                     container.innerHTML = `
-                        <div class="alert alert-info mt-4" role="alert">
-                            <i class="fas fa-info-circle me-2"></i>
-                            No hay reservas próximas para tus establecimientos.
+                        <div class="empty-state">
+                            <div class="empty-state__icon"><i class="fas fa-calendar-day"></i></div>
+                            <div class="empty-state__text">No hay reservas próximas para tus establecimientos.</div>
                         </div>
                     `;
                 }
@@ -161,8 +143,20 @@ require_once 'verificar_sesion_gestor.php';
     </script>
 
     <style>
+        :root {
+            --azul:       #1976d2;
+            --azul-dark:  #0d47a1;
+            --azul-light: #e3f0fb;
+            --azul-mid:   #bbdefb;
+            --text:       #1a2333;
+            --muted:      #546e8a;
+        }
+
         body {
             padding-bottom: 15%;
+            background: linear-gradient(160deg, #e8f1fb 0%, #f0f5ff 50%, #e6f4f1 100%);
+            min-height: 100vh;
+            font-family: 'Nunito', sans-serif;
         }
 
         .footer {
@@ -207,17 +201,112 @@ require_once 'verificar_sesion_gestor.php';
             border-radius: 0.5rem;
         }
 
-        .espacio {
-            border-radius: 1rem;
-            background: #f3f3f3ff;
-        }
-
-        .hora {
-            color: #00B7CF;
-        }
-
         .spinner-border {
-            color: #1976d2;
+            color: var(--azul);
+        }
+
+        /* ── Tarjeta de reserva ── */
+        .reserva-card {
+            background: #ffffff;
+            border: 1px solid var(--azul-mid);
+            border-radius: 16px;
+            margin-bottom: 18px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(25, 118, 210, 0.10);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .reserva-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(25, 118, 210, 0.16);
+        }
+
+        /* Banda de fecha */
+        .reserva-fecha {
+            background: linear-gradient(120deg, #1565c0 0%, #1976d2 55%, #42a5f5 100%);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 12px 20px;
+            letter-spacing: 0.2px;
+        }
+
+        /* Cuerpo */
+        .reserva-card .col-12 {
+            padding: 16px 20px 8px;
+        }
+
+        .reserva-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.97rem;
+            color: var(--text);
+        }
+
+        .reserva-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--azul-light);
+            color: var(--azul);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            flex-shrink: 0;
+        }
+
+        .reserva-divider {
+            border: 0;
+            border-top: 1px solid var(--azul-mid);
+            opacity: 0.6;
+            margin: 6px 0 12px;
+        }
+
+        .reserva-boton {
+            text-align: right;
+            padding-bottom: 12px;
+        }
+
+        .btn-detalle {
+            display: inline-block;
+            background: var(--azul);
+            color: #ffffff;
+            padding: 7px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.25s ease, transform 0.2s ease;
+        }
+
+        .btn-detalle:hover {
+            background: var(--azul-dark);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+        .empty-state__icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+        .empty-state__text {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        /* Contenedor principal */
+        .container#container {
+            padding: 0 8px;
         }
 
         .footer-container {
@@ -260,10 +349,12 @@ require_once 'verificar_sesion_gestor.php';
         .header-tabs {
             overflow: hidden;
             border-radius: 12px;
-            background-color: white;
+            background-color: #ffffff;
             margin-bottom: 1rem;
-            margin-left: 3rem;
-            margin-right: 3rem;
+            margin-left: 1.2rem;
+            margin-right: 1.2rem;
+            box-shadow: 0 2px 10px rgba(25, 118, 210, 0.10);
+            border: 1px solid var(--azul-mid);
         }
 
         .header-tab {
@@ -298,10 +389,10 @@ require_once 'verificar_sesion_gestor.php';
 
 <body>
     <header>
-        <div class="container-fluid info text-center">
+        <div class="container-fluid text-center" style="background: linear-gradient(120deg, #1565c0 0%, #1976d2 55%, #42a5f5 100%); padding: 18px 0 14px; margin-bottom: 4px; box-shadow: 0 4px 16px rgba(21,101,192,0.18);">
             <div class="row">
-                <div class="col color-white h2 fw-bold pt-3 pb-2">
-                    Reservas de tus Establecimientos
+                <div class="col fw-bold pt-1 pb-1" style="color:#ffffff; font-size:1.3rem; font-family:'Nunito',sans-serif; letter-spacing:0.2px;">
+                    <i class="fas fa-calendar-check me-2"></i>Reservas de tus Establecimientos
                 </div>
             </div>
         </div>
