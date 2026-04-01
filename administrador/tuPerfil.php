@@ -68,34 +68,39 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
     <link href="../style.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>TheNomadapp - Panel Administrador</title>
     <style>
         :root {
-            --primary-color: #dc3545;
+            --primary-color: #c83a45;
+            --primary-hover: #db4b56;
             --secondary-color: #6c757d;
-            --cancel-color: #343a40;
-            --light-bg: #f8f9fa;
+            --cancel-color: #5f6772;
+            --light-bg: #f8f9fb;
             --white: #ffffff;
-            --dark-text: #343a40;
-            --border-radius-lg: 15px;
-            --border-radius-md: 10px;
+            --dark-text: #151922;
+            --border-radius-lg: 16px;
+            --border-radius-md: 12px;
             --border-radius-sm: 8px;
-            --bg: #f4f7fb;
+            --bg: #eef2f6;
             --ink: #1f2933;
+            --muted-text: #4f5b67;
             --line: #d8e1ea;
-            --accent-dark: #8c1c13;
-            --accent-mid: #c44536;
+            --accent-dark: #4d131a;
+            --accent-mid: #8f2a33;
+            --surface-card: #ffffff;
+            --surface-soft: #f4f7fb;
         }
 
         body {
-            font-family: 'Nunito', sans-serif;
-            background: #eef2f5;
+            font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(155deg, #f9fbfd 0%, #eef2f6 48%, #f4f7fb 100%);
             color: var(--ink);
             padding-bottom: 120px;
+            min-height: 100vh;
         }
 
         .page-shell {
@@ -105,22 +110,23 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         }
 
         .hero {
-            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #962d22 0%, #c44536 52%, #df786c 100%);
+            color: #fffaf8;
             border-radius: 24px;
-            padding: 22px;
-            box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            margin-bottom: 18px;
+            padding: 22px 24px;
+            box-shadow: 0 18px 42px #cfd8e2;
+            border: 1px solid #b93d41;
+            margin-bottom: 20px;
             box-sizing: border-box;
             width: 100%;
+            backdrop-filter: blur(2px);
         }
 
         .hero-title {
-            font-size: 1.35rem;
-            font-weight: 800;
+            font-size: 1.3rem;
+            font-weight: 700;
             margin: 0;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.3px;
         }
 
         .title-row {
@@ -131,7 +137,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         }
 
         .contenedorPerfil {
-            background-color: var(--white);
+            background-color: #ffffff;
             border-radius: 20px;
             padding: 40px 30px;
             margin: 0 auto;
@@ -142,12 +148,13 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: flex-start;
-            border: 1px solid var(--line);
+            border: 1px solid #d8e1ea;
             box-sizing: border-box;
+            backdrop-filter: blur(6px);
         }
 
         .sombra {
-            box-shadow: 0 18px 36px rgba(31, 41, 51, 0.12);
+            box-shadow: 0 18px 34px #d9e1ea;
         }
 
         .fotoPerfilMovil {
@@ -160,8 +167,10 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             overflow: hidden;
             border-radius: 50%;
             margin: 0 auto 15px auto;
-            border: 4px solid var(--primary-color);
+            border: 1.5px solid #dce4ee;
+            box-shadow: 0 0 0 4px #f0d7da;
             flex-shrink: 0;
+            background: #ffffff;
         }
 
         .profile-image-container img {
@@ -191,26 +200,43 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             flex-direction: column;
         }
 
-        .perfilInfo .info-item {
-            background-color: var(--light-bg);
-            padding: 15px 20px;
-            border-radius: var(--border-radius-md);
-            margin-bottom: 18px;
-            font-size: 1.1em;
+        .section-title {
+            margin-bottom: 20px !important;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #d8989e;
             display: flex;
             align-items: center;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            gap: 8px;
+            color: #1f2933;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .perfilInfo .info-item {
+            background-color: #f8fafd;
+            padding: 15px 20px;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 12px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #e2e8f0;
+            color: var(--muted-text);
+            line-height: 1.35;
         }
 
         .perfilInfo .info-item:last-child {
             margin-bottom: 0;
         }
 
-        .perfilInfo .h5 {
-            margin-bottom: 30px !important;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--primary-color);
-            display: inline-block;
+        .perfilInfo .info-item strong {
+            color: #1f2933;
+            font-weight: 500;
+            margin-right: 14px;
+            border-right: 1px solid #d9e2ec;
+            padding-right: 14px;
+            min-width: 145px;
         }
 
         .btn-primary,
@@ -220,45 +246,49 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px 15px;
-            font-size: 0.95em;
+            padding: 10px 14px;
+            font-size: 0.88rem;
+            letter-spacing: 0.2px;
             width: 100%;
             margin-top: 10px !important;
-            border-radius: 50rem !important;
+            border-radius: 10px !important;
+            border: 1px solid transparent;
+            box-shadow: none;
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: var(--white);
+            background-color: #c83a45;
+            border-color: #c83a45;
+            color: #ffffff;
         }
 
         .btn-primary:hover {
-            background-color: #b02a37;
-            border-color: #b02a37;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #b7333e;
+            border-color: #b7333e;
+            color: #ffffff;
+            transform: translateY(-1px);
         }
 
         .btn-cancel {
-            background-color: var(--cancel-color);
-            border-color: var(--cancel-color);
-            color: var(--white);
+            background-color: #eef2f6;
+            border-color: #d5dde6;
+            color: #2f3945;
         }
 
         .btn-cancel:hover {
-            background-color: #23272b;
-            border-color: #23272b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #dfe7ef;
+            border-color: #c3cfdb;
+            color: #1f2933;
+            transform: translateY(-1px);
         }
 
         .badge-admin {
-            background-color: var(--accent-mid);
-            color: white;
-            padding: 5px 15px;
+            background-color: #f5d9dc;
+            color: #8d2e35;
+            padding: 6px 15px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
+            border: 1px solid #d89aa0;
             margin-bottom: 15px;
             display: inline-block;
         }
@@ -272,18 +302,18 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         .legal-info-label {
             display: block;
             font-weight: 700;
-            color: var(--ink);
+            color: #1f2933;
             margin-bottom: 8px;
         }
 
         .legal-info-box {
             max-width: 520px;
             margin: 0 auto;
-            background-color: var(--light-bg);
-            border: 1px solid var(--line);
+            background-color: #f8fafd;
+            border: 1px solid #dde5ef;
             border-radius: 12px;
             padding: 10px 14px;
-            color: #495057;
+            color: #4f5b67;
             text-align: left;
             max-height: 240px;
             overflow-y: auto;
@@ -292,12 +322,12 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
         .legal-rich-content h6 {
             margin-bottom: 8px;
             font-weight: 800;
-            color: var(--ink);
+            color: #1f2933;
         }
 
         .legal-rich-content p {
             margin-bottom: 8px;
-            color: #495057;
+            color: #4f5b67;
             font-size: 0.92rem;
             line-height: 1.4;
         }
@@ -311,15 +341,51 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             margin-bottom: 5px;
             font-size: 0.9rem;
             line-height: 1.35;
+            color: #4f5b67;
         }
 
         .legal-rich-content a {
-            color: #0d6efd;
+            color: #ff9299;
             text-decoration: none;
         }
 
         .legal-rich-content a:hover {
             text-decoration: underline;
+        }
+
+        .separator-line {
+            border: 0;
+            border-top: 1px solid #d8e1ea;
+            margin: 14px 0;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            color: #1f2933;
+            border: 1px solid #dde5ef;
+        }
+
+        .modal-header,
+        .modal-footer {
+            border-color: #e3eaf2;
+        }
+
+        .form-control {
+            background: #f8fafd;
+            border: 1px solid #d6dee8;
+            color: #1f2933;
+        }
+
+        .form-control:focus {
+            background: #ffffff;
+            color: #1f2933;
+            border-color: #c83a45;
+            box-shadow: 0 0 0 0.2rem #f2cfd2;
+        }
+
+        .form-label {
+            color: #2f3945;
+            font-size: 0.92rem;
         }
 
         @media (max-width: 768px) {
@@ -365,6 +431,15 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
 
             .perfilInfo .info-item {
                 font-size: 1em;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .perfilInfo .info-item strong {
+                min-width: auto;
+                border-right: none;
+                padding-right: 0;
             }
         }
     </style>
@@ -385,13 +460,13 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                 <div class="profile-image-container sombra mb-3">
                     <img id="fotoPerfilMovil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
                 </div>
-                <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+                <button type="button" class="btn btn-primary mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
                     <i class="fas fa-camera"></i> Cambiar imágen
                 </button>
-                <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                <button type="button" class="btn btn-primary mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
                     <i class="fas fa-edit"></i> Información legal
                 </button>
-                <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
+                <button type="button" class="btn btn-cancel mt-2 w-100" onclick="window.location.href='../cerrarSesion.php'">
                     <i class="fas fa-sign-out-alt"></i> Cerrar sesión
                 </button>
             </div>
@@ -401,30 +476,32 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                 <div class="profile-image-container sombra mb-3">
                     <img id="fotoPerfil" src="<?= htmlspecialchars($admin['avatar_url'] ?? '../img/perfil.png') ?>" alt="Profile Image">
                 </div>
-                <button type="button" class="btn btn-primary rounded-pill mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+                <button type="button" class="btn btn-primary mt-2 w-100" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
                     <i class="fas fa-camera"></i> Cambiar imágen
                 </button>
-                <button type="button" class="btn btn-primary rounded-pill mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                <button type="button" class="btn btn-primary mt-2 w-100 botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
                     <i class="fas fa-edit"></i> Información legal
                 </button>
-                <button type="button" class="btn btn-cancel rounded-pill mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
+                <button type="button" class="btn btn-cancel mt-2 w-100" onclick="window.location.href='cerrarSesion.php'">
                     <i class="fas fa-sign-out-alt"></i> Cerrar sesión
                 </button>
             </div>
 
             <div class="perfilInfo">
-                <p class="h5 fw-bold mb-3"><u>Información Legal Global:</u></p>
+                <p class="h5 section-title"><i class="fas fa-file-signature"></i> Información Legal Global</p>
 
-                <div id="nombre" class="info-item">Nombre: <?= htmlspecialchars($admin['name'] ?? '') ?></div>
-                <div id="email" class="info-item">E-mail: <?= htmlspecialchars($admin['email'] ?? '') ?></div>
-                <div id="telefono" class="info-item">Teléfono: <?= htmlspecialchars($admin['phone'] ?? '') ?></div>
-                <div id="empresa" class="info-item">Empresa: <?= htmlspecialchars($admin['empresa'] ?? '') ?></div>
-                <div id="cif" class="info-item">CIF/NIF: <?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? '') ?></div>
+                <div id="nombre" class="info-item"><strong>Nombre</strong> <?= htmlspecialchars($admin['name'] ?? '') ?></div>
+                <div id="email" class="info-item"><strong>E-mail</strong> <?= htmlspecialchars($admin['email'] ?? '') ?></div>
+                <div id="telefono" class="info-item"><strong>Teléfono</strong> <?= htmlspecialchars($admin['phone'] ?? '') ?></div>
+                <div id="empresa" class="info-item"><strong>Empresa</strong> <?= htmlspecialchars($admin['empresa'] ?? '') ?></div>
+                <div id="cif" class="info-item"><strong>CIF/NIF</strong> <?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? '') ?></div>
 
-                <div id="direccion" class="info-item">Dirección: <?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? '') ?></div>
-                <div id="localidad" class="info-item">Localidad: <?= htmlspecialchars($admin['localidad'] ?? '') ?></div>
-                <div id="provincia" class="info-item">Provincia: <?= htmlspecialchars($admin['provincia'] ?? '') ?></div>
-                <div id="codigoPostal" class="info-item">Código Postal: <?= htmlspecialchars($admin['codigo_postal'] ?? '') ?></div>
+                <hr class="separator-line">
+
+                <div id="direccion" class="info-item"><strong>Dirección</strong> <?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? '') ?></div>
+                <div id="localidad" class="info-item"><strong>Localidad</strong> <?= htmlspecialchars($admin['localidad'] ?? '') ?></div>
+                <div id="provincia" class="info-item"><strong>Provincia</strong> <?= htmlspecialchars($admin['provincia'] ?? '') ?></div>
+                <div id="codigoPostal" class="info-item"><strong>Código Postal</strong> <?= htmlspecialchars($admin['codigo_postal'] ?? '') ?></div>
 
                 <input type="hidden" id="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
             </div>
