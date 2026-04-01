@@ -388,6 +388,12 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             font-size: 0.92rem;
         }
 
+        .custom-toast {
+            border-radius: var(--border-radius-sm);
+            font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            min-width: 290px;
+        }
+
         @media (max-width: 768px) {
             .page-shell {
                 padding-left: 12px;
@@ -446,6 +452,15 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
 </head>
 
 <body>
+    <div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 10050">
+        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <div class="page-shell">
         <section class="hero">
             <div class="title-row">
@@ -612,6 +627,31 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
     </div>
 
     <script>
+        function mostrarNotificacion(mensaje, tipo = 'success', duracion = 3500) {
+            const toastEl = document.getElementById('liveToast');
+            const toastMessage = document.getElementById('toastMessage');
+            const closeBtn = toastEl.querySelector('.btn-close');
+
+            toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'text-dark');
+            closeBtn.classList.remove('btn-close-white');
+
+            if (tipo === 'success') {
+                toastEl.classList.add('bg-success');
+                closeBtn.classList.add('btn-close-white');
+            } else if (tipo === 'warning') {
+                toastEl.classList.add('bg-warning', 'text-dark');
+            } else {
+                toastEl.classList.add('bg-danger');
+                closeBtn.classList.add('btn-close-white');
+            }
+
+            toastMessage.textContent = mensaje;
+            const toast = new bootstrap.Toast(toastEl, {
+                delay: duracion
+            });
+            toast.show();
+        }
+
         // Cargar los datos en el modal de edición
         document.querySelectorAll('.botonEditar').forEach(boton => {
             boton.addEventListener('click', function() {
@@ -642,17 +682,23 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert("Información global actualizada correctamente");
-                        location.reload();
+                        mostrarNotificacion("Información global actualizada correctamente", "success", 4500);
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editarPerfilModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                        setTimeout(() => {
+                            location.reload();
+                        }, 4200);
                     } else {
-                        alert("Error: " + data.message);
+                        mostrarNotificacion("Error: " + data.message, "error");
                         btn.disabled = false;
                         btn.textContent = "Guardar cambios";
                     }
                 })
                 .catch(error => {
                     console.error("Error:", error);
-                    alert("Aviso: Falta el archivo actualizarAdmin.php para procesar los datos.");
+                    mostrarNotificacion("Aviso: Falta el archivo actualizarAdmin.php para procesar los datos.", "warning");
                     btn.disabled = false;
                     btn.textContent = "Guardar cambios";
                 });
@@ -675,7 +721,7 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
             const inputImagen = document.getElementById("inputImagen");
 
             if (inputImagen.files.length === 0) {
-                alert("Debes seleccionar una imagen");
+                mostrarNotificacion("Debes seleccionar una imagen", "warning");
                 return;
             }
 
@@ -696,16 +742,16 @@ if (is_array($datosAdmin) && count($datosAdmin) > 0) {
                     if (data.success) {
                         document.getElementById("fotoPerfil").src = data.avatarUrl;
                         document.getElementById("fotoPerfilMovil").src = data.avatarUrl;
-                        alert("Imagen de perfil actualizada correctamente");
+                        mostrarNotificacion("Imagen de perfil actualizada correctamente", "success");
                         const modal = bootstrap.Modal.getInstance(document.getElementById('cambiarImagenModal'));
                         modal.hide();
                     } else {
-                        alert("Error: " + data.message);
+                        mostrarNotificacion("Error: " + data.message, "error");
                     }
                 })
                 .catch(error => {
                     console.error("Error:", error);
-                    alert("Aviso: Falta el archivo subir-imagen-perfil-admin.php para guardar la foto.");
+                    mostrarNotificacion("Aviso: Falta el archivo subir-imagen-perfil-admin.php para guardar la foto.", "warning");
                 })
                 .finally(() => {
                     btn.disabled = false;
