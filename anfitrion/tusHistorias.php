@@ -173,6 +173,7 @@ require_once 'verificar_sesion_host.php';
         body {
             font-family: 'Nunito', sans-serif;
             padding-bottom: 15%;
+            background-color: #f4f6f9;
         }
 
         .page-shell {
@@ -296,34 +297,8 @@ require_once 'verificar_sesion_host.php';
 
 <body>
     <div class="page-shell">
-        <header class="page-hero">
-            <div class="page-hero-inner">
-                <div class="hero-title-row">
-                    <div class="page-hero-title"><i class="fas fa-history me-2"></i>Tu Historial</div>
-                </div>
-            </div>
-        </header>
+       <?php include 'headerAnfitrion.php'; ?>
 
-        <div class="row py-3 mb-0 header-main">
-            <div class="col-12">
-                <div class="header-tabs shadow-sm mb-0">
-                    <div class="row g-0">
-                        <div class="col-6">
-                            <a href="tusReservas.php" class="header-tab-link">
-                                <div class="header-tab py-3 text-center rounded-start">
-                                    <i class="fas fa-calendar-check me-2"></i>RESERVAS
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <div class="header-tab header-tab-active py-3 text-center rounded-end">
-                                <i class="fas fa-history me-2"></i>HISTÓRICO
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div id="container" style="max-width: 100%; overflow-x: hidden; box-sizing: border-box;"></div>
     </div>
 

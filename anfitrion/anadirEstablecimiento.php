@@ -263,6 +263,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding-bottom: 50px;
         }
 
+        .custom-toast {
+            border-radius: 10px;
+            font-family: 'Nunito', sans-serif;
+            z-index: 10500;
+        }
+
         .contenedor-principal {
             max-width: 800px;
             margin: 2rem auto;
@@ -519,6 +525,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
+        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <div class="contenedor-principal">
         <div class="header-container">
             <h1 class="fw-bold mb-4">Añadir Establecimiento</h1>
@@ -717,6 +733,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setupEventListeners();
         });
 
+        // Función para notificaciones Toast
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const toastEl = document.getElementById('liveToast');
+            if (!toastEl) return;
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+
+            if (tipo === 'success') {
+                toastEl.classList.add('bg-success');
+                mensaje = '✅ ' + mensaje;
+            } else if (tipo === 'error') {
+                toastEl.classList.add('bg-danger');
+                mensaje = '⚠️ ' + mensaje;
+            } else if (tipo === 'warning') {
+                toastEl.classList.add('bg-warning');
+                mensaje = '⚠️ ' + mensaje;
+            }
+
+            toastMessage.textContent = mensaje;
+            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+            toast.show();
+        }
+
         // Inicializar mapa
         function initMap() {
             mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -778,7 +818,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Obtener ubicación actual
         function getCurrentLocation() {
             if (!navigator.geolocation) {
-                alert('Tu navegador no soporta geolocalización');
+                mostrarNotificacion('Tu navegador no soporta geolocalización', 'error');
                 return toggleLocationMode(document.getElementById('btn-click-map'), document.getElementById('btn-current-location'));
             }
 
@@ -795,7 +835,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     updateMarker(lngLat);
                 },
                 (error) => {
-                    alert('Error al obtener la ubicación: ' + error.message);
+                    mostrarNotificacion('Error al obtener la ubicación: ' + error.message, 'error');
                     toggleLocationMode(document.getElementById('btn-click-map'), document.getElementById('btn-current-location'));
                 }
             );
@@ -966,7 +1006,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Validar imágenes
             if (selectedFiles.length === 0) {
-                alert('Debes subir al menos una imagen del establecimiento.');
+                mostrarNotificacion('Debes subir al menos una imagen del establecimiento.', 'error');
                 isValid = false;
             }
 
@@ -975,7 +1015,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const lng = document.getElementById('longitude');
 
             if (!lat.value || !lng.value) {
-                alert('Por favor, selecciona una ubicación en el mapa.');
+                mostrarNotificacion('Por favor, selecciona una ubicación en el mapa.', 'error');
                 lat.classList.add('is-invalid');
                 lng.classList.add('is-invalid');
                 isValid = false;

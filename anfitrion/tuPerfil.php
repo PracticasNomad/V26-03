@@ -36,6 +36,13 @@ require_once 'verificar_sesion_host.php';
             padding-bottom: 90px;
         }
 
+           .page-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
         .contenedorPerfil {
             background-color: var(--white);
             border-radius: var(--border-radius-lg);
@@ -286,6 +293,12 @@ require_once 'verificar_sesion_host.php';
 </head>
 
 <body>
+    <div class="page-shell">
+        
+        <?php include 'headerAnfitrion.php'; ?>
+
+        <div id="container" style="max-width: 100%; overflow-x: hidden; box-sizing: border-box;"></div>
+    </div>
     <div id="loadingContainer">
         <div class="spinner-border" role="status">
             <span class="visually-hidden">Cargando...</span>

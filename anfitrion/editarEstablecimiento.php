@@ -83,7 +83,7 @@ if ($gallery_httpCode === 200) {
 }
 
 // Debug temporal - eliminar después
-echo "<!-- Debug: " . json_encode($imagenes_existentes) . " -->";
+echo "";
 
 if ($establecimiento['host_id'] != $_SESSION['user_id']) {
     header("Location: verEstablecimientos.php");
@@ -460,6 +460,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding-bottom: 50px;
         }
 
+        .custom-toast {
+            border-radius: 10px;
+            font-family: 'Nunito', sans-serif;
+            z-index: 10500;
+        }
+
         .contenedor-principal {
             max-width: 800px;
             margin: 2rem auto;
@@ -717,6 +723,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
+        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none;">
+                <div class="modal-header" style="border-bottom: none;">
+                    <h5 class="modal-title fw-bold">¿Eliminar imagen?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>¿Estás seguro de que quieres eliminar esta imagen?</p>
+                </div>
+                <div class="modal-footer d-flex justify-content-center" style="border-top: none;">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Cancelar</button>
+                    <button type="button" id="btn-confirmar-eliminar-imagen" class="btn btn-danger px-4" style="border-radius: 10px;">Sí, eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="contenedor-principal">
         <div class="header-container">
             <h1 class="fw-bold mb-4">Editar Establecimiento</h1>
@@ -760,7 +794,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="image-preview" id="imagePreview"></div>
 
-                    <!-- Inputs ocultos para las imágenes -->
                     <input type="file" name="imagen" id="imagen" style="display: none;">
                     <input type="file" name="imagen2" id="imagen2" style="display: none;">
                     <input type="file" name="imagen3" id="imagen3" style="display: none;">
@@ -916,6 +949,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setupPostalCodeAutocompletion();
         });
 
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const toastEl = document.getElementById('liveToast');
+            if (!toastEl) return;
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+
+            if (tipo === 'success') {
+                toastEl.classList.add('bg-success');
+                mensaje = '✅ ' + mensaje;
+            } else if (tipo === 'error') {
+                toastEl.classList.add('bg-danger');
+                mensaje = '⚠️ ' + mensaje;
+            } else if (tipo === 'warning') {
+                toastEl.classList.add('bg-warning');
+                mensaje = '⚠️ ' + mensaje;
+            }
+
+            toastMessage.textContent = mensaje;
+            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+            toast.show();
+        }
+
         function initMap() {
             mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
             map = new mapboxgl.Map({
@@ -993,12 +1049,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 break;
                         }
 
-                        alert("Error: " + errorMessage);
+                        mostrarNotificacion(errorMessage, "error");
                         document.getElementById('btn-current-location').innerHTML = '<i class="fas fa-location-arrow"></i> Usar mi ubicación actual';
                     }
                 );
             } else {
-                alert("Tu navegador no soporta geolocalización.");
+                mostrarNotificacion("Tu navegador no soporta geolocalización.", "error");
             }
         }
 
@@ -1080,12 +1136,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const available = MAX_FILES - selectedFiles.length - existingCount;
 
                 if (imageFiles.length === 0) {
-                    alert('Por favor, selecciona solo archivos de imagen.');
+                    mostrarNotificacion('Por favor, selecciona solo archivos de imagen.', 'error');
                     return;
                 }
 
                 if (imageFiles.length > available) {
-                    alert(`Solo puedes añadir ${available} imagen(es) más.`);
+                    mostrarNotificacion(`Solo puedes añadir ${available} imagen(es) más.`, 'warning');
                 }
 
                 imageFiles.slice(0, available).forEach(file => {
@@ -1234,13 +1290,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 updateImageUI();
             };
 
-            // Función global para remover imagen existente
+            // Función global para remover imagen existente con MODAL
             window.removeExistingImage = function(imageId, buttonElement) {
-                if (confirm('¿Estás seguro de que quieres eliminar esta imagen?')) {
+                const deleteImageModal = new bootstrap.Modal(document.getElementById('deleteImageModal'));
+                
+                const btnConfirmar = document.getElementById('btn-confirmar-eliminar-imagen');
+                const nuevoBtn = btnConfirmar.cloneNode(true);
+                btnConfirmar.parentNode.replaceChild(nuevoBtn, btnConfirmar);
+                
+                nuevoBtn.addEventListener('click', function() {
                     const previewItem = buttonElement.closest('.preview-item');
-                    previewItem.remove();
+                    if(previewItem) previewItem.remove();
                     updateImageUI();
-                }
+                    deleteImageModal.hide();
+                });
+                
+                deleteImageModal.show();
             };
         }
 
@@ -1305,6 +1370,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             });
         }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            let isValid = true;
+
+            // Validar campos requeridos
+            this.querySelectorAll('[required]').forEach(field => {
+                const valid = field.value.trim();
+                field.classList.toggle('is-invalid', !valid);
+                field.classList.toggle('is-valid', valid);
+                if (!valid) isValid = false;
+            });
+
+            // Validar imágenes
+            const existingCount = document.querySelectorAll('.existing-image').length;
+            if (selectedFiles.length === 0 && existingCount === 0) {
+                mostrarNotificacion('Debes subir o mantener al menos una imagen del establecimiento.', 'error');
+                isValid = false;
+            }
+
+            // Validar coordenadas
+            const lat = document.getElementById('latitude');
+            const lng = document.getElementById('longitude');
+
+            if (!lat.value || !lng.value) {
+                mostrarNotificacion('Por favor, selecciona una ubicación en el mapa.', 'error');
+                lat.classList.add('is-invalid');
+                lng.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            this.classList.add('was-validated');
+
+            if (isValid) {
+                const btn = this.querySelector('button[type="submit"]');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                btn.disabled = true;
+                this.submit();
+            }
+        }
+        
+        // Adjuntamos la validación del submit de forma segura al form
+        document.getElementById('establecimiento-form').addEventListener('submit', handleFormSubmit);
     </script>
 </body>
 
