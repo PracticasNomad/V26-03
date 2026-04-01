@@ -106,16 +106,15 @@ if ($num_espacios >= $limites[$plan]) {
             padding-bottom: 15%;
         }
 
-           .page-shell {
-            max-width: 1200px;
+        .page-shell {
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 15px;
             box-sizing: border-box;
         }
 
         .contenedorLista {
-            max-width: 900px;
-            margin: 2rem auto;
+            max-width: 100%;
             background-color: white;
             border-radius: 15px;
             box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
@@ -413,187 +412,188 @@ if ($num_espacios >= $limites[$plan]) {
 
 <body>
     <div class="page-shell">
-        
+
         <?php include 'headerAnfitrion.php'; ?>
 
         <div id="container" style="max-width: 100%; overflow-x: hidden; box-sizing: border-box;"></div>
-    </div>
-    <div class="contenedorLista">
-        <div class="header-container">
-            <div class="col-12 text-center py-3 fw-bold h4">
-                <p>Mis Espacios</p>
-            </div>
 
-            <?php if (!empty($establecimientos) && !$tieneError): ?>
-                <?php if ($mostrarMensajeLimite): ?>
-                    <a href="#" id="btnAvisoLimiteEspacio" class="add-btn" style="background-color: #6c757d;">
-                        <i class="fas fa-lock"></i>
-                    </a>
-                <?php else: ?>
-                    <a href="crearEspacio.php" class="add-btn">
-                        <i class="fas fa-plus"></i>
-                    </a>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
+        <div class="contenedorLista">
+            <div class="header-container">
+                <div class="col-12 text-center py-3 fw-bold h4">
+                    <p>Mis Espacios</p>
+                </div>
 
-        <div class="col-12 text-center mb-3">
-            <div class="logo-container">
-                <img src="../img/establecimiento.png" width="80" alt="Logo Establecimiento">
-            </div>
-        </div>
-
-        <?php if ($tieneError): ?>
-            <div class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                Ha ocurrido un error al cargar los datos: <?php echo $establecimientos['error']; ?>
-            </div>
-        <?php elseif (empty($establecimientos)): ?>
-            <div class="alert alert-info" role="alert">
-                <i class="fas fa-info-circle me-2"></i>
-                No tienes establecimientos registrados.
-                Para crear uno, antes deberás crear un establecimiento <a href="verEstablecimientos.php"> aquí</a>
-            </div>
-        <?php else: ?>
-            <div id="espacios-container">
-                <?php
-                foreach ($establecimientos as $establecimiento):
-                    ?>
-                    <div class="establecimiento-header">
-                        <i class="fas fa-building me-2"></i> <?php echo htmlspecialchars($establecimiento['nombre']); ?>
-                    </div>
-
-                    <?php if (empty($establecimiento['space'])): ?>
-                        <div class="establecimiento-vacio">
-                            <i class="fas fa-exclamation-circle mb-2"></i>
-                            <p class="mb-0">Este establecimiento no tiene ningún espacio registrado.</p>
-                        </div>
+                <?php if (!empty($establecimientos) && !$tieneError): ?>
+                    <?php if ($mostrarMensajeLimite): ?>
+                        <a href="#" id="btnAvisoLimiteEspacio" class="add-btn" style="background-color: #6c757d;">
+                            <i class="fas fa-lock"></i>
+                        </a>
                     <?php else: ?>
-                        <?php foreach ($establecimiento['space'] as $espacio): ?>
-                            <div class="espacio-card">
-                                <div class="espacio-header">
-                                    <div>
-                                        <h5 class="mb-1"><?php echo htmlspecialchars($espacio['name']); ?></h5>
-                                        <p class="mb-0"><?php echo htmlspecialchars($espacio['description']); ?></p>
-                                    </div>
-                                    <div class="btn-group">
-                                        <button class="btn btn-info btn-sm toggle-horarios"
-                                            data-espacio-id="<?php echo $espacio['id']; ?>">
-                                            <i class="fas fa-clock me-1"></i> Horarios
-                                        </button>
-
-                                        <?php
-                                        // Asumimos que vas a crear un campo "visible" en la BD (por defecto true)
-                                        $esVisible = isset($espacio['visible']) ? $espacio['visible'] : true;
-                                        ?>
-                                        <button
-                                            class="btn btn-<?php echo $esVisible ? 'warning' : 'secondary'; ?> btn-sm btn-visibilidad"
-                                            data-espacio-id="<?php echo $espacio['id']; ?>"
-                                            data-visible="<?php echo $esVisible ? 'true' : 'false'; ?>">
-                                            <?php if ($esVisible): ?>
-                                                <i class="fas fa-eye-slash me-1"></i> Ocultar
-                                            <?php else: ?>
-                                                <i class="fas fa-eye me-1"></i> Mostrar
-                                            <?php endif; ?>
-                                        </button>
-
-                                        <a href="editarSpace.php?id=<?php echo $espacio['id']; ?>" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-edit me-1"></i> Editar
-                                        </a>
-                                        <button class="btn btn-danger btn-sm btn-eliminar"
-                                            data-espacio-id="<?php echo $espacio['id']; ?>"
-                                            data-espacio-nombre="<?php echo htmlspecialchars($espacio['name']); ?>">
-                                            <i class="fas fa-trash-alt me-1"></i> Eliminar
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="horarios-container" id="horarios-<?php echo $espacio['id']; ?>">
-                                    <?php if (empty($espacio['schedule'])): ?>
-                                        <div class="alert alert-secondary">Este espacio no tiene horarios configurados.</div>
-                                    <?php else: ?>
-                                        <?php foreach ($espacio['schedule'] as $horario): ?>
-                                            <div class="horario-item">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <div>
-                                                        <span
-                                                            class="day-badge <?php echo $horario['has_monday'] ? 'day-active' : 'day-inactive'; ?>">L</span>
-                                                        <span
-                                                            class="day-badge <?php echo $horario['has_tuesday'] ? 'day-active' : 'day-inactive'; ?>">M</span>
-                                                        <span
-                                                            class="day-badge <?php echo $horario['has_wednesday'] ? 'day-active' : 'day-inactive'; ?>">X</span>
-                                                        <span
-                                                            class="day-badge <?php echo $horario['has_thursday'] ? 'day-active' : 'day-inactive'; ?>">J</span>
-                                                        <span
-                                                            class="day-badge <?php echo $horario['has_friday'] ? 'day-active' : 'day-inactive'; ?>">V</span>
-                                                        <span
-                                                            class="day-badge <?php echo $horario['has_saturday'] ? 'day-active' : 'day-inactive'; ?>">S</span>
-                                                        <span
-                                                            class="day-badge <?php echo $horario['has_sunday'] ? 'day-active' : 'day-inactive'; ?>">D</span>
-                                                    </div>
-                                                    <div>
-                                                        <strong><?php echo substr($horario['start_time'], 0, 5); ?> -
-                                                            <?php echo substr($horario['end_time'], 0, 5); ?></strong>
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-flex justify-content-between mb-2">
-                                                    <div>
-                                                        <strong>Precio:</strong> <?php echo number_format($horario['price'], 2); ?>€/hora
-                                                    </div>
-                                                </div>
-
-                                                <?php if (!empty($horario['services'])): ?>
-                                                    <div>
-                                                        <strong>Servicios:</strong>
-                                                        <?php foreach ($horario['services'] as $servicio): ?>
-                                                            <div class="servicio-item">
-                                                                <div class="d-flex justify-content-between">
-                                                                    <strong><?php echo htmlspecialchars($servicio['name']); ?></strong>
-                                                                    <span><?php echo number_format($servicio['price'], 2); ?>€</span>
-                                                                </div>
-                                                                <div><?php echo htmlspecialchars($servicio['description']); ?></div>
-                                                            </div>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <div class="text-muted">No hay servicios adicionales</div>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                        <a href="crearEspacio.php" class="add-btn">
+                            <i class="fas fa-plus"></i>
+                        </a>
                     <?php endif; ?>
-                <?php endforeach; ?>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
 
-    </div>
-
-    <div class="modal fade modal-confirm" id="avisoLimiteEspacioModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">¡Límite de espacios alcanzado!</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="col-12 text-center mb-3">
+                <div class="logo-container">
+                    <img src="../img/establecimiento.png" width="80" alt="Logo Establecimiento">
                 </div>
-                <div class="modal-body text-center">
-                    <div class="icon-box" style="border-color: #ffc107;">
-                        <i class="fas fa-crown" style="color: #ffc107;"></i>
+            </div>
+
+            <?php if ($tieneError): ?>
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Ha ocurrido un error al cargar los datos: <?php echo $establecimientos['error']; ?>
+                </div>
+            <?php elseif (empty($establecimientos)): ?>
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No tienes establecimientos registrados.
+                    Para crear uno, antes deberás crear un establecimiento <a href="verEstablecimientos.php"> aquí</a>
+                </div>
+            <?php else: ?>
+                <div id="espacios-container">
+                    <?php
+                    foreach ($establecimientos as $establecimiento):
+                    ?>
+                        <div class="establecimiento-header">
+                            <i class="fas fa-building me-2"></i> <?php echo htmlspecialchars($establecimiento['nombre']); ?>
+                        </div>
+
+                        <?php if (empty($establecimiento['space'])): ?>
+                            <div class="establecimiento-vacio">
+                                <i class="fas fa-exclamation-circle mb-2"></i>
+                                <p class="mb-0">Este establecimiento no tiene ningún espacio registrado.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($establecimiento['space'] as $espacio): ?>
+                                <div class="espacio-card">
+                                    <div class="espacio-header">
+                                        <div>
+                                            <h5 class="mb-1"><?php echo htmlspecialchars($espacio['name']); ?></h5>
+                                            <p class="mb-0"><?php echo htmlspecialchars($espacio['description']); ?></p>
+                                        </div>
+                                        <div class="btn-group">
+                                            <button class="btn btn-info btn-sm toggle-horarios"
+                                                data-espacio-id="<?php echo $espacio['id']; ?>">
+                                                <i class="fas fa-clock me-1"></i> Horarios
+                                            </button>
+
+                                            <?php
+                                            // Asumimos que vas a crear un campo "visible" en la BD (por defecto true)
+                                            $esVisible = isset($espacio['visible']) ? $espacio['visible'] : true;
+                                            ?>
+                                            <button
+                                                class="btn btn-<?php echo $esVisible ? 'warning' : 'secondary'; ?> btn-sm btn-visibilidad"
+                                                data-espacio-id="<?php echo $espacio['id']; ?>"
+                                                data-visible="<?php echo $esVisible ? 'true' : 'false'; ?>">
+                                                <?php if ($esVisible): ?>
+                                                    <i class="fas fa-eye-slash me-1"></i> Ocultar
+                                                <?php else: ?>
+                                                    <i class="fas fa-eye me-1"></i> Mostrar
+                                                <?php endif; ?>
+                                            </button>
+
+                                            <a href="editarSpace.php?id=<?php echo $espacio['id']; ?>" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-edit me-1"></i> Editar
+                                            </a>
+                                            <button class="btn btn-danger btn-sm btn-eliminar"
+                                                data-espacio-id="<?php echo $espacio['id']; ?>"
+                                                data-espacio-nombre="<?php echo htmlspecialchars($espacio['name']); ?>">
+                                                <i class="fas fa-trash-alt me-1"></i> Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="horarios-container" id="horarios-<?php echo $espacio['id']; ?>">
+                                        <?php if (empty($espacio['schedule'])): ?>
+                                            <div class="alert alert-secondary">Este espacio no tiene horarios configurados.</div>
+                                        <?php else: ?>
+                                            <?php foreach ($espacio['schedule'] as $horario): ?>
+                                                <div class="horario-item">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <div>
+                                                            <span
+                                                                class="day-badge <?php echo $horario['has_monday'] ? 'day-active' : 'day-inactive'; ?>">L</span>
+                                                            <span
+                                                                class="day-badge <?php echo $horario['has_tuesday'] ? 'day-active' : 'day-inactive'; ?>">M</span>
+                                                            <span
+                                                                class="day-badge <?php echo $horario['has_wednesday'] ? 'day-active' : 'day-inactive'; ?>">X</span>
+                                                            <span
+                                                                class="day-badge <?php echo $horario['has_thursday'] ? 'day-active' : 'day-inactive'; ?>">J</span>
+                                                            <span
+                                                                class="day-badge <?php echo $horario['has_friday'] ? 'day-active' : 'day-inactive'; ?>">V</span>
+                                                            <span
+                                                                class="day-badge <?php echo $horario['has_saturday'] ? 'day-active' : 'day-inactive'; ?>">S</span>
+                                                            <span
+                                                                class="day-badge <?php echo $horario['has_sunday'] ? 'day-active' : 'day-inactive'; ?>">D</span>
+                                                        </div>
+                                                        <div>
+                                                            <strong><?php echo substr($horario['start_time'], 0, 5); ?> -
+                                                                <?php echo substr($horario['end_time'], 0, 5); ?></strong>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <div>
+                                                            <strong>Precio:</strong> <?php echo number_format($horario['price'], 2); ?>€/hora
+                                                        </div>
+                                                    </div>
+
+                                                    <?php if (!empty($horario['services'])): ?>
+                                                        <div>
+                                                            <strong>Servicios:</strong>
+                                                            <?php foreach ($horario['services'] as $servicio): ?>
+                                                                <div class="servicio-item">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <strong><?php echo htmlspecialchars($servicio['name']); ?></strong>
+                                                                        <span><?php echo number_format($servicio['price'], 2); ?>€</span>
+                                                                    </div>
+                                                                    <div><?php echo htmlspecialchars($servicio['description']); ?></div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <div class="text-muted">No hay servicios adicionales</div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+        </div>
+
+        <div class="modal fade modal-confirm" id="avisoLimiteEspacioModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">¡Límite de espacios alcanzado!</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <p class="mt-4">Has alcanzado el límite de
-                        <b><?php echo $limites[$plan] === PHP_INT_MAX ? 'ilimitados' : $limites[$plan]; ?> espacios</b>
-                        permitidos en tu plan <b><?php echo htmlspecialchars($plan); ?></b>.
-                    </p>
-                    <p>Mejora tu suscripción para crear más espacios y hacer crecer tu negocio.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <a href="Suscripciones.php" class="btn btn-warning"
-                        style="border:none; font-weight: bold; color: black; background-color: #ffc107;">Mejorar
-                        Plan</a>
+                    <div class="modal-body text-center">
+                        <div class="icon-box" style="border-color: #ffc107;">
+                            <i class="fas fa-crown" style="color: #ffc107;"></i>
+                        </div>
+                        <p class="mt-4">Has alcanzado el límite de
+                            <b><?php echo $limites[$plan] === PHP_INT_MAX ? 'ilimitados' : $limites[$plan]; ?> espacios</b>
+                            permitidos en tu plan <b><?php echo htmlspecialchars($plan); ?></b>.
+                        </p>
+                        <p>Mejora tu suscripción para crear más espacios y hacer crecer tu negocio.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <a href="Suscripciones.php" class="btn btn-warning"
+                            style="border:none; font-weight: bold; color: black; background-color: #ffc107;">Mejorar
+                            Plan</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -645,11 +645,11 @@ if ($num_espacios >= $limites[$plan]) {
         </div>
     </div>
 
-   <?php include 'footerAnfitrion.php'; ?>
+    <?php include 'footerAnfitrion.php'; ?>
 
     <script>
-        $(document).ready(function () {
-            $('.toggle-horarios').click(function () {
+        $(document).ready(function() {
+            $('.toggle-horarios').click(function() {
                 const espacioId = $(this).data('espacio-id');
                 $(`#horarios-${espacioId}`).slideToggle();
 
@@ -672,7 +672,7 @@ if ($num_espacios >= $limites[$plan]) {
             });
 
             // Lógica botón Mostrar / Ocultar Espacio
-            $('.btn-visibilidad').click(function () {
+            $('.btn-visibilidad').click(function() {
                 const btn = $(this);
                 const espacioId = btn.data('espacio-id');
                 const currentState = btn.attr('data-visible') === 'true';
@@ -682,10 +682,15 @@ if ($num_espacios >= $limites[$plan]) {
                 btn.prop('disabled', true);
 
                 fetch('toggleVisibilidadEspacio.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: espacioId, visible: newState })
-                })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: espacioId,
+                            visible: newState
+                        })
+                    })
                     .then(response => response.json())
                     .then(data => {
                         btn.prop('disabled', false);
@@ -717,13 +722,13 @@ if ($num_espacios >= $limites[$plan]) {
             });
 
             // Disparar modal de límite de espacios
-            $('#btnAvisoLimiteEspacio').click(function (e) {
+            $('#btnAvisoLimiteEspacio').click(function(e) {
                 e.preventDefault();
                 const avisoLimiteModal = new bootstrap.Modal(document.getElementById('avisoLimiteEspacioModal'));
                 avisoLimiteModal.show();
             });
 
-            $('#btnAvisoEstablecimiento').click(function (e) {
+            $('#btnAvisoEstablecimiento').click(function(e) {
                 e.preventDefault(); // Esto evita que se ponga el # en la URL
                 const avisoModal = new bootstrap.Modal(document.getElementById('avisoEstablecimientoModal'));
                 avisoModal.show();
@@ -731,7 +736,7 @@ if ($num_espacios >= $limites[$plan]) {
 
             let espacioIdAEliminar = null;
 
-            $('.btn-eliminar').click(function () {
+            $('.btn-eliminar').click(function() {
                 espacioIdAEliminar = $(this).data('espacio-id');
                 const espacioNombre = $(this).data('espacio-nombre');
 
@@ -747,7 +752,7 @@ if ($num_espacios >= $limites[$plan]) {
                 }
             });
 
-            $('#btnConfirmarEliminar').click(function () {
+            $('#btnConfirmarEliminar').click(function() {
                 if (espacioIdAEliminar) {
                     eliminarEspacio(espacioIdAEliminar);
                     if (typeof confirmModal !== 'undefined') confirmModal.hide();
@@ -762,11 +767,11 @@ if ($num_espacios >= $limites[$plan]) {
 
             function eliminarEspacio(espacioId) {
                 fetch('eliminarEspacio.php?id=' + espacioId, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
@@ -778,7 +783,7 @@ if ($num_espacios >= $limites[$plan]) {
                             const establecimientoHeader = espacioElement.prev('.establecimiento-header');
                             const nextElement = espacioElement.next();
 
-                            espacioElement.fadeOut(300, function () {
+                            espacioElement.fadeOut(300, function() {
                                 $(this).remove();
 
                                 if (!nextElement.hasClass('espacio-card')) {

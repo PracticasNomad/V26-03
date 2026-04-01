@@ -19,7 +19,7 @@ switch ($currentPage) {
         $showTabs = true;
         break;
     case 'tusEspacios.php':
-        $title = "Mis Espacios";
+        $title = "Tus Espacios";
         $icon = "fa-chair";
         break;
     case 'verEstablecimientos.php':

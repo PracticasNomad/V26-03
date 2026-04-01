@@ -185,35 +185,6 @@ require_once 'verificar_sesion_host.php';
             box-sizing: border-box;
         }
 
-        .page-hero {
-            max-width: 100%;
-            margin: 1.2rem 0 0.5rem;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        .page-hero-inner {
-            border-radius: 20px;
-            background: linear-gradient(135deg, var(--host-accent-dark) 0%, var(--host-accent) 62%, #51cfee 100%);
-            color: #ffffff;
-            padding: 1.1rem 1.2rem;
-            box-shadow: 0 18px 40px rgba(16, 191, 235, 0.28);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-
-        .page-hero-title {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: 0.2px;
-        }
-
-        .hero-title-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
         label,
         .form-check input[type=checkbox] {
             position: static;
