@@ -153,7 +153,7 @@ require_once 'verificar_sesion_host.php';
                     container.innerHTML = `
                         <div class="alert alert-info mt-4" role="alert">
                             <i class="fas fa-info-circle me-2"></i>
-                            No tienes historias de reservas anteriores.
+                            No tienes historial de reservas anteriores.
                         </div>
                     `;
                 }

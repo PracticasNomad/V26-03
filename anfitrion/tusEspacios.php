@@ -95,10 +95,11 @@ if ($num_espacios >= $limites[$plan]) {
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="style.css" rel="stylesheet">
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
-    <title>Mis Espacios</title>
+    <title>Tus Espacios</title>
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -192,11 +193,38 @@ if ($num_espacios >= $limites[$plan]) {
         }
 
         .establecimiento-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
             background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 12px 14px;
+            border-radius: 12px;
             margin-bottom: 15px;
-            font-weight: bold;
+        }
+
+        .establecimiento-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .establecimiento-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .establecimiento-name {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .establecimiento-address {
+            font-size: 0.9rem;
+            color: #6c757d;
         }
 
         .espacio-card {
@@ -263,7 +291,6 @@ if ($num_espacios >= $limites[$plan]) {
         }
 
         .add-btn {
-            position: absolute;
             top: 15px;
             right: 15px;
             width: 45px;
@@ -278,6 +305,13 @@ if ($num_espacios >= $limites[$plan]) {
             box-shadow: 0 .3rem .5rem rgba(0, 0, 0, .15);
             text-decoration: none;
             z-index: 10;
+            margin-left: auto;
+        }
+
+        .establecimiento-header .add-btn {
+            width: 40px;
+            height: 40px;
+            flex: 0 0 auto;
         }
 
         .add-btn:hover {
@@ -419,11 +453,8 @@ if ($num_espacios >= $limites[$plan]) {
 
         <div class="contenedorLista">
             <div class="header-container">
-                <div class="col-12 text-center py-3 fw-bold h4">
-                    <p>Mis Espacios</p>
-                </div>
 
-                <?php if (!empty($establecimientos) && !$tieneError): ?>
+                <?php /* if (!empty($establecimientos) && !$tieneError): ?>
                     <?php if ($mostrarMensajeLimite): ?>
                         <a href="#" id="btnAvisoLimiteEspacio" class="add-btn" style="background-color: #6c757d;">
                             <i class="fas fa-lock"></i>
@@ -433,7 +464,7 @@ if ($num_espacios >= $limites[$plan]) {
                             <i class="fas fa-plus"></i>
                         </a>
                     <?php endif; ?>
-                <?php endif; ?>
+                <?php endif; */ ?>
             </div>
 
             <div class="col-12 text-center mb-3">
@@ -459,7 +490,25 @@ if ($num_espacios >= $limites[$plan]) {
                     foreach ($establecimientos as $establecimiento):
                     ?>
                         <div class="establecimiento-header">
-                            <i class="fas fa-building me-2"></i> <?php echo htmlspecialchars($establecimiento['nombre']); ?>
+                            <div class="establecimiento-title">
+                                <i class="fas fa-building"></i>
+                                <div class="establecimiento-text">
+                                    <div class="establecimiento-name"><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
+                                    <div class="establecimiento-address"><?php echo htmlspecialchars($establecimiento['direccion']); ?></div>
+                                </div>
+                            </div>
+
+                            <?php if (!empty($establecimientos) && !$tieneError): ?>
+                                <?php if ($mostrarMensajeLimite): ?>
+                                    <a href="#" id="btnAvisoLimiteEspacio" class="add-btn" style="background-color: #6c757d;">
+                                        <i class="fas fa-lock"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <a href="crearEspacio.php" class="add-btn">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </div>
 
                         <?php if (empty($establecimiento['space'])): ?>

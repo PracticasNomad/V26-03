@@ -138,7 +138,7 @@ function formatearDireccion($direccion, $piso = "")
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet'>
     <link rel="icon" href="../favicon-color.png">
-    <title>Mis Establecimientos</title>
+    <title>Tus Establecimientos</title>
     
     <style>
         :root {
