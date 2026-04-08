@@ -389,8 +389,10 @@ function formatearDireccion($direccion, $piso = "")
                 ?>
                     <div class="filaEstablecimiento" id="establecimiento-<?php echo $establecimiento['id']; ?>">
                         
+                    
                         <div class="imagenCompacta">
-                            <?php 
+                            <?php
+                            /*
                             $imgSrc = strpos($establecimiento['image_url'], 'http') === 0 
                                 ? $establecimiento['image_url'] 
                                 : 'http://' . $establecimiento['image_url'];
@@ -398,7 +400,21 @@ function formatearDireccion($direccion, $piso = "")
                             if($establecimiento['image_url'] == '../img/bricks0.jpg'){
                                 $imgSrc = '../img/bricks0.jpg';
                             }
-                            ?>
+                            */
+                
+ 
+        // Dentro del loop de establecimientos
+            $rawUrl = $establecimiento['image_url'];
+            $imgSrc = '../img/bricks0.jpg';
+
+            if (!empty($rawUrl) && $rawUrl != '../img/bricks0.jpg') {
+            // Extraemos solo la ruta (ej: /establecimientos/foto.jpg) borrando cualquier IP o dominio viejo
+            $path = parse_url($rawUrl, PHP_URL_PATH);
+             $imgSrc = rtrim($_ENV['MINIO_PUBLIC_URL'], '/') . $path;
+                }
+            ?>
+            <img src="<?= htmlspecialchars($imgSrc) ?>" ...>
+                            
                             <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="Imagen local">
                         </div>
 

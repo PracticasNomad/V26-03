@@ -111,15 +111,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ? ['success' => true, 'url' => $minioUrl, 'filename' => $nombreArchivo]
             : ['success' => false, 'message' => 'Error al subir a MinIO: ' . $codigoRespuesta];
     }
+    /*
+        function insertarImagenesEnGallery($establecimientoId, $imagenesSubidas, $token)
+        {
+            $galleryData = array_map(function ($imagen) use ($establecimientoId) {
+                return [
+                    'image_url' => $_ENV['SERVER_IP'] . ':' . $_ENV['REPO_PORT'] . '/establecimientos/' . $imagen['filename'],
+                    'establecimiento_id' => $establecimientoId
+                ];
+            }, $imagenesSubidas); */
 
     function insertarImagenesEnGallery($establecimientoId, $imagenesSubidas, $token)
     {
-        $galleryData = array_map(function ($imagen) use ($establecimientoId) {
+        // Usamos la variable del .env que apunta al dominio de tu compañero
+        $publicDomain = rtrim($_ENV['MINIO_PUBLIC_URL'], '/');
+
+        $galleryData = array_map(function ($imagen) use ($establecimientoId, $publicDomain) {
             return [
-                'image_url' => $_ENV['SERVER_IP'] . ':' . $_ENV['REPO_PORT'] . '/establecimientos/' . $imagen['filename'],
+                // Guardamos: https://minio.yonomad.app/establecimientos/nombre.jpg
+                'image_url' => $publicDomain . '/establecimientos/' . $imagen['filename'],
                 'establecimiento_id' => $establecimientoId
             ];
         }, $imagenesSubidas);
+
 
         $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gallery';
         $ch = curl_init($url);
@@ -527,7 +541,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
-        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert"
+            aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body fw-bold" id="toastMessage"></div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>

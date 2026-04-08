@@ -1,5 +1,11 @@
 <?php
 require_once 'verificar_sesion_host.php';
+require '../vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load();
 ?>
 
 <!DOCTYPE html>
@@ -36,7 +42,7 @@ require_once 'verificar_sesion_host.php';
             padding-bottom: 90px;
         }
 
-           .page-shell {
+        .page-shell {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 15px;
@@ -293,12 +299,6 @@ require_once 'verificar_sesion_host.php';
 </head>
 
 <body>
-    <div class="page-shell">
-        
-        <?php include 'headerAnfitrion.php'; ?>
-
-        <div id="container" style="max-width: 100%; overflow-x: hidden; box-sizing: border-box;"></div>
-    </div>
     <div id="loadingContainer">
         <div class="spinner-border" role="status">
             <span class="visually-hidden">Cargando...</span>
@@ -315,103 +315,107 @@ require_once 'verificar_sesion_host.php';
         </div>
     </div>
 
-    <div class="contenedorPerfil">
-        <div class="fotoPerfilMovil">
-            <div class="profile-image-container">
-                <img id="fotoPerfilMovil" src="../img/perfil.png" alt="Profile Image">
-            </div>
-        </div>
+    <div class="page-shell">
+        <?php include 'headerAnfitrion.php'; ?>
 
-        <div class="perfilFotoBotones">
-            <div class="profile-image-container">
-                <img id="fotoPerfil" src="../img/perfil.png" alt="Profile Image">
-            </div>
-            <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal" onclick="prepararModalImagen()">
-                <i class="fas fa-camera"></i> Cambiar imagen
-            </button>
-            <button type="button" class="btn-custom btn-brand botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal" onclick="cargarDatosModal()">
-                <i class="fas fa-user-edit"></i> Editar perfil
-            </button>
-            <button type="button" class="btn-custom btn-brand" onclick="location.href='Suscripciones.php'">
-                <i class="fas fa-crown"></i> Cambiar plan
-            </button>
-            <button type="button" class="btn-custom btn-logout mt-2" onclick="location.href='./logoutHost.php'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </button>
-        </div>
-
-        <div class="perfilInfo">
-            <div class="perfil-header">
-                <h4>Detalles de tu cuenta</h4>
-            </div>
-
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-user"></i></div>
-                <div class="info-content">
-                    <span class="info-label">Nombre</span>
-                    <span class="info-value" id="val-nombre">...</span>
+        <div class="contenedorPerfil mt-2">
+            <div class="fotoPerfilMovil">
+                <div class="profile-image-container">
+                    <img id="fotoPerfilMovil" src="../img/perfil.png" alt="Profile Image">
                 </div>
             </div>
 
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                <div class="info-content">
-                    <span class="info-label">E-mail</span>
-                    <span class="info-value" id="val-email">...</span>
+            <div class="perfilFotoBotones">
+                <div class="profile-image-container">
+                    <img id="fotoPerfil" src="../img/perfil.png" alt="Profile Image">
                 </div>
+                <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal" onclick="prepararModalImagen()">
+                    <i class="fas fa-camera"></i> Cambiar imagen
+                </button>
+                <button type="button" class="btn-custom btn-brand botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal" onclick="cargarDatosModal()">
+                    <i class="fas fa-user-edit"></i> Editar perfil
+                </button>
+                <button type="button" class="btn-custom btn-brand" onclick="location.href='Suscripciones.php'">
+                    <i class="fas fa-crown"></i> Cambiar plan
+                </button>
+                <button type="button" class="btn-custom btn-logout mt-2" onclick="location.href='./logoutHost.php'">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
             </div>
 
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-building"></i></div>
-                <div class="info-content">
-                    <span class="info-label">Empresa</span>
-                    <span class="info-value" id="val-empresa">...</span>
+            <div class="perfilInfo">
+                <div class="perfil-header">
+                    <h4><i class="fas fa-id-card me-2 text-muted"></i>Detalles de tu cuenta</h4>
                 </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-user"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">Nombre</span>
+                        <span class="info-value" id="val-nombre">...</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">E-mail</span>
+                        <span class="info-value" id="val-email">...</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-building"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">Empresa</span>
+                        <span class="info-value" id="val-empresa">...</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">Teléfono</span>
+                        <span class="info-value" id="val-telefono">...</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-id-card"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">NIF</span>
+                        <span class="info-value" id="val-nif">...</span>
+                    </div>
+                </div>
+
+                <div class="info-card" style="border-color: #09b2fb;">
+                    <div class="info-icon" style="background-color: var(--primary-color); color: white;"><i class="fas fa-star"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">Suscripción actual</span>
+                        <span class="info-value">
+                            Plan <span id="val-plan" class="text-primary fw-bolder">...</span> 
+                            <small class="text-muted" style="font-size:0.8rem; margin-left: 5px;">(Válido hasta: <span id="val-planEnd">...</span>)</small>
+                        </span>
+                    </div>
+                </div>
+
+                <input type="hidden" id="anfitrionId" name="anfitrionId">
             </div>
 
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
-                <div class="info-content">
-                    <span class="info-label">Teléfono</span>
-                    <span class="info-value" id="val-telefono">...</span>
-                </div>
+            <div class="botonesMovil">
+                <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal" onclick="prepararModalImagen()">
+                    <i class="fas fa-camera"></i> Cambiar imagen
+                </button>
+                <button type="button" class="btn-custom btn-brand botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal" onclick="cargarDatosModal()">
+                    <i class="fas fa-user-edit"></i> Editar perfil
+                </button>
+                <button type="button" class="btn-custom btn-brand" onclick="location.href='Suscripciones.php'">
+                    <i class="fas fa-crown"></i> Cambiar plan
+                </button>
+                <button type="button" class="btn-custom btn-logout mt-3" onclick="location.href='./logoutHost.php'">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
             </div>
-
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-id-card"></i></div>
-                <div class="info-content">
-                    <span class="info-label">NIF</span>
-                    <span class="info-value" id="val-nif">...</span>
-                </div>
-            </div>
-
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-star"></i></div>
-                <div class="info-content">
-                    <span class="info-label">Suscripción actual</span>
-                    <span class="info-value">
-                        Plan <span id="val-plan" class="text-primary fw-bolder">...</span> 
-                        <small class="text-muted" style="font-size:0.8rem; margin-left: 5px;">(Válido hasta: <span id="val-planEnd">...</span>)</small>
-                    </span>
-                </div>
-            </div>
-
-            <input type="hidden" id="anfitrionId" name="anfitrionId">
-        </div>
-
-        <div class="botonesMovil">
-            <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal" onclick="prepararModalImagen()">
-                <i class="fas fa-camera"></i> Cambiar imagen
-            </button>
-            <button type="button" class="btn-custom btn-brand botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal" onclick="cargarDatosModal()">
-                <i class="fas fa-user-edit"></i> Editar perfil
-            </button>
-            <button type="button" class="btn-custom btn-brand" onclick="location.href='Suscripciones.php'">
-                <i class="fas fa-crown"></i> Cambiar plan
-            </button>
-            <button type="button" class="btn-custom btn-logout mt-3" onclick="location.href='./logoutHost.php'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </button>
         </div>
     </div>
 
@@ -514,10 +518,29 @@ require_once 'verificar_sesion_host.php';
                     if (!response.ok) throw new Error('Error de red');
                     return response.json();
                 })
-                .then(data => {
-                    const avatarUrl = data.avatar_url ? data.avatar_url : '../img/perfil.png';
-                    document.getElementById("fotoPerfil").src = avatarUrl;
-                    document.getElementById("fotoPerfilMovil").src = avatarUrl;
+               // Dentro del .then(data => { ... }) del fetch de tuPerfil.php
+.then(data => {
+    let avatarUrl = '../img/perfil.png'; // Imagen por defecto
+    
+    if (data.avatar_url && data.avatar_url !== '../img/perfil.png') {
+        try {
+            // Cogemos la URL de la base de datos y extraemos solo el nombre del archivo
+            // Independientemente de si tiene IP o http
+            let tempUrl = data.avatar_url.startsWith('http') ? data.avatar_url : 'http://' + data.avatar_url;
+            let urlObj = new URL(tempUrl);
+            
+            // Construimos la URL final usando tu dominio del .env
+            // rtrim elimina barras sobrantes para que no quede // en la URL
+            const publicDomain = "<?php echo rtrim($_ENV['MINIO_PUBLIC_URL'], '/'); ?>";
+            avatarUrl = publicDomain + urlObj.pathname;
+        } catch(e) {
+            avatarUrl = data.avatar_url; // Fallback por seguridad
+        }
+    }
+
+    document.getElementById("fotoPerfil").src = avatarUrl;
+    document.getElementById("fotoPerfilMovil").src = avatarUrl;
+
 
                     document.getElementById("val-nombre").textContent = data.name || "Sin especificar";
                     document.getElementById("val-email").textContent = data.email || "Sin especificar";
@@ -560,7 +583,6 @@ require_once 'verificar_sesion_host.php';
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Actualizar la interfaz sin recargar
                             document.getElementById("val-nombre").textContent = formData.get('nombre') || "Sin especificar";
                             document.getElementById("val-empresa").textContent = formData.get('empresa') || "Sin especificar";
                             document.getElementById("val-telefono").textContent = formData.get('telefono') || "Sin especificar";
@@ -592,7 +614,7 @@ require_once 'verificar_sesion_host.php';
                 }
             });
 
-            // Guardar Imagen
+            // Guardar Imagen (Llama al script arreglado)
             document.getElementById('btnGuardarImagen').addEventListener('click', function() {
                 const formData = new FormData();
                 const inputImagen = document.getElementById("inputImagen");
@@ -603,7 +625,6 @@ require_once 'verificar_sesion_host.php';
                 }
 
                 formData.append('imagen', inputImagen.files[0]);
-                formData.append('anfitrionId', document.getElementById('imagenAnfitrionId').value);
 
                 const btn = this;
                 btn.disabled = true;
@@ -616,6 +637,7 @@ require_once 'verificar_sesion_host.php';
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            // Gracias al script arreglado, data.avatarUrl ahora viene con https://minio.yonomad.app
                             document.getElementById("fotoPerfil").src = data.avatarUrl;
                             document.getElementById("fotoPerfilMovil").src = data.avatarUrl;
                             

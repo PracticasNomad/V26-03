@@ -134,10 +134,12 @@ $minioConfig = [
 
 function subirImagenAMinio($archivo, $nombreArchivo, $config)
 {
-    if (!$archivo || $archivo['error'] !== UPLOAD_ERR_OK) return ['success' => false, 'message' => 'Error en el archivo'];
+    if (!$archivo || $archivo['error'] !== UPLOAD_ERR_OK)
+        return ['success' => false, 'message' => 'Error en el archivo'];
 
     $extension = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
-    if (!isset($config['mimeTypes'][$extension])) return ['success' => false, 'message' => 'Tipo de archivo no permitido'];
+    if (!isset($config['mimeTypes'][$extension]))
+        return ['success' => false, 'message' => 'Tipo de archivo no permitido'];
 
     $minioUrl = $config['host'] . '/' . $config['bucket'] . '/' . $nombreArchivo;
     $fileContent = file_get_contents($archivo['tmp_name']);
@@ -162,6 +164,7 @@ function subirImagenAMinio($archivo, $nombreArchivo, $config)
         : ['success' => false, 'message' => 'Error al subir a MinIO: ' . $codigoRespuesta];
 }
 
+/*
 function insertarImagenesEnGallery($establecimientoId, $imagenesSubidas, $token)
 {
     $galleryData = array_map(function ($imagen) use ($establecimientoId) {
@@ -169,7 +172,21 @@ function insertarImagenesEnGallery($establecimientoId, $imagenesSubidas, $token)
             'image_url' => $_ENV['SERVER_IP'] . ':' . $_ENV['REPO_PORT'] . '/establecimientos/' . $imagen['filename'],
             'establecimiento_id' => $establecimientoId
         ];
+    }, $imagenesSubidas); */
+
+function insertarImagenesEnGallery($establecimientoId, $imagenesSubidas, $token)
+{
+    // Usamos la variable del .env que apunta al dominio de tu compañero
+    $publicDomain = rtrim($_ENV['MINIO_PUBLIC_URL'], '/');
+
+    $galleryData = array_map(function ($imagen) use ($establecimientoId, $publicDomain) {
+        return [
+            // Guardamos: https://minio.yonomad.app/establecimientos/nombre.jpg
+            'image_url' => $publicDomain . '/establecimientos/' . $imagen['filename'],
+            'establecimiento_id' => $establecimientoId
+        ];
     }, $imagenesSubidas);
+
 
     $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gallery';
     $ch = curl_init($url);
@@ -725,7 +742,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
-        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert"
+            aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body fw-bold" id="toastMessage"></div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -744,8 +762,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p>¿Estás seguro de que quieres eliminar esta imagen?</p>
                 </div>
                 <div class="modal-footer d-flex justify-content-center" style="border-top: none;">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Cancelar</button>
-                    <button type="button" id="btn-confirmar-eliminar-imagen" class="btn btn-danger px-4" style="border-radius: 10px;">Sí, eliminar</button>
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal"
+                        style="border-radius: 10px;">Cancelar</button>
+                    <button type="button" id="btn-confirmar-eliminar-imagen" class="btn btn-danger px-4"
+                        style="border-radius: 10px;">Sí, eliminar</button>
                 </div>
             </div>
         </div>
@@ -765,13 +785,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="mb-3">
                         <label for="nombre" class="form-label required-field">Nombre del establecimiento</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($establecimiento['nombre']); ?>" required>
+                        <input type="text" class="form-control" id="nombre" name="nombre"
+                            value="<?php echo htmlspecialchars($establecimiento['nombre']); ?>" required>
                         <div class="invalid-feedback">Por favor, introduce un nombre para el establecimiento.</div>
                     </div>
 
                     <div class="mb-3">
                         <label for="descripcion" class="form-label required-field">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required><?php echo htmlspecialchars($establecimiento['descripcion']); ?></textarea>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
+                            required><?php echo htmlspecialchars($establecimiento['descripcion']); ?></textarea>
                         <div class="invalid-feedback">Por favor, introduce una descripción.</div>
                     </div>
                 </div>
@@ -784,11 +806,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="image-upload-container" id="uploadContainer">
                         <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
                         <p class="mb-3">Arrastra tus imágenes aquí o haz clic para seleccionar</p>
-                        <button type="button" class="upload-btn" onclick="document.getElementById('imageFiles').click()">
+                        <button type="button" class="upload-btn"
+                            onclick="document.getElementById('imageFiles').click()">
                             <i class="fas fa-plus"></i>
                             Seleccionar Imágenes
                         </button>
-                        <input type="file" id="imageFiles" class="file-input" multiple accept=".tiff,.jfif,.bmp,.pjp,.apng,.webp,.svgz,.heic,.gif,.svg,.heif,.ico,.xbm,.dib,.tif,.pjpeg,.avif,.jpg,.jpeg,.png">
+                        <input type="file" id="imageFiles" class="file-input" multiple
+                            accept=".tiff,.jfif,.bmp,.pjp,.apng,.webp,.svgz,.heic,.gif,.svg,.heif,.ico,.xbm,.dib,.tif,.pjpeg,.avif,.jpg,.jpeg,.png">
                         <div class="image-counter" id="imageCounter">0 de 5 imágenes seleccionadas</div>
                     </div>
 
@@ -815,11 +839,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </label>
                         </div>
 
-                        <div id="wifi-price-container" class="mt-3 ms-4 <?php echo $establecimiento['has_wifi'] ? '' : 'd-none'; ?>">
+                        <div id="wifi-price-container"
+                            class="mt-3 ms-4 <?php echo $establecimiento['has_wifi'] ? '' : 'd-none'; ?>">
                             <label for="wifi_price" class="form-label">Precio WiFi (€/hora)</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
-                                <input type="number" class="form-control" id="wifi_price" name="wifi_price" step="0.01" min="0" value="<?php echo htmlspecialchars($establecimiento['wifi_price']); ?>">
+                                <input type="number" class="form-control" id="wifi_price" name="wifi_price" step="0.01"
+                                    min="0" value="<?php echo htmlspecialchars($establecimiento['wifi_price']); ?>">
                             </div>
                         </div>
                     </div>
@@ -832,11 +858,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </label>
                         </div>
 
-                        <div id="parking-price-container" class="mt-3 ms-4 <?php echo $establecimiento['has_parking'] ? '' : 'd-none'; ?>">
+                        <div id="parking-price-container"
+                            class="mt-3 ms-4 <?php echo $establecimiento['has_parking'] ? '' : 'd-none'; ?>">
                             <label for="parking_price" class="form-label">Precio Parking (€/día)</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
-                                <input type="number" class="form-control" id="parking_price" name="parking_price" step="0.01" min="0" value="<?php echo htmlspecialchars($establecimiento['parking_price']); ?>">
+                                <input type="number" class="form-control" id="parking_price" name="parking_price"
+                                    step="0.01" min="0"
+                                    value="<?php echo htmlspecialchars($establecimiento['parking_price']); ?>">
                             </div>
                         </div>
                     </div>
@@ -850,39 +879,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="direccion" class="form-label required-field">Calle</label>
-                            <input type="text" class="form-control" id="direccion" name="direccion" value="<?php echo htmlspecialchars($calle); ?>" required>
+                            <input type="text" class="form-control" id="direccion" name="direccion"
+                                value="<?php echo htmlspecialchars($calle); ?>" required>
                             <div class="invalid-feedback">Por favor, introduce la calle.</div>
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label for="numero" class="form-label required-field">Número</label>
-                            <input type="text" class="form-control" id="numero" name="numero" value="<?php echo htmlspecialchars($numero); ?>" required>
+                            <input type="text" class="form-control" id="numero" name="numero"
+                                value="<?php echo htmlspecialchars($numero); ?>" required>
                             <div class="invalid-feedback">Por favor, introduce el número.</div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="piso" class="form-label">Piso/Puerta (opcional)</label>
-                        <input type="text" class="form-control" id="piso" name="piso" value="<?php echo htmlspecialchars($establecimiento['piso'] ?? ''); ?>">
+                        <input type="text" class="form-control" id="piso" name="piso"
+                            value="<?php echo htmlspecialchars($establecimiento['piso'] ?? ''); ?>">
                     </div>
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="codigo_postal" class="form-label required-field">Código Postal</label>
-                            <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" value="<?php echo htmlspecialchars($establecimiento['codigo_postal']); ?>" required>
+                            <input type="text" class="form-control" id="codigo_postal" name="codigo_postal"
+                                value="<?php echo htmlspecialchars($establecimiento['codigo_postal']); ?>" required>
                             <div class="invalid-feedback">Por favor, introduce el código postal.</div>
                         </div>
 
                         <div class="col-md-8 mb-3">
                             <label for="localidad" class="form-label required-field">Localidad</label>
-                            <input type="text" class="form-control" id="localidad" name="localidad" value="<?php echo htmlspecialchars($establecimiento['localidad']); ?>" required>
+                            <input type="text" class="form-control" id="localidad" name="localidad"
+                                value="<?php echo htmlspecialchars($establecimiento['localidad']); ?>" required>
                             <div class="invalid-feedback">Por favor, introduce la localidad.</div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="provincia" class="form-label required-field">Provincia</label>
-                        <input type="text" class="form-control" id="provincia" name="provincia" value="<?php echo htmlspecialchars($establecimiento['provincia']); ?>" required>
+                        <input type="text" class="form-control" id="provincia" name="provincia"
+                            value="<?php echo htmlspecialchars($establecimiento['provincia']); ?>" required>
                         <div class="invalid-feedback">Por favor, introduce la provincia.</div>
                     </div>
                 </div>
@@ -906,13 +941,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="latitude" class="form-label required-field">Latitud</label>
-                            <input type="text" class="form-control" id="latitude" name="latitude" value="<?php echo htmlspecialchars($establecimiento['latitude']); ?>" required readonly>
+                            <input type="text" class="form-control" id="latitude" name="latitude"
+                                value="<?php echo htmlspecialchars($establecimiento['latitude']); ?>" required readonly>
                             <div class="invalid-feedback">Por favor, selecciona una ubicación en el mapa.</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label for="longitude" class="form-label required-field">Longitud</label>
-                            <input type="text" class="form-control" id="longitude" name="longitude" value="<?php echo htmlspecialchars($establecimiento['longitude']); ?>" required readonly>
+                            <input type="text" class="form-control" id="longitude" name="longitude"
+                                value="<?php echo htmlspecialchars($establecimiento['longitude']); ?>" required
+                                readonly>
                             <div class="invalid-feedback">Por favor, selecciona una ubicación en el mapa.</div>
                         </div>
                     </div>
@@ -940,7 +978,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const establecimientoLat = <?php echo $establecimiento['latitude']; ?>;
         const establecimientoLng = <?php echo $establecimiento['longitude']; ?>;
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initMap();
             setupFormValidation();
             setupServiceCheckboxes();
@@ -983,11 +1021,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-            map.on('click', function(e) {
+            map.on('click', function (e) {
                 addMarker(e.lngLat.lng, e.lngLat.lat);
             });
 
-            map.on('load', function() {
+            map.on('load', function () {
                 addMarker(establecimientoLng, establecimientoLat);
             });
         }
@@ -1022,7 +1060,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('btn-current-location').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obteniendo ubicación...';
 
                 navigator.geolocation.getCurrentPosition(
-                    function(position) {
+                    function (position) {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
 
@@ -1032,7 +1070,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         document.getElementById('btn-current-location').classList.add('active');
                         document.getElementById('btn-click-map').classList.remove('active');
                     },
-                    function(error) {
+                    function (error) {
                         let errorMessage;
                         switch (error.code) {
                             case error.PERMISSION_DENIED:
@@ -1059,18 +1097,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         function setupMapButtons() {
-            document.getElementById('btn-current-location').addEventListener('click', function() {
+            document.getElementById('btn-current-location').addEventListener('click', function () {
                 getCurrentLocation();
             });
 
-            document.getElementById('btn-click-map').addEventListener('click', function() {
+            document.getElementById('btn-click-map').addEventListener('click', function () {
                 document.getElementById('btn-click-map').classList.add('active');
                 document.getElementById('btn-current-location').classList.remove('active');
             });
         }
 
         function setupServiceCheckboxes() {
-            document.getElementById('has_wifi').addEventListener('change', function() {
+            document.getElementById('has_wifi').addEventListener('change', function () {
                 document.getElementById('wifi-price-container').classList.toggle('d-none', !this.checked);
                 if (this.checked) {
                     document.getElementById('wifi_price').setAttribute('required', '');
@@ -1079,7 +1117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             });
 
-            document.getElementById('has_parking').addEventListener('change', function() {
+            document.getElementById('has_parking').addEventListener('change', function () {
                 document.getElementById('parking-price-container').classList.toggle('d-none', !this.checked);
                 if (this.checked) {
                     document.getElementById('parking_price').setAttribute('required', '');
@@ -1171,24 +1209,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Cargar imágenes existentes
+
             function loadExistingImages() {
                 const existingImages = <?php echo json_encode($imagenes_existentes ?? []); ?>;
+                const publicDomain = "<?php echo rtrim($_ENV['MINIO_PUBLIC_URL'], '/'); ?>";
 
                 if (existingImages && existingImages.length > 0) {
                     existingImages.forEach((imagen, index) => {
-                        // Construir URL correcta
-                        const imageUrl = `http://${imagen.image_url}`;
+
+                        let imageUrl = imagen.image_url;
+
+                        // Limpieza robusta para evitar "http://https://"
+                        try {
+                            let tempUrl = imageUrl.startsWith('http') ? imageUrl : 'http://' + imageUrl;
+                            let urlObj = new URL(tempUrl);
+                            imageUrl = publicDomain + urlObj.pathname;
+                        } catch (e) {
+                            if (!imageUrl.startsWith('http')) {
+                                imageUrl = 'https://' + imageUrl;
+                            }
+                        }
 
                         // Crear elemento de preview para imagen existente
                         const div = document.createElement('div');
                         div.className = 'preview-item existing-image';
                         div.dataset.imageId = imagen.id || index;
                         div.innerHTML = `
-                    <img src="${imageUrl}" alt="Imagen existente ${index + 1}">
-                    <button type="button" class="remove-btn" onclick="removeExistingImage('${imagen.id || index}', this)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
+        <img src="${imageUrl}" alt="Imagen existente ${index + 1}">
+        <button type="button" class="remove-btn" onclick="removeExistingImage('${imagen.id || index}', this)">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
                         preview.appendChild(div);
                     });
                 }
@@ -1276,7 +1327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Función global para remover imagen nueva
-            window.removeImage = function(index) {
+            window.removeImage = function (index) {
                 selectedFiles.splice(index, 1);
 
                 // Remover solo las nuevas imágenes del preview
@@ -1291,27 +1342,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             };
 
             // Función global para remover imagen existente con MODAL
-            window.removeExistingImage = function(imageId, buttonElement) {
+            window.removeExistingImage = function (imageId, buttonElement) {
                 const deleteImageModal = new bootstrap.Modal(document.getElementById('deleteImageModal'));
-                
+
                 const btnConfirmar = document.getElementById('btn-confirmar-eliminar-imagen');
                 const nuevoBtn = btnConfirmar.cloneNode(true);
                 btnConfirmar.parentNode.replaceChild(nuevoBtn, btnConfirmar);
-                
-                nuevoBtn.addEventListener('click', function() {
+
+                nuevoBtn.addEventListener('click', function () {
                     const previewItem = buttonElement.closest('.preview-item');
-                    if(previewItem) previewItem.remove();
+                    if (previewItem) previewItem.remove();
                     updateImageUI();
                     deleteImageModal.hide();
                 });
-                
+
                 deleteImageModal.show();
             };
         }
 
         function setupFormValidation() {
             const form = document.getElementById('establecimiento-form');
-            form.addEventListener('submit', function(event) {
+            form.addEventListener('submit', function (event) {
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -1322,7 +1373,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         function setupPostalCodeAutocompletion() {
-            document.getElementById('codigo_postal').addEventListener('blur', function() {
+            document.getElementById('codigo_postal').addEventListener('blur', function () {
                 const codigoPostal = this.value.trim();
 
                 if (codigoPostal.length === 5 && /^\d+$/.test(codigoPostal)) {
@@ -1412,7 +1463,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 this.submit();
             }
         }
-        
+
         // Adjuntamos la validación del submit de forma segura al form
         document.getElementById('establecimiento-form').addEventListener('submit', handleFormSubmit);
     </script>
