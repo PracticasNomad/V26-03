@@ -1,6 +1,12 @@
 <?php
 require_once 'verificar_sesion_guest.php';
 
+
+require './vendor/autoload.php';
+use Dotenv\Dotenv;
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 $nombreCookie = "mi_cookie_visitas";
 if (isset($_COOKIE[$nombreCookie])) {
 } else {
@@ -17,7 +23,7 @@ if (isset($_POST['cerrar'])) {
     header('Location: https://nomadappme.yonomad.app/login.php');
     exit;
 }
-    */
+*/
 ?>
 
 <!DOCTYPE html>
@@ -29,23 +35,19 @@ if (isset($_POST['cerrar'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
-        integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"
-        integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
-        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
     <link rel="icon" href="favicon-color.png">
-
     <link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
-
     <link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Explorar espacios</title>
+
+    <script>
+        const MINIO_URL = "<?php echo rtrim($_ENV['MINIO_PUBLIC_URL'] ?? 'http://127.0.0.1:9000', '/'); ?>";
+    </script>
+
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -79,7 +81,6 @@ if (isset($_POST['cerrar'])) {
             color: #333;
         }
 
-        /* Estilos para los filtros */
         .filters-container {
             background: white;
             border-radius: 20px;
@@ -311,34 +312,6 @@ if (isset($_POST['cerrar'])) {
             color: #28a745;
         }
 
-        .modal-content {
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: none;
-        }
-
-        .modal-header {
-            border-bottom: none;
-            padding: 20px 20px 10px;
-        }
-
-        .btn-google {
-            background-color: #fff;
-            color: #333;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            padding: 10px 20px;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .btn-google:hover {
-            background-color: #f8f9fa;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
         .anfitrion-img {
             height: 120px;
             background-size: cover;
@@ -383,36 +356,16 @@ if (isset($_POST['cerrar'])) {
 </head>
 
 <body>
-    <!--
-    <div id="myModal" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header text-center">
-                    <span class="fw-bold">¡Descarga nuestra app móvil!</span>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p><a class="btn btn-google"
-                            href="https://play.google.com/store/apps/details?id=com.TheNomadApp.movil"
-                            title="Google Play">Google Play</a></p>
-                </div>
-            </div>
-        </div>
-    </div>
-    -->
     <div class="contenedorAnfitriones">
         <div class="header hr my-3">
             <img src="img/logoNomada.png" alt="">
             <span class="logo">Encuentra tu espacio</span>
         </div>
 
-        <!-- Contenedor de filtros -->
         <div class="filters-container">
             <div class="filters-title">
-                <i class="fas fa-filter"></i>
-                Filtrar espacios
+                <i class="fas fa-filter"></i> Filtrar espacios
             </div>
-
             <div class="row">
                 <div class="col-md-4">
                     <div class="filter-group">
@@ -422,7 +375,6 @@ if (isset($_POST['cerrar'])) {
                         </select>
                     </div>
                 </div>
-
                 <div class="col-md-4">
                     <div class="filter-group">
                         <label class="filter-label">Provincia</label>
@@ -431,7 +383,6 @@ if (isset($_POST['cerrar'])) {
                         </select>
                     </div>
                 </div>
-
                 <div class="col-md-4">
                     <div class="filter-group">
                         <label class="filter-label">Servicios</label>
@@ -439,24 +390,21 @@ if (isset($_POST['cerrar'])) {
                             <div class="col-6">
                                 <div class="filter-checkbox-group">
                                     <input type="checkbox" id="filter-wifi" class="filter-checkbox">
-                                    <label for="filter-wifi" class="filter-checkbox-label">
-                                        <i class="fas fa-wifi"></i> WiFi
-                                    </label>
+                                    <label for="filter-wifi" class="filter-checkbox-label"><i class="fas fa-wifi"></i>
+                                        WiFi</label>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="filter-checkbox-group">
                                     <input type="checkbox" id="filter-parking" class="filter-checkbox">
-                                    <label for="filter-parking" class="filter-checkbox-label">
-                                        <i class="fas fa-car"></i> Parking
-                                    </label>
+                                    <label for="filter-parking" class="filter-checkbox-label"><i class="fas fa-car"></i>
+                                        Parking</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="text-end mt-3">
                 <button class="clear-filters-btn" onclick="clearAllFilters()">
                     <i class="fas fa-times"></i> Limpiar filtros
@@ -480,34 +428,8 @@ if (isset($_POST['cerrar'])) {
     </div>
 
     <script>
-        let allAnfitriones = []; // Almacenar todos los datos originales
-        let filteredAnfitriones = []; // Datos filtrados
-
-        let details = navigator.userAgent;
-        let regexp = /android/i;
-        let isMobileDevice = regexp.test(details);
-
-        if (isMobileDevice) {
-            $(document).ready(function () {
-                $("#myModal").modal('show');
-            });
-        }
-
-        window.onload = notifyMe();
-
-        function notifyMe() {
-            if (!("Notification" in window)) {
-                alert("Este navegador no es compatible con las notificaciones de escritorio");
-            } else if (Notification.permission === "granted") {
-                var notification = new Notification("¡Hola!");
-            } else if (Notification.permission !== "denied") {
-                Notification.requestPermission().then(function (permission) {
-                    if (permission === "granted") {
-                        var notification = new Notification("¡Hola!");
-                    }
-                });
-            }
-        }
+        let allAnfitriones = [];
+        let filteredAnfitriones = [];
 
         const url = "./mapaLerrApi.php";
 
@@ -535,7 +457,6 @@ if (isset($_POST['cerrar'])) {
                 document.getElementById("contenedor").style.display = "block";
             });
 
-        // Función para poblar los filtros con datos únicos
         function populateFilters(data) {
             const localidades = [...new Set(data.map(item => item.localidad))].sort();
             const provincias = [...new Set(data.map(item => item.provincia || 'Sin provincia'))].sort();
@@ -544,25 +465,14 @@ if (isset($_POST['cerrar'])) {
             const provinciaSelect = document.getElementById('filter-provincia');
 
             localidades.forEach(localidad => {
-                if (localidad) {
-                    const option = document.createElement('option');
-                    option.value = localidad;
-                    option.textContent = localidad;
-                    localidadSelect.appendChild(option);
-                }
+                if (localidad) localidadSelect.appendChild(new Option(localidad, localidad));
             });
 
             provincias.forEach(provincia => {
-                if (provincia) {
-                    const option = document.createElement('option');
-                    option.value = provincia;
-                    option.textContent = provincia;
-                    provinciaSelect.appendChild(option);
-                }
+                if (provincia) provinciaSelect.appendChild(new Option(provincia, provincia));
             });
         }
 
-        // Event listeners para los filtros
         document.getElementById('filter-localidad').addEventListener('change', applyFilters);
         document.getElementById('filter-provincia').addEventListener('change', applyFilters);
         document.getElementById('filter-wifi').addEventListener('change', applyFilters);
@@ -576,37 +486,19 @@ if (isset($_POST['cerrar'])) {
 
             filteredAnfitriones = allAnfitriones.filter(anfitrion => {
                 let matches = true;
-
-                // Filtro por localidad
-                if (localidadFilter && anfitrion.localidad !== localidadFilter) {
-                    matches = false;
-                }
-
-                // Filtro por provincia
-                if (provinciaFilter && (anfitrion.provincia || 'Sin provincia') !== provinciaFilter) {
-                    matches = false;
-                }
-
-                // Filtro por WiFi
-                if (wifiFilter && !anfitrion.has_wifi) {
-                    matches = false;
-                }
-                if (parkingFilter && !anfitrion.has_parking) {
-                    matches = false;
-                }
-
+                if (localidadFilter && anfitrion.localidad !== localidadFilter) matches = false;
+                if (provinciaFilter && (anfitrion.provincia || 'Sin provincia') !== provinciaFilter) matches = false;
+                if (wifiFilter && !anfitrion.has_wifi) matches = false;
+                if (parkingFilter && !anfitrion.has_parking) matches = false;
                 return matches;
             });
 
-            // Limpiar contenedor y mostrar resultados filtrados
             document.getElementById("contenedor").innerHTML = '';
-
             if (filteredAnfitriones.length === 0) {
                 showNoResults();
             } else {
                 appendData(filteredAnfitriones);
             }
-
             updateResultsCount();
         }
 
@@ -626,12 +518,7 @@ if (isset($_POST['cerrar'])) {
             const count = filteredAnfitriones.length;
             const total = allAnfitriones.length;
             const resultsElement = document.getElementById('results-count');
-
-            if (count === total) {
-                resultsElement.textContent = `Mostrando ${total} espacios`;
-            } else {
-                resultsElement.textContent = `Mostrando ${count} de ${total} espacios`;
-            }
+            resultsElement.textContent = count === total ? `Mostrando ${total} espacios` : `Mostrando ${count} de ${total} espacios`;
         }
 
         function showNoResults() {
@@ -657,8 +544,16 @@ if (isset($_POST['cerrar'])) {
                 var imgContainer = document.createElement("div");
                 imgContainer.className = "anfitrion-img";
 
+                // MAGIA DE URLS AQUÍ: Limpiamos la URL y aplicamos la de MINIO_URL inyectada por PHP
                 if (anfitrion.imagen) {
-                    imgContainer.style.backgroundImage = `url('${"http://" + anfitrion.imagen}')`;
+                    let cleanUrl = anfitrion.imagen;
+                    try {
+                        let tempUrl = cleanUrl.startsWith('http') ? cleanUrl : 'http://' + cleanUrl;
+                        let urlObj = new URL(tempUrl);
+                        cleanUrl = MINIO_URL + urlObj.pathname;
+                    } catch (e) { }
+
+                    imgContainer.style.backgroundImage = `url('${cleanUrl}')`;
                 } else {
                     imgContainer.style.backgroundImage = "url('img/bricks0.jpg')";
                     imgContainer.classList.add('image-placeholder');
@@ -699,14 +594,11 @@ if (isset($_POST['cerrar'])) {
 
                 var puntuacion = document.createElement("div");
                 puntuacion.className = "star";
-                var estrella = document.createElement("i");
-                estrella.className = "fas fa-star";
-                puntuacion.appendChild(estrella);
-                puntuacion.appendChild(document.createTextNode(" 4.5"));
+                puntuacion.innerHTML = '<i class="fas fa-star"></i> 4.5';
 
                 var enlace = document.createElement("div");
                 enlace.className = "enlace";
-                enlace.innerHTML = '<a href="anfitrion.php?nombre=' + anfitrion.nombre + '&id=' + anfitrion.id + '&direccion=' + anfitrion.direccion + ", " + anfitrion.localidad + '&coordinates0=' + anfitrion.longitude + '&coordinates1=' + anfitrion.latitude + '&fromIndex=false' + '"><span class="azul">Ver detalles</span></a>';
+                enlace.innerHTML = '<a href="anfitrion.php?nombre=' + anfitrion.nombre + '&id=' + anfitrion.id + '&direccion=' + anfitrion.direccion + ", " + anfitrion.localidad + '&coordinates0=' + anfitrion.longitude + '&coordinates1=' + anfitrion.latitude + '&fromIndex=false"><span class="azul">Ver detalles</span></a>';
 
                 card.appendChild(imgContainer);
                 imgContainer.appendChild(overlay);
@@ -722,3 +614,5 @@ if (isset($_POST['cerrar'])) {
         }
     </script>
 </body>
+
+</html>

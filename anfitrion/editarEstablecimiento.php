@@ -7,17 +7,6 @@ use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
-/*
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
-if (!isset($_SESSION['token'])) {
-    header("Location: logoutHost.php");
-    exit();
-}
-*/
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header("Location: verEstablecimientos.php");
@@ -82,9 +71,6 @@ if ($gallery_httpCode === 200) {
     }
 }
 
-// Debug temporal - eliminar después
-echo "";
-
 if ($establecimiento['host_id'] != $_SESSION['user_id']) {
     header("Location: verEstablecimientos.php");
     exit();
@@ -105,30 +91,14 @@ function generateUuidV4()
 
 // Configuración MinIO
 $minioConfig = [
-    'host' => 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['REPO_PORT'],
+    'host' => rtrim($_ENV['MINIO_PUBLIC_URL'], '/'),
     'bucket' => 'establecimientos',
     'extensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'tiff', 'jfif', 'bmp', 'pjp', 'apng', 'svgz', 'heic', 'svg', 'heif', 'ico', 'xbm', 'dib', 'tif', 'pjpeg', 'avif'],
     'mimeTypes' => [
-        'jpg' => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'png' => 'image/png',
-        'gif' => 'image/gif',
-        'webp' => 'image/webp',
-        'tiff' => 'image/tiff',
-        'jfif' => 'image/jpeg',
-        'bmp' => 'image/bmp',
-        'pjp' => 'image/jpeg',
-        'apng' => 'image/png',
-        'svgz' => 'image/svg+xml',
-        'heic' => 'image/heic',
-        'svg' => 'image/svg+xml',
-        'heif' => 'image/heif',
-        'ico' => 'image/x-icon',
-        'xbm' => 'image/x-xbitmap',
-        'dib' => 'image/bmp',
-        'tif' => 'image/tiff',
-        'pjpeg' => 'image/pjpeg',
-        'avif' => 'image/avif'
+        'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif', 'webp' => 'image/webp',
+        'tiff' => 'image/tiff', 'jfif' => 'image/jpeg', 'bmp' => 'image/bmp', 'pjp' => 'image/jpeg', 'apng' => 'image/png',
+        'svgz' => 'image/svg+xml', 'heic' => 'image/heic', 'svg' => 'image/svg+xml', 'heif' => 'image/heif', 'ico' => 'image/x-icon',
+        'xbm' => 'image/x-xbitmap', 'dib' => 'image/bmp', 'tif' => 'image/tiff', 'pjpeg' => 'image/pjpeg', 'avif' => 'image/avif'
     ]
 ];
 
@@ -149,6 +119,9 @@ function subirImagenAMinio($archivo, $nombreArchivo, $config)
         CURLOPT_CUSTOMREQUEST => 'PUT',
         CURLOPT_POSTFIELDS => $fileContent,
         CURLOPT_RETURNTRANSFER => true,
+        // Añadimos el bypass SSL
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_HTTPHEADER => [
             'Content-Type: ' . $config['mimeTypes'][$extension],
             'Content-Length: ' . strlen($fileContent)
@@ -164,29 +137,14 @@ function subirImagenAMinio($archivo, $nombreArchivo, $config)
         : ['success' => false, 'message' => 'Error al subir a MinIO: ' . $codigoRespuesta];
 }
 
-/*
 function insertarImagenesEnGallery($establecimientoId, $imagenesSubidas, $token)
 {
     $galleryData = array_map(function ($imagen) use ($establecimientoId) {
         return [
-            'image_url' => $_ENV['SERVER_IP'] . ':' . $_ENV['REPO_PORT'] . '/establecimientos/' . $imagen['filename'],
-            'establecimiento_id' => $establecimientoId
-        ];
-    }, $imagenesSubidas); */
-
-function insertarImagenesEnGallery($establecimientoId, $imagenesSubidas, $token)
-{
-    // Usamos la variable del .env que apunta al dominio de tu compañero
-    $publicDomain = rtrim($_ENV['MINIO_PUBLIC_URL'], '/');
-
-    $galleryData = array_map(function ($imagen) use ($establecimientoId, $publicDomain) {
-        return [
-            // Guardamos: https://minio.yonomad.app/establecimientos/nombre.jpg
-            'image_url' => $publicDomain . '/establecimientos/' . $imagen['filename'],
+            'image_url' => $imagen['url'], // Usamos la url validada que devolvió subirImagenAMinio
             'establecimiento_id' => $establecimientoId
         ];
     }, $imagenesSubidas);
-
 
     $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/gallery';
     $ch = curl_init($url);
@@ -216,16 +174,19 @@ function descargarImagenDesdeUrl($url, $nombreArchivo, $config)
         'http' => [
             'timeout' => 30,
             'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        ],
+        // Añadimos bypass SSL para descargar también
+        'ssl' => [
+            'verify_peer' => false,
+            'verify_peer_name' => false,
         ]
     ]);
 
-    // Descargar la imagen
     $imageContent = file_get_contents($url, false, $context);
     if ($imageContent === false) {
         return ['success' => false, 'message' => 'No se pudo descargar la imagen'];
     }
 
-    // Obtener extensión de la URL o detectar por contenido
     $extension = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
     if (!$extension) {
         $finfo = new finfo(FILEINFO_MIME_TYPE);
@@ -245,6 +206,9 @@ function descargarImagenDesdeUrl($url, $nombreArchivo, $config)
         CURLOPT_CUSTOMREQUEST => 'PUT',
         CURLOPT_POSTFIELDS => $imageContent,
         CURLOPT_RETURNTRANSFER => true,
+        // Añadimos bypass SSL para subir a MinIO
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_HTTPHEADER => [
             'Content-Type: ' . $config['mimeTypes'][$extension],
             'Content-Length: ' . strlen($imageContent)
@@ -266,7 +230,9 @@ function eliminarImagenDeMinio($filename, $config)
     $ch = curl_init($deleteUrl);
     curl_setopt_array($ch, [
         CURLOPT_CUSTOMREQUEST => 'DELETE',
-        CURLOPT_RETURNTRANSFER => true
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false
     ]);
     curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -296,7 +262,6 @@ function eliminarImagenesDeGallery($establecimientoId, $token)
     return ['success' => ($httpCode === 204), 'httpCode' => $httpCode];
 }
 
-// CÓDIGO A REEMPLAZAR EN EL BLOQUE if ($_SERVER['REQUEST_METHOD'] === 'POST')
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre'];
     $descripcion = $_POST['descripcion'];
@@ -313,8 +278,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $longitude = $_POST['longitude'];
     $host_id = $_SESSION['user_id'];
 
-    // Procesar imágenes del formulario
-    // Procesar imágenes del formulario (NUEVAS)
     $imagenesSubidas = [];
     $erroresImagenes = [];
     $camposImagen = ['imagen', 'imagen2', 'imagen3', 'imagen4', 'imagen5'];
@@ -334,23 +297,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Procesar imágenes EXISTENTES que se mantienen
     $imagenesExistentesConservadas = [];
     $existingImagesCount = intval($_POST['existing_images_count'] ?? 0);
 
     for ($i = 0; $i < $existingImagesCount; $i++) {
         $existingImageUrl = $_POST["existing_image_$i"] ?? '';
         if (!empty($existingImageUrl)) {
-            // Extraer el nombre del archivo de la URL existente
             $parsedUrl = parse_url($existingImageUrl);
             $pathParts = explode('/', $parsedUrl['path']);
             $oldFilename = end($pathParts);
 
-            // Crear nuevo nombre de archivo para evitar conflictos
             $extension = strtolower(pathinfo($oldFilename, PATHINFO_EXTENSION));
             $newFilename = 'establecimiento_' . $establecimiento_id . '_existing_' . ($i + 1) . '_' . time() . '.' . $extension;
 
-            // Descargar y re-subir la imagen con el nuevo nombre
             $resultado = descargarImagenDesdeUrl(
                 $existingImageUrl,
                 'establecimiento_' . $establecimiento_id . '_existing_' . ($i + 1) . '_' . time(),
@@ -365,20 +324,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Combinar todas las imágenes (nuevas + existentes conservadas)
     $todasLasImagenes = array_merge($imagenesSubidas, $imagenesExistentesConservadas);
 
-    // Validar que haya al menos una imagen
     if (empty($todasLasImagenes)) {
-        echo '<div class="alert alert-danger" role="alert">Error: Debes tener al menos una imagen.</div>';
+        echo '<div class="alert alert-danger" role="alert">Error: Debes tener al menos una imagen válida subida o conservada.</div>';
         exit();
     }
 
-    // SIEMPRE eliminar todas las imágenes anteriores de la galería
     $eliminarResult = eliminarImagenesDeGallery($establecimiento_id, $_SESSION['token']);
 
     if (!$eliminarResult['success']) {
-        // Si falla la eliminación, limpiar las nuevas imágenes subidas y mostrar error
         foreach ($todasLasImagenes as $imagen) {
             eliminarImagenDeMinio($imagen['filename'], $minioConfig);
         }
@@ -386,7 +341,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Actualizar establecimiento
     $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/establecimiento?id=eq.' . $establecimiento_id;
     $ch = curl_init($url);
     $data = [
@@ -422,27 +376,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     curl_close($ch);
 
     if ($httpCode === 204) {
-        // SIEMPRE insertar las nuevas imágenes en la galería
         $galleryResult = insertarImagenesEnGallery($establecimiento_id, $todasLasImagenes, $_SESSION['token']);
 
         if (!$galleryResult['success']) {
             $erroresImagenes[] = "Error al insertar nuevas imágenes en gallery: HTTP " . $galleryResult['httpCode'];
         }
 
-        // Mensaje de éxito
         $_SESSION[empty($erroresImagenes) ? 'success_message' : 'warning_message'] =
             empty($erroresImagenes) ? 'Establecimiento actualizado exitosamente' :
             'Establecimiento actualizado, pero hubo problemas con las imágenes: ' . implode(', ', $erroresImagenes);
 
         header("Location: verEstablecimientos.php");
-
-
         exit();
     } else if ($httpCode === 401) {
         header("Location: logoutHost.php");
         exit();
     } else {
-        // Si falla la actualización, limpiar imágenes subidas
         foreach ($imagenesSubidas as $imagen) {
             eliminarImagenDeMinio($imagen['filename'], $minioConfig);
         }
@@ -450,7 +399,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -471,279 +419,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Editar Establecimiento</title>
     <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #f8f9fa;
-            padding-bottom: 50px;
-        }
-
-        .custom-toast {
-            border-radius: 10px;
-            font-family: 'Nunito', sans-serif;
-            z-index: 10500;
-        }
-
-        .contenedor-principal {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 15px;
-        }
-
-        .header-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .form-card {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-section {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .form-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .section-title {
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #28a745;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-label {
-            font-weight: 600;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 10px;
-            padding: 0.75rem;
-        }
-
-        .form-check-input {
-            width: 1.2em;
-            height: 1.2em;
-        }
-
-        .map-container {
-            height: 400px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 15px 0;
-        }
-
-        .price-input-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-action {
-            border-radius: 50px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background-color: #28a745;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border: none;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .buttons-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-        }
-
-        .alert {
-            border-radius: 10px;
-        }
-
-        .required-field::after {
-            content: "*";
-            color: red;
-            margin-left: 4px;
-        }
-
-        .location-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-
-        .btn-location {
-            background-color: #f8f9fa;
-            border: 1px solid #ced4da;
-            color: #212529;
-            border-radius: 10px;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s;
-        }
-
-        .btn-location:hover {
-            background-color: #e9ecef;
-        }
-
-        .btn-location.active {
-            background-color: #28a745;
-            border-color: #28a745;
-            color: white;
-        }
-
-        @media (max-width: 767px) {
-            .form-card {
-                padding: 1.5rem;
-            }
-
-            .buttons-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .btn-action {
-                width: 100%;
-            }
-        }
-
-        .image-upload-container {
-            border: 2px dashed #ced4da;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-        }
-
-        .image-upload-container:hover {
-            border-color: #28a745;
-            background-color: #f8f9fa;
-        }
-
-        .image-upload-container.dragover {
-            border-color: #28a745;
-            background-color: #e6f7e6;
-        }
-
-        .image-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .preview-item {
-            position: relative;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid #e9ecef;
-        }
-
-        .preview-item img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .preview-item .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(255, 0, 0, 0.8);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-
-        .preview-item .remove-btn:hover {
-            background: rgba(255, 0, 0, 1);
-        }
-
-        .upload-btn {
-            background-color: #28a745;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .upload-btn:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .image-counter {
-            color: #6c757d;
-            font-size: 14px;
-            margin-top: 10px;
-        }
+        body { font-family: 'Nunito', sans-serif; background-color: #f8f9fa; padding-bottom: 50px; }
+        .custom-toast { border-radius: 10px; font-family: 'Nunito', sans-serif; z-index: 10500; }
+        .contenedor-principal { max-width: 800px; margin: 2rem auto; padding: 0 15px; }
+        .header-container { display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 2rem; }
+        .form-card { background-color: white; border-radius: 15px; box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15); padding: 2rem; margin-bottom: 2rem; }
+        .form-section { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #e9ecef; }
+        .form-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .section-title { font-weight: 700; margin-bottom: 1.5rem; color: #28a745; display: flex; align-items: center; gap: 10px; }
+        .form-label { font-weight: 600; }
+        .form-control, .form-select { border-radius: 10px; padding: 0.75rem; }
+        .form-check-input { width: 1.2em; height: 1.2em; }
+        .map-container { height: 400px; border-radius: 10px; overflow: hidden; margin: 15px 0; }
+        .btn-action { border-radius: 50px; padding: 0.75rem 1.5rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.3s; }
+        .btn-primary { background-color: #28a745; border: none; }
+        .btn-primary:hover { background-color: #218838; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .btn-secondary { background-color: #6c757d; border: none; }
+        .btn-secondary:hover { background-color: #5a6268; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .buttons-container { display: flex; justify-content: space-between; margin-top: 2rem; }
+        .required-field::after { content: "*"; color: red; margin-left: 4px; }
+        .location-buttons { display: flex; gap: 10px; margin-bottom: 1rem; }
+        .btn-location { background-color: #f8f9fa; border: 1px solid #ced4da; color: #212529; border-radius: 10px; padding: 0.5rem 1rem; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all 0.3s; }
+        .btn-location:hover { background-color: #e9ecef; }
+        .btn-location.active { background-color: #28a745; border-color: #28a745; color: white; }
+        .image-upload-container { border: 2px dashed #ced4da; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 15px; transition: all 0.3s; }
+        .image-upload-container:hover { border-color: #28a745; background-color: #f8f9fa; }
+        .image-preview { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+        .preview-item { position: relative; border-radius: 10px; overflow: hidden; border: 2px solid #e9ecef; }
+        .preview-item img { width: 120px; height: 120px; object-fit: cover; display: block; }
+        .preview-item .remove-btn { position: absolute; top: 5px; right: 5px; background: rgba(255, 0, 0, 0.8); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .preview-item .remove-btn:hover { background: rgba(255, 0, 0, 1); }
+        .upload-btn { background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; }
+        .file-input { display: none; }
+        .image-counter { color: #6c757d; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
 
 <body>
-
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
-        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert"
-            aria-live="assertive" aria-atomic="true">
+        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body fw-bold" id="toastMessage"></div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -762,10 +476,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p>¿Estás seguro de que quieres eliminar esta imagen?</p>
                 </div>
                 <div class="modal-footer d-flex justify-content-center" style="border-top: none;">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal"
-                        style="border-radius: 10px;">Cancelar</button>
-                    <button type="button" id="btn-confirmar-eliminar-imagen" class="btn btn-danger px-4"
-                        style="border-radius: 10px;">Sí, eliminar</button>
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Cancelar</button>
+                    <button type="button" id="btn-confirmar-eliminar-imagen" class="btn btn-danger px-4" style="border-radius: 10px;">Sí, eliminar</button>
                 </div>
             </div>
         </div>
@@ -779,43 +491,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form id="establecimiento-form" method="POST" class="needs-validation" enctype="multipart/form-data" novalidate>
             <div class="form-card">
                 <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-info-circle"></i> Información General
-                    </h3>
-
+                    <h3 class="section-title"><i class="fas fa-info-circle"></i> Información General</h3>
                     <div class="mb-3">
                         <label for="nombre" class="form-label required-field">Nombre del establecimiento</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre"
-                            value="<?php echo htmlspecialchars($establecimiento['nombre']); ?>" required>
-                        <div class="invalid-feedback">Por favor, introduce un nombre para el establecimiento.</div>
+                        <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($establecimiento['nombre']); ?>" required>
                     </div>
-
                     <div class="mb-3">
                         <label for="descripcion" class="form-label required-field">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
-                            required><?php echo htmlspecialchars($establecimiento['descripcion']); ?></textarea>
-                        <div class="invalid-feedback">Por favor, introduce una descripción.</div>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required><?php echo htmlspecialchars($establecimiento['descripcion']); ?></textarea>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-images"></i> Imágenes
-                    </h3>
-
+                    <h3 class="section-title"><i class="fas fa-images"></i> Imágenes</h3>
                     <div class="image-upload-container" id="uploadContainer">
                         <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
                         <p class="mb-3">Arrastra tus imágenes aquí o haz clic para seleccionar</p>
-                        <button type="button" class="upload-btn"
-                            onclick="document.getElementById('imageFiles').click()">
-                            <i class="fas fa-plus"></i>
-                            Seleccionar Imágenes
+                        <button type="button" class="upload-btn" onclick="document.getElementById('imageFiles').click()">
+                            <i class="fas fa-plus"></i> Seleccionar Imágenes
                         </button>
-                        <input type="file" id="imageFiles" class="file-input" multiple
-                            accept=".tiff,.jfif,.bmp,.pjp,.apng,.webp,.svgz,.heic,.gif,.svg,.heif,.ico,.xbm,.dib,.tif,.pjpeg,.avif,.jpg,.jpeg,.png">
+                        <input type="file" id="imageFiles" class="file-input" multiple accept="image/*">
                         <div class="image-counter" id="imageCounter">0 de 5 imágenes seleccionadas</div>
                     </div>
-
                     <div class="image-preview" id="imagePreview"></div>
 
                     <input type="file" name="imagen" id="imagen" style="display: none;">
@@ -827,106 +524,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-concierge-bell"></i> Servicios
-                    </h3>
-
+                    <h3 class="section-title"><i class="fas fa-concierge-bell"></i> Servicios</h3>
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="has_wifi" name="has_wifi" <?php echo $establecimiento['has_wifi'] ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="has_wifi">
-                                <i class="fas fa-wifi me-1"></i> Ofrece WiFi
-                            </label>
+                            <label class="form-check-label" for="has_wifi"><i class="fas fa-wifi me-1"></i> Ofrece WiFi</label>
                         </div>
-
-                        <div id="wifi-price-container"
-                            class="mt-3 ms-4 <?php echo $establecimiento['has_wifi'] ? '' : 'd-none'; ?>">
+                        <div id="wifi-price-container" class="mt-3 ms-4 <?php echo $establecimiento['has_wifi'] ? '' : 'd-none'; ?>">
                             <label for="wifi_price" class="form-label">Precio WiFi (€/hora)</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
-                                <input type="number" class="form-control" id="wifi_price" name="wifi_price" step="0.01"
-                                    min="0" value="<?php echo htmlspecialchars($establecimiento['wifi_price']); ?>">
+                                <input type="number" class="form-control" id="wifi_price" name="wifi_price" step="0.01" min="0" value="<?php echo htmlspecialchars($establecimiento['wifi_price']); ?>">
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="has_parking" name="has_parking" <?php echo $establecimiento['has_parking'] ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="has_parking">
-                                <i class="fas fa-parking me-1"></i> Ofrece Parking
-                            </label>
+                            <label class="form-check-label" for="has_parking"><i class="fas fa-parking me-1"></i> Ofrece Parking</label>
                         </div>
-
-                        <div id="parking-price-container"
-                            class="mt-3 ms-4 <?php echo $establecimiento['has_parking'] ? '' : 'd-none'; ?>">
+                        <div id="parking-price-container" class="mt-3 ms-4 <?php echo $establecimiento['has_parking'] ? '' : 'd-none'; ?>">
                             <label for="parking_price" class="form-label">Precio Parking (€/día)</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
-                                <input type="number" class="form-control" id="parking_price" name="parking_price"
-                                    step="0.01" min="0"
-                                    value="<?php echo htmlspecialchars($establecimiento['parking_price']); ?>">
+                                <input type="number" class="form-control" id="parking_price" name="parking_price" step="0.01" min="0" value="<?php echo htmlspecialchars($establecimiento['parking_price']); ?>">
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-map-marker-alt"></i> Dirección
-                    </h3>
-
+                    <h3 class="section-title"><i class="fas fa-map-marker-alt"></i> Dirección</h3>
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="direccion" class="form-label required-field">Calle</label>
-                            <input type="text" class="form-control" id="direccion" name="direccion"
-                                value="<?php echo htmlspecialchars($calle); ?>" required>
-                            <div class="invalid-feedback">Por favor, introduce la calle.</div>
+                            <input type="text" class="form-control" id="direccion" name="direccion" value="<?php echo htmlspecialchars($calle); ?>" required>
                         </div>
-
                         <div class="col-md-4 mb-3">
                             <label for="numero" class="form-label required-field">Número</label>
-                            <input type="text" class="form-control" id="numero" name="numero"
-                                value="<?php echo htmlspecialchars($numero); ?>" required>
-                            <div class="invalid-feedback">Por favor, introduce el número.</div>
+                            <input type="text" class="form-control" id="numero" name="numero" value="<?php echo htmlspecialchars($numero); ?>" required>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <label for="piso" class="form-label">Piso/Puerta (opcional)</label>
-                        <input type="text" class="form-control" id="piso" name="piso"
-                            value="<?php echo htmlspecialchars($establecimiento['piso'] ?? ''); ?>">
+                        <input type="text" class="form-control" id="piso" name="piso" value="<?php echo htmlspecialchars($establecimiento['piso'] ?? ''); ?>">
                     </div>
-
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="codigo_postal" class="form-label required-field">Código Postal</label>
-                            <input type="text" class="form-control" id="codigo_postal" name="codigo_postal"
-                                value="<?php echo htmlspecialchars($establecimiento['codigo_postal']); ?>" required>
-                            <div class="invalid-feedback">Por favor, introduce el código postal.</div>
+                            <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" value="<?php echo htmlspecialchars($establecimiento['codigo_postal']); ?>" required>
                         </div>
-
                         <div class="col-md-8 mb-3">
                             <label for="localidad" class="form-label required-field">Localidad</label>
-                            <input type="text" class="form-control" id="localidad" name="localidad"
-                                value="<?php echo htmlspecialchars($establecimiento['localidad']); ?>" required>
-                            <div class="invalid-feedback">Por favor, introduce la localidad.</div>
+                            <input type="text" class="form-control" id="localidad" name="localidad" value="<?php echo htmlspecialchars($establecimiento['localidad']); ?>" required>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <label for="provincia" class="form-label required-field">Provincia</label>
-                        <input type="text" class="form-control" id="provincia" name="provincia"
-                            value="<?php echo htmlspecialchars($establecimiento['provincia']); ?>" required>
-                        <div class="invalid-feedback">Por favor, introduce la provincia.</div>
+                        <input type="text" class="form-control" id="provincia" name="provincia" value="<?php echo htmlspecialchars($establecimiento['provincia']); ?>" required>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-map"></i> Ubicación en el Mapa
-                    </h3>
-
+                    <h3 class="section-title"><i class="fas fa-map"></i> Ubicación en el Mapa</h3>
                     <div class="location-buttons">
                         <button type="button" class="btn btn-location active" id="btn-click-map">
                             <i class="fas fa-map-pin"></i> Seleccionar en el mapa
@@ -935,23 +595,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-location-arrow"></i> Usar mi ubicación actual
                         </button>
                     </div>
-
                     <div class="map-container" id="map"></div>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="latitude" class="form-label required-field">Latitud</label>
-                            <input type="text" class="form-control" id="latitude" name="latitude"
-                                value="<?php echo htmlspecialchars($establecimiento['latitude']); ?>" required readonly>
-                            <div class="invalid-feedback">Por favor, selecciona una ubicación en el mapa.</div>
+                            <input type="text" class="form-control" id="latitude" name="latitude" value="<?php echo htmlspecialchars($establecimiento['latitude']); ?>" required readonly>
                         </div>
-
                         <div class="col-md-6 mb-3">
                             <label for="longitude" class="form-label required-field">Longitud</label>
-                            <input type="text" class="form-control" id="longitude" name="longitude"
-                                value="<?php echo htmlspecialchars($establecimiento['longitude']); ?>" required
-                                readonly>
-                            <div class="invalid-feedback">Por favor, selecciona una ubicación en el mapa.</div>
+                            <input type="text" class="form-control" id="longitude" name="longitude" value="<?php echo htmlspecialchars($establecimiento['longitude']); ?>" required readonly>
                         </div>
                     </div>
                 </div>
@@ -993,21 +645,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const toastMessage = document.getElementById('toastMessage');
 
             toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
-
-            if (tipo === 'success') {
-                toastEl.classList.add('bg-success');
-                mensaje = '✅ ' + mensaje;
-            } else if (tipo === 'error') {
-                toastEl.classList.add('bg-danger');
-                mensaje = '⚠️ ' + mensaje;
-            } else if (tipo === 'warning') {
-                toastEl.classList.add('bg-warning');
-                mensaje = '⚠️ ' + mensaje;
-            }
+            if (tipo === 'success') { toastEl.classList.add('bg-success'); mensaje = '✅ ' + mensaje; }
+            else if (tipo === 'error') { toastEl.classList.add('bg-danger'); mensaje = '⚠️ ' + mensaje; }
+            else if (tipo === 'warning') { toastEl.classList.add('bg-warning'); mensaje = '⚠️ ' + mensaje; }
 
             toastMessage.textContent = mensaje;
-            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
-            toast.show();
+            new bootstrap.Toast(toastEl, { delay: 3500 }).show();
         }
 
         function initMap() {
@@ -1018,91 +661,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 center: [establecimientoLng, establecimientoLat],
                 zoom: 15
             });
-
             map.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-            map.on('click', function (e) {
-                addMarker(e.lngLat.lng, e.lngLat.lat);
-            });
-
-            map.on('load', function () {
-                addMarker(establecimientoLng, establecimientoLat);
-            });
+            map.on('click', function (e) { addMarker(e.lngLat.lng, e.lngLat.lat); });
+            map.on('load', function () { addMarker(establecimientoLng, establecimientoLat); });
         }
 
         function addMarker(lng, lat) {
-            if (marker) {
-                marker.remove();
-            }
-
+            if (marker) { marker.remove(); }
             const el = document.createElement('div');
             el.className = 'marker';
             el.style.backgroundImage = `url('../img/posicionAnfitrion.png')`;
             el.style.width = '40px';
             el.style.height = '40px';
             el.style.backgroundSize = '100%';
-
-            marker = new mapboxgl.Marker(el)
-                .setLngLat([lng, lat])
-                .addTo(map);
-
+            marker = new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(map);
             document.getElementById('latitude').value = lat.toFixed(6);
             document.getElementById('longitude').value = lng.toFixed(6);
-
-            map.flyTo({
-                center: [lng, lat],
-                zoom: 15
-            });
+            map.flyTo({ center: [lng, lat], zoom: 15 });
         }
 
         function getCurrentLocation() {
             if (navigator.geolocation) {
                 document.getElementById('btn-current-location').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obteniendo ubicación...';
-
                 navigator.geolocation.getCurrentPosition(
                     function (position) {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-
-                        addMarker(lng, lat);
-
+                        addMarker(position.coords.longitude, position.coords.latitude);
                         document.getElementById('btn-current-location').innerHTML = '<i class="fas fa-location-arrow"></i> Usar mi ubicación actual';
                         document.getElementById('btn-current-location').classList.add('active');
                         document.getElementById('btn-click-map').classList.remove('active');
                     },
                     function (error) {
-                        let errorMessage;
-                        switch (error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMessage = "No has dado permiso para acceder a tu ubicación.";
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMessage = "La información de ubicación no está disponible.";
-                                break;
-                            case error.TIMEOUT:
-                                errorMessage = "Se agotó el tiempo de espera al solicitar tu ubicación.";
-                                break;
-                            case error.UNKNOWN_ERROR:
-                                errorMessage = "Ha ocurrido un error desconocido.";
-                                break;
-                        }
-
-                        mostrarNotificacion(errorMessage, "error");
+                        mostrarNotificacion("Error al obtener ubicación", "error");
                         document.getElementById('btn-current-location').innerHTML = '<i class="fas fa-location-arrow"></i> Usar mi ubicación actual';
                     }
                 );
-            } else {
-                mostrarNotificacion("Tu navegador no soporta geolocalización.", "error");
             }
         }
 
         function setupMapButtons() {
-            document.getElementById('btn-current-location').addEventListener('click', function () {
-                getCurrentLocation();
-            });
-
+            document.getElementById('btn-current-location').addEventListener('click', getCurrentLocation);
             document.getElementById('btn-click-map').addEventListener('click', function () {
-                document.getElementById('btn-click-map').classList.add('active');
+                this.classList.add('active');
                 document.getElementById('btn-current-location').classList.remove('active');
             });
         }
@@ -1110,20 +709,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function setupServiceCheckboxes() {
             document.getElementById('has_wifi').addEventListener('change', function () {
                 document.getElementById('wifi-price-container').classList.toggle('d-none', !this.checked);
-                if (this.checked) {
-                    document.getElementById('wifi_price').setAttribute('required', '');
-                } else {
-                    document.getElementById('wifi_price').removeAttribute('required');
-                }
+                if (this.checked) document.getElementById('wifi_price').setAttribute('required', '');
+                else document.getElementById('wifi_price').removeAttribute('required');
             });
 
             document.getElementById('has_parking').addEventListener('change', function () {
                 document.getElementById('parking-price-container').classList.toggle('d-none', !this.checked);
-                if (this.checked) {
-                    document.getElementById('parking_price').setAttribute('required', '');
-                } else {
-                    document.getElementById('parking_price').removeAttribute('required');
-                }
+                if (this.checked) document.getElementById('parking_price').setAttribute('required', '');
+                else document.getElementById('parking_price').removeAttribute('required');
             });
         }
 
@@ -1133,13 +726,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const preview = document.getElementById('imagePreview');
             const counter = document.getElementById('imageCounter');
 
-            // Cargar imágenes existentes al inicio
             loadExistingImages();
 
-            // Drag & Drop events
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                container.addEventListener(eventName, preventDefaults, false);
-                document.body.addEventListener(eventName, preventDefaults, false);
+                container.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+                document.body.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
             });
 
             ['dragenter', 'dragover'].forEach(eventName => {
@@ -1150,38 +741,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 container.addEventListener(eventName, () => container.classList.remove('dragover'), false);
             });
 
-            container.addEventListener('drop', handleDrop, false);
-
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                handleFiles(Array.from(files));
-            }
-
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(Array.from(e.target.files));
-            });
+            container.addEventListener('drop', (e) => handleFiles(Array.from(e.dataTransfer.files)), false);
+            fileInput.addEventListener('change', (e) => handleFiles(Array.from(e.target.files)));
 
             function handleFiles(files) {
                 const imageFiles = files.filter(file => file.type.startsWith('image/'));
                 const existingCount = document.querySelectorAll('.existing-image').length;
                 const available = MAX_FILES - selectedFiles.length - existingCount;
 
-                if (imageFiles.length === 0) {
-                    mostrarNotificacion('Por favor, selecciona solo archivos de imagen.', 'error');
-                    return;
-                }
-
-                if (imageFiles.length > available) {
-                    mostrarNotificacion(`Solo puedes añadir ${available} imagen(es) más.`, 'warning');
-                }
-
+                if (imageFiles.length === 0) return;
                 imageFiles.slice(0, available).forEach(file => {
                     selectedFiles.push(file);
                     createPreview(file, selectedFiles.length - 1);
@@ -1198,17 +766,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     div.className = 'preview-item new-image';
                     div.dataset.index = index;
                     div.innerHTML = `
-                <img src="${e.target.result}" alt="Preview ${index + 1}">
-                <button type="button" class="remove-btn" onclick="removeImage(${index})">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
+                        <img src="${e.target.result}" alt="Preview ${index + 1}">
+                        <button type="button" class="remove-btn" onclick="removeImage(${index})"><i class="fas fa-times"></i></button>
+                    `;
                     preview.appendChild(div);
                 };
                 reader.readAsDataURL(file);
             }
-
-            // Cargar imágenes existentes
 
             function loadExistingImages() {
                 const existingImages = <?php echo json_encode($imagenes_existentes ?? []); ?>;
@@ -1216,67 +780,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (existingImages && existingImages.length > 0) {
                     existingImages.forEach((imagen, index) => {
-
                         let imageUrl = imagen.image_url;
-
-                        // Limpieza robusta para evitar "http://https://"
                         try {
                             let tempUrl = imageUrl.startsWith('http') ? imageUrl : 'http://' + imageUrl;
                             let urlObj = new URL(tempUrl);
                             imageUrl = publicDomain + urlObj.pathname;
-                        } catch (e) {
-                            if (!imageUrl.startsWith('http')) {
-                                imageUrl = 'https://' + imageUrl;
-                            }
-                        }
+                        } catch (e) {}
 
-                        // Crear elemento de preview para imagen existente
                         const div = document.createElement('div');
                         div.className = 'preview-item existing-image';
                         div.dataset.imageId = imagen.id || index;
                         div.innerHTML = `
-        <img src="${imageUrl}" alt="Imagen existente ${index + 1}">
-        <button type="button" class="remove-btn" onclick="removeExistingImage('${imagen.id || index}', this)">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
+                            <img src="${imageUrl}" alt="Imagen existente ${index + 1}">
+                            <button type="button" class="remove-btn" onclick="removeExistingImage('${imagen.id || index}', this)"><i class="fas fa-times"></i></button>
+                        `;
                         preview.appendChild(div);
                     });
                 }
-
                 updateImageUI();
             }
 
+            // RECONSTRUIDO PARA MAYOR FIABILIDAD
             function updateImageUI() {
                 const existingImages = document.querySelectorAll('.existing-image').length;
                 const totalImages = existingImages + selectedFiles.length;
 
-                // NUEVO: Actualizar el contador de imágenes existentes
                 document.getElementById('existing_images_count').value = existingImages;
-
                 counter.textContent = `${totalImages} de ${MAX_FILES} imágenes`;
-                if (existingImages > 0) {
-                    counter.textContent += ` (${existingImages} existentes)`;
-                }
-
+                
                 const uploadBtn = container.querySelector('.upload-btn');
-                const isDisabled = totalImages >= MAX_FILES;
-
-                if (isDisabled) {
+                if (totalImages >= MAX_FILES) {
                     container.style.opacity = '0.6';
                     uploadBtn.style.pointerEvents = 'none';
-                    uploadBtn.innerHTML = '<i class="fas fa-check"></i> Máximo de imágenes alcanzado';
+                    uploadBtn.innerHTML = '<i class="fas fa-check"></i> Máximo alcanzado';
                 } else {
                     container.style.opacity = '1';
                     uploadBtn.style.pointerEvents = 'auto';
                     uploadBtn.innerHTML = '<i class="fas fa-plus"></i> Seleccionar Imágenes';
                 }
 
-                updateHiddenInputs();
-            }
-
-            function updateHiddenInputs() {
-                // Limpiar todos los inputs ocultos
+                // 1. Limpiar los inputs
                 for (let i = 1; i <= MAX_FILES; i++) {
                     const inputId = i === 1 ? 'imagen' : `imagen${i}`;
                     const input = document.getElementById(inputId);
@@ -1290,7 +833,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                // Asignar archivos a los inputs correspondientes
+                // 2. Asignar archivos
                 selectedFiles.forEach((file, index) => {
                     const inputId = index === 0 ? 'imagen' : `imagen${index + 1}`;
                     const input = document.getElementById(inputId);
@@ -1301,61 +844,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 });
 
-                // NUEVO: Crear inputs ocultos para las imágenes existentes que se mantienen
-                const existingImagesContainer = document.getElementById('existing-images-container');
-                if (existingImagesContainer) {
-                    existingImagesContainer.remove();
-                }
-
-                const container = document.createElement('div');
-                container.id = 'existing-images-container';
-                container.style.display = 'none';
+                // 3. Ocultos existentes
+                let existingContainer = document.getElementById('existing-images-container');
+                if (existingContainer) existingContainer.remove();
+                
+                existingContainer = document.createElement('div');
+                existingContainer.id = 'existing-images-container';
+                existingContainer.style.display = 'none';
 
                 document.querySelectorAll('.existing-image').forEach((item, index) => {
-                    const imageId = item.dataset.imageId;
-                    const img = item.querySelector('img');
-                    const imageUrl = img.src;
-
                     const input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = `existing_image_${index}`;
-                    input.value = imageUrl;
-                    container.appendChild(input);
+                    input.value = item.querySelector('img').src;
+                    existingContainer.appendChild(input);
                 });
 
-                document.querySelector('form').appendChild(container);
+                document.querySelector('form').appendChild(existingContainer);
             }
 
-            // Función global para remover imagen nueva
             window.removeImage = function (index) {
                 selectedFiles.splice(index, 1);
-
-                // Remover solo las nuevas imágenes del preview
                 document.querySelectorAll('.new-image').forEach(el => el.remove());
-
-                // Recrear previews con índices actualizados
-                selectedFiles.forEach((file, i) => {
-                    createPreview(file, i);
-                });
-
+                selectedFiles.forEach((file, i) => createPreview(file, i));
                 updateImageUI();
             };
 
-            // Función global para remover imagen existente con MODAL
             window.removeExistingImage = function (imageId, buttonElement) {
                 const deleteImageModal = new bootstrap.Modal(document.getElementById('deleteImageModal'));
-
                 const btnConfirmar = document.getElementById('btn-confirmar-eliminar-imagen');
                 const nuevoBtn = btnConfirmar.cloneNode(true);
                 btnConfirmar.parentNode.replaceChild(nuevoBtn, btnConfirmar);
 
                 nuevoBtn.addEventListener('click', function () {
-                    const previewItem = buttonElement.closest('.preview-item');
-                    if (previewItem) previewItem.remove();
+                    buttonElement.closest('.preview-item').remove();
                     updateImageUI();
                     deleteImageModal.hide();
                 });
-
                 deleteImageModal.show();
             };
         }
@@ -1367,58 +892,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     event.preventDefault();
                     event.stopPropagation();
                 }
-
                 form.classList.add('was-validated');
             });
         }
 
         function setupPostalCodeAutocompletion() {
-            document.getElementById('codigo_postal').addEventListener('blur', function () {
-                const codigoPostal = this.value.trim();
-
-                if (codigoPostal.length === 5 && /^\d+$/.test(codigoPostal)) {
-                    const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${codigoPostal}.json?country=es&types=postcode&access_token=${MAPBOX_ACCESS_TOKEN}`;
-
-                    fetch(geocodingUrl)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.features && data.features.length > 0) {
-                                const feature = data.features[0];
-                                const context = feature.context || [];
-
-                                let localidad = '';
-                                let provincia = '';
-
-                                context.forEach(item => {
-                                    if (item.id.startsWith('place')) {
-                                        localidad = item.text;
-                                    } else if (item.id.startsWith('region')) {
-                                        provincia = item.text;
-                                    }
-                                });
-
-                                if (!localidad && feature.text) {
-                                    localidad = feature.text;
-                                }
-
-                                if (localidad) {
-                                    document.getElementById('localidad').value = localidad;
-                                }
-
-                                if (provincia) {
-                                    document.getElementById('provincia').value = provincia;
-                                }
-
-                                if (feature.center) {
-                                    const [lng, lat] = feature.center;
-                                    addMarker(lng, lat);
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error al obtener información del código postal:', error);
-                        });
-                }
+            document.getElementById('codigo_postal').addEventListener('blur', async function () {
+                const codigo = this.value.trim();
+                if (!/^\d{5}$/.test(codigo)) return;
+                try {
+                    const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${codigo}.json?country=es&types=postcode&access_token=${MAPBOX_ACCESS_TOKEN}`);
+                    const data = await res.json();
+                    if (data.features?.length) {
+                        const feature = data.features[0];
+                        const context = feature.context || [];
+                        const localidad = context.find(item => item.id.startsWith('place'))?.text || feature.text;
+                        const provincia = context.find(item => item.id.startsWith('region'))?.text;
+                        if (localidad) document.getElementById('localidad').value = localidad;
+                        if (provincia) document.getElementById('provincia').value = provincia;
+                        if (feature.center) {
+                            addMarker(feature.center[0], feature.center[1]);
+                        }
+                    }
+                } catch (e) {}
             });
         }
 
@@ -1427,8 +923,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             event.stopPropagation();
 
             let isValid = true;
-
-            // Validar campos requeridos
             this.querySelectorAll('[required]').forEach(field => {
                 const valid = field.value.trim();
                 field.classList.toggle('is-invalid', !valid);
@@ -1436,26 +930,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!valid) isValid = false;
             });
 
-            // Validar imágenes
             const existingCount = document.querySelectorAll('.existing-image').length;
             if (selectedFiles.length === 0 && existingCount === 0) {
                 mostrarNotificacion('Debes subir o mantener al menos una imagen del establecimiento.', 'error');
                 isValid = false;
             }
 
-            // Validar coordenadas
-            const lat = document.getElementById('latitude');
-            const lng = document.getElementById('longitude');
-
-            if (!lat.value || !lng.value) {
+            if (!document.getElementById('latitude').value || !document.getElementById('longitude').value) {
                 mostrarNotificacion('Por favor, selecciona una ubicación en el mapa.', 'error');
-                lat.classList.add('is-invalid');
-                lng.classList.add('is-invalid');
                 isValid = false;
             }
 
             this.classList.add('was-validated');
-
             if (isValid) {
                 const btn = this.querySelector('button[type="submit"]');
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
@@ -1464,9 +950,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Adjuntamos la validación del submit de forma segura al form
         document.getElementById('establecimiento-form').addEventListener('submit', handleFormSubmit);
     </script>
 </body>
-
 </html>

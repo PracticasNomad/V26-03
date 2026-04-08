@@ -19,46 +19,42 @@ if (!isset($_FILES['imagen']) || $_FILES['imagen']['error'] !== UPLOAD_ERR_OK) {
     exit;
 }
 
-// Para la subida (conexión interna de PHP a Minio)
-$minioHost = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['REPO_PORT'];
-$minioBucket = 'images'; // Asegúrate de que el bucket de avatares se llama 'images' (o cámbialo a 'perfiles')
-
+$minioBucket = 'images';
 $file = $_FILES['imagen'];
 $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-$nombreArchivo = 'avatar_host_' . $_SESSION['user_id'] . '_' . time() . '.' . $extension;
-$rutaTemporal = $file['tmp_name'];
+
+// Limpiamos el user_id
+$cleanUserId = trim($_SESSION['user_id']);
+$nombreArchivo = 'avatar_host_' . $cleanUserId . '_' . time() . '.' . $extension;
 
 $extensionesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
 if (!in_array($extension, $extensionesPermitidas)) {
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, GIF, WEBP)']);
+    echo json_encode(['success' => false, 'message' => 'Tipo de archivo no permitido.']);
     exit;
 }
 
 $mimeTypes = [
-    'jpg' => 'image/jpeg',
-    'jpeg' => 'image/jpeg',
-    'png' => 'image/png',
-    'gif' => 'image/gif',
-    'webp' => 'image/webp'
+    'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png',
+    'gif' => 'image/gif', 'webp' => 'image/webp'
 ];
 $fileType = $mimeTypes[$extension];
 
-// URL INTERNA PARA LA SUBIDA CURL
-$minioUrlInterna = $minioHost . '/' . $minioBucket . '/' . $nombreArchivo;
-
-// URL PÚBLICA PARA GUARDAR EN LA BD Y ENVIAR AL NAVEGADOR
-$dominioPublico = rtrim($_ENV['MINIO_PUBLIC_URL'], '/');
-$minioUrlPublica = $dominioPublico . '/' . $minioBucket . '/' . $nombreArchivo;
-
-// Subimos la imagen a la red local de tu servidor (rápido y seguro sin cortafuegos)
-$ch = curl_init($minioUrlInterna);
+// URL directa desde tu .env (https://79.150.19.209:9000)
+$minioUrl = rtrim($_ENV['MINIO_PUBLIC_URL'], '/') . '/' . $minioBucket . '/' . $nombreArchivo;
+$rutaTemporal = $file['tmp_name'];
 $fileContent = file_get_contents($rutaTemporal);
 
+$ch = curl_init($minioUrl);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $fileContent);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+// --- LAS DOS LÍNEAS MÁGICAS PARA SALTAR EL BLOQUEO SSL DE LA IP ---
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+// ------------------------------------------------------------------
+
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: ' . $fileType,
     'Content-Length: ' . strlen($fileContent)
@@ -66,16 +62,14 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
 
 $resultado = curl_exec($ch);
 $codigoRespuesta = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlError = curl_error($ch);
 curl_close($ch);
 
 if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
-    // Si la subida fue un éxito, guardamos LA URL PÚBLICA (HTTPS) en la tabla 'host'
-    $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/host?id=eq.' . $_SESSION['user_id'];
+    // Guardar la URL en la tabla host
+    $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/host?id=eq.' . $cleanUserId;
     $ch_db = curl_init($url);
-    
-    $data = [
-        'avatar_url' => $minioUrlPublica
-    ];
+    $data = ['avatar_url' => $minioUrl];
     
     curl_setopt($ch_db, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch_db, CURLOPT_HTTPHEADER, [
@@ -92,22 +86,13 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     
     header('Content-Type: application/json');
     if ($codigoRespuesta_db >= 200 && $codigoRespuesta_db < 300) {
-        echo json_encode([
-            'success' => true, 
-            'message' => 'Imagen de perfil actualizada correctamente',
-            'avatarUrl' => $minioUrlPublica // Devolvemos el link https al navegador
-        ]);
+        echo json_encode(['success' => true, 'message' => 'Imagen actualizada', 'avatarUrl' => $minioUrl]);
     } else {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Error al guardar en base de datos. Código: ' . $codigoRespuesta_db
-        ]);
+        echo json_encode(['success' => false, 'message' => 'Error en la BD.']);
     }
 } else {
     header('Content-Type: application/json');
-    echo json_encode([
-        'success' => false, 
-        'message' => 'Error al subir la imagen al servidor. Código: ' . $codigoRespuesta
-    ]);
+    // Añadimos $curlError para que si falla te diga el motivo exacto en la consola
+    echo json_encode(['success' => false, 'message' => 'Error MinIO: ' . $codigoRespuesta . ' - ' . $curlError]);
 }
 ?>

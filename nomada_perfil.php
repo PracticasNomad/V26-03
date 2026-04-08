@@ -1,5 +1,10 @@
 <?php
 require_once 'verificar_sesion_guest.php';
+
+require './vendor/autoload.php';
+use Dotenv\Dotenv;
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 ?>
 
 <!DOCTYPE html>
@@ -17,6 +22,10 @@ require_once 'verificar_sesion_guest.php';
     <link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>TheNomadApp - Tu perfil</title>
+
+    <script>
+        const MINIO_URL = "<?php echo rtrim($_ENV['MINIO_PUBLIC_URL'] ?? 'http://127.0.0.1:9000', '/'); ?>";
+    </script>
 
     <style>
         :root {
@@ -496,7 +505,6 @@ require_once 'verificar_sesion_guest.php';
 
             // Asignar color dependiendo de si es éxito o error
             if (tipo === 'success') {
-                // Usamos success nativo o podemos forzar un color
                 toastEl.classList.add('bg-success');
                 mensaje = '✅ ' + mensaje;
             } else if (tipo === 'error') {
@@ -528,13 +536,24 @@ require_once 'verificar_sesion_guest.php';
                         return;
                     }
 
+                    // LIMPIEZA DE URL DE AVATAR USANDO MINIO_URL DEL .ENV
+                    let avatarUrl = 'img/perfil.png';
+                    if (data.avatar_url && data.avatar_url !== 'img/perfil.png') {
+                        try {
+                            let tempUrl = data.avatar_url.startsWith('http') ? data.avatar_url : 'http://' + data.avatar_url;
+                            let urlObj = new URL(tempUrl);
+                            avatarUrl = MINIO_URL + urlObj.pathname;
+                        } catch(e) {
+                            avatarUrl = data.avatar_url; 
+                        }
+                    }
+
                     // Asignamos imágenes
-                    const avatarUrl = data.avatar_url ? data.avatar_url : 'img/perfil.png';
                     document.getElementById("fotoPerfil").src = avatarUrl;
                     document.getElementById("fotoPerfilMovil").src = avatarUrl;
                     document.getElementById("previewImagen").src = avatarUrl;
 
-                    // Asignamos textos a las nuevas tarjetas
+                    // Asignamos textos a las tarjetas
                     document.getElementById("val-nombre").textContent = data.name || 'Sin nombre';
                     document.getElementById("val-email").textContent = data.email || 'Sin correo';
                     document.getElementById("val-telefono").textContent = data.telefono || 'Aún no especificado';
@@ -587,8 +606,8 @@ require_once 'verificar_sesion_guest.php';
                         if (data.success) {
                             document.getElementById("fotoPerfil").src = data.avatarUrl;
                             document.getElementById("fotoPerfilMovil").src = data.avatarUrl;
+                            document.getElementById("previewImagen").src = data.avatarUrl;
 
-                            // Reemplazamos el alert() por la notificación bonita
                             mostrarNotificacion("Imagen de perfil actualizada correctamente", "success");
 
                             const modal = bootstrap.Modal.getInstance(document.getElementById('cambiarImagenModal'));
@@ -644,11 +663,9 @@ require_once 'verificar_sesion_guest.php';
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Actualizar UI
                         document.getElementById("val-nombre").textContent = formData.get('nombre') || 'Sin nombre';
                         document.getElementById("val-telefono").textContent = formData.get('telefono') || 'Aún no especificado';
 
-                        // Reemplazamos el alert() por la notificación bonita
                         mostrarNotificacion("Perfil actualizado correctamente", "success");
 
                         const modal = bootstrap.Modal.getInstance(document.getElementById('editarPerfilModal'));
