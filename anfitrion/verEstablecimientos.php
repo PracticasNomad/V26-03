@@ -356,6 +356,7 @@ function formatearDireccion($direccion, $piso = "")
     </div>
 
     <div class="page-shell">
+        <?php include 'headerAnfitrion.php'; ?>
         
         <?php if ($mostrarMensajeLimite): ?>
             <div class="mensaje-limite mt-4">
@@ -371,7 +372,6 @@ function formatearDireccion($direccion, $piso = "")
         } else {
             $heroActionButton = '<form action="anadirEstablecimiento.php" method="get" style="margin: 0;"><button type="submit" class="btn-hero-action"><i class="fas fa-plus me-2"></i> Añadir Establecimiento</button></form>';
         }
-        include 'headerAnfitrion.php'; 
         ?>
 
         <?php if (empty($establecimientos)): ?>

@@ -43,7 +43,7 @@ $dotenv->load();
         }
 
         .page-shell {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 15px;
             box-sizing: border-box;
@@ -54,7 +54,6 @@ $dotenv->load();
             border-radius: var(--border-radius-lg);
             padding: 40px 30px;
             margin: 40px auto;
-            max-width: 900px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-wrap: wrap;
