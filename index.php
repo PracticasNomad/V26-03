@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500&display=swap" rel="stylesheet">
-    <!-- Font Awesome para el icono del candado -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
@@ -20,9 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/0.0.11/push.min.js"></script>
 
     <link rel="icon" href="favicon-color.png">
-
     <link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
-
     <link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="style.css">
 
@@ -56,6 +53,17 @@
                 padding: 6px;
             }
         }
+
+        /* Estilos para la ventana flotante de aviso */
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .btn-modal-hover:hover {
+            filter: brightness(0.9);
+            transform: translateY(-1px);
+        }
     </style>
 
     <title>TheNomadApp - Encuentra un espacio de trabajo donde tu quieras</title>
@@ -68,7 +76,6 @@
             <span class="logo">TheNomadApp</span>
         </div>
 
-        <!-- Icono del candado -->
         <div class="lock-icon" title="Acceso Gestor" onclick="location.href='gestor/inicio_sesion_gestor.php'">
             <i class="fas fa-lock"></i>
         </div>
@@ -89,6 +96,19 @@
             <button class="btn-index btn-success fw-bold" type="button" onclick="location.href='login.php'">Busco un espacio</button>
         </div>
     </div>
+
+    <div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; flex-direction:column; justify-content:center; align-items:center; backdrop-filter: blur(3px);">
+        <div style="background:white; padding:35px 25px; border-radius:20px; text-align:center; max-width:400px; width:90%; box-shadow:0 15px 30px rgba(0,0,0,0.3); animation: fadeInModal 0.3s ease;">
+            <i class="fas fa-user-lock fa-3x" style="color:#00B7CF; margin-bottom:20px;"></i>
+            <h3 style="font-family:'Nunito', sans-serif; font-weight:800; color:#333; margin-bottom: 15px; font-size:1.5rem;">¡Identifícate primero!</h3>
+            <p style="font-family:'Nunito', sans-serif; color:#666; margin-bottom:30px; line-height: 1.5; font-size:1rem;">Para ver los detalles de este espacio y poder reservarlo, necesitas iniciar sesión como <b>Nómada</b>.</p>
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button class="btn-modal-hover" onclick="document.getElementById('loginModal').style.display='none'" style="padding:10px 20px; border-radius:25px; border:none; background:#e9ecef; color:#333; font-weight:bold; cursor:pointer; transition: 0.2s; flex: 1;">Cancelar</button>
+                <button class="btn-modal-hover" onclick="location.href='login.php'" style="padding:10px 20px; border-radius:25px; border:none; background:#81ba18; color:white; font-weight:bold; cursor:pointer; transition: 0.2s; flex: 1;">Ir al Login</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.fonts.ready.then(() => {
             document.body.classList.add('fonts-loaded');
@@ -111,6 +131,12 @@
             showMap();
         }
 
+        // Función para mostrar el Modal de Login
+        function showLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'flex';
+        }
+
         function showMap() {
 
             L.mapbox.accessToken = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
@@ -131,10 +157,18 @@
                 .then(data => {
                     data.forEach(element => {
                         if (element.latitude != null && element.longitude != null) {
+                            
+                            // SE HA CAMBIADO EL ENLACE DEL POPUP PARA ABRIR LA VENTANA FLOTANTE EN LUGAR DE REDIRIGIR
+                            var popupContent = 
+                                '<a href="javascript:void(0);" onclick="showLoginModal();" style="text-decoration:none;">' + 
+                                    '<div class="colorTitleSitio text-center" style="font-size:1.1rem;">' + element.nombre + '</div>' + 
+                                '</a>' + 
+                                '<div class="text-center" style="color:#555; margin-top:3px;">' + element.direccion + ", " + element.localidad + '</div>';
+
                             var myPopup = L.popup({
                                 offset: L.point(0, -20)
-                            }).setContent('<a href="anfitrion.php?nombre=' + element.nombre + '&id=' + element.id + '&direccion=' + element.direccion + ", " + element.localidad + '&coordinates0=' + element.longitude + '&coordinates1=' + element.latitude + '&fromIndex=true"' + '<div class="colorTitleSitio text-center">' + element.nombre + '</div><div class="text-center">' + '</a>' + element.direccion + ", " + element.localidad + '</div>');
-                            // }).setContent('<a href="anfitrion.php?nombre=' + element.properties.title + '&direccion=' + element.properties.description + '&coordinates0=' + element.geometry.coordinates[0] + '&coordinates1=' + element.geometry.coordinates[1] + '"' + '<div class="colorTitleSitio text-center">' + element.properties.title + '</div><div class="text-center">' + '</a>' + element.properties.description + '</div>' + '<div class="text-center">' + element.geometry.coordinates[0] + '</div>' + '<div class="text-center">' + element.geometry.coordinates[1] + '</div>');
+                            }).setContent(popupContent);
+                            
                             L.marker([element.latitude, element.longitude]).addTo(map).setIcon(myIcon).bindPopup(myPopup);
                         }
 
