@@ -103,7 +103,7 @@ if (!empty($establecimientos)) {
         // Asignar la primera imagen a la portada y guardar el resto en 'gallery'
         if (!empty($gallery_data) && !curl_error($curl_gallery)) {
             $establecimiento['image_url'] = $gallery_data[0]['image_url'];
-            $establecimiento['gallery'] = $gallery_data; 
+            $establecimiento['gallery'] = $gallery_data;
         } else {
             $establecimiento['image_url'] = "../img/bricks0.jpg";
             $establecimiento['gallery'] = [];
@@ -139,7 +139,7 @@ function formatearDireccion($direccion, $piso = "")
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet'>
     <link rel="icon" href="../favicon-color.png">
     <title>Tus Establecimientos</title>
-    
+
     <style>
         :root {
             --host-accent: #10bfeb;
@@ -160,7 +160,11 @@ function formatearDireccion($direccion, $piso = "")
         }
 
         /* Toasts personalizados */
-        .custom-toast { border-radius: 10px; font-family: 'Nunito', sans-serif; z-index: 10500; }
+        .custom-toast {
+            border-radius: 10px;
+            font-family: 'Nunito', sans-serif;
+            z-index: 10500;
+        }
 
         /* Mensajes de límite */
         .mensaje-limite {
@@ -188,7 +192,7 @@ function formatearDireccion($direccion, $piso = "")
             margin-bottom: 20px;
             display: flex;
             align-items: center;
-            flex-wrap: wrap; 
+            flex-wrap: wrap;
             border: 1px solid #e9ecef;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
             transition: all 0.3s ease;
@@ -208,7 +212,7 @@ function formatearDireccion($direccion, $piso = "")
             overflow: hidden;
             margin-right: 25px;
             flex-shrink: 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .imagenCompacta img {
@@ -261,8 +265,15 @@ function formatearDireccion($direccion, $piso = "")
             transition: 0.3s;
         }
 
-        .btn-outline-secondary { border-color: #ced4da; color: #6c757d; }
-        .btn-outline-secondary:hover { background-color: #f8f9fa; color: #333; }
+        .btn-outline-secondary {
+            border-color: #ced4da;
+            color: #6c757d;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            color: #333;
+        }
 
         /* Contenido Desplegable (Mapa y detalles extras) */
         .collapsed-content {
@@ -298,18 +309,31 @@ function formatearDireccion($direccion, $piso = "")
             object-fit: cover;
             flex-shrink: 0;
             border: 1px solid #e9ecef;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s;
         }
-        
+
         .galeria-item:hover {
             transform: scale(1.05);
         }
 
-        .galeria-establecimiento::-webkit-scrollbar { height: 8px; }
-        .galeria-establecimiento::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .galeria-establecimiento::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
-        .galeria-establecimiento::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+        .galeria-establecimiento::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .galeria-establecimiento::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .galeria-establecimiento::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .galeria-establecimiento::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
 
         .precio-tag {
             background-color: #28a745;
@@ -330,17 +354,75 @@ function formatearDireccion($direccion, $piso = "")
         }
 
         /* Modal Eliminar */
-        .modal-confirm .modal-content { padding: 20px; border-radius: 15px; border: none; }
-        .modal-confirm .modal-header.delete { background-color: #f7d7db; border-bottom: none; position: relative; text-align: center; margin: -20px -20px 0; border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 35px; }
-        .modal-confirm h4 { text-align: center; font-size: 26px; margin: 30px 0 -15px; color: #333; }
-        .modal-confirm .icon-box { color: #fff; position: absolute; margin: 0 auto; left: 0; right: 0; top: -40px; width: 80px; height: 80px; border-radius: 50%; background-color: #f15e5e; display: flex; align-items: center; justify-content: center; box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); }
-        .modal-confirm .icon-box i { font-size: 40px; }
+        .modal-confirm .modal-content {
+            padding: 20px;
+            border-radius: 15px;
+            border: none;
+        }
+
+        .modal-confirm .modal-header.delete {
+            background-color: #f7d7db;
+            border-bottom: none;
+            position: relative;
+            text-align: center;
+            margin: -20px -20px 0;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            padding: 35px;
+        }
+
+        .modal-confirm h4 {
+            text-align: center;
+            font-size: 26px;
+            margin: 30px 0 -15px;
+            color: #333;
+        }
+
+        .modal-confirm .icon-box {
+            color: #fff;
+            position: absolute;
+            margin: 0 auto;
+            left: 0;
+            right: 0;
+            top: -40px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #f15e5e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-confirm .icon-box i {
+            font-size: 40px;
+        }
 
         @media (max-width: 768px) {
-            .filaEstablecimiento { flex-direction: column; text-align: center; }
-            .imagenCompacta { margin-right: 0; margin-bottom: 15px; width: 150px; height: 150px; }
-            .accionesFila { margin-left: 0; margin-top: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
-            .nombreEstablecimiento { justify-content: center; }
+            .filaEstablecimiento {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .imagenCompacta {
+                margin-right: 0;
+                margin-bottom: 15px;
+                width: 150px;
+                height: 150px;
+            }
+
+            .accionesFila {
+                margin-left: 0;
+                margin-top: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .nombreEstablecimiento {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -356,16 +438,8 @@ function formatearDireccion($direccion, $piso = "")
     </div>
 
     <div class="page-shell">
-        
-        
-        <?php if ($mostrarMensajeLimite): ?>
-            <div class="mensaje-limite mt-4">
-                Ha alcanzado el número máximo de establecimientos para su suscripción.
-                Para mejorar su plan <a href="Suscripciones.php">pulse aquí</a>.
-            </div>
-        <?php endif; ?>
 
-        <?php 
+        <?php
         $heroActionButton = '';
         if ($mostrarMensajeLimite) {
             $heroActionButton = '<button type="button" class="btn-hero-action disabled-style" disabled><i class="fas fa-plus me-2"></i> Añadir Establecimiento</button>';
@@ -375,6 +449,12 @@ function formatearDireccion($direccion, $piso = "")
         include 'headerAnfitrion.php';
         ?>
 
+        <?php if ($mostrarMensajeLimite): ?>
+            <div class="mensaje-limite mt-4">
+                Ha alcanzado el número máximo de establecimientos para su suscripción.
+                Para mejorar su plan <a href="Suscripciones.php">pulse aquí</a>.
+            </div>
+        <?php endif; ?>
         <?php if (empty($establecimientos)): ?>
             <div class="no-establecimientos">
                 <img src="../img/establecimiento.png" width="80" alt="Logo Establecimiento" class="mb-3">
@@ -385,15 +465,15 @@ function formatearDireccion($direccion, $piso = "")
 
             <div class="row">
                 <div class="col-12">
-                <?php foreach ($establecimientos as $index => $establecimiento):
-                    $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
-                ?>
-                    <div class="filaEstablecimiento" id="establecimiento-<?php echo $establecimiento['id']; ?>">
-                        
-                    
-                        <div class="imagenCompacta">
-                            <?php
-                            /*
+                    <?php foreach ($establecimientos as $index => $establecimiento):
+                        $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
+                    ?>
+                        <div class="filaEstablecimiento" id="establecimiento-<?php echo $establecimiento['id']; ?>">
+
+
+                            <div class="imagenCompacta">
+                                <?php
+                                /*
                             $imgSrc = strpos($establecimiento['image_url'], 'http') === 0 
                                 ? $establecimiento['image_url'] 
                                 : 'http://' . $establecimiento['image_url'];
@@ -402,99 +482,99 @@ function formatearDireccion($direccion, $piso = "")
                                 $imgSrc = '../img/bricks0.jpg';
                             }
                             */
-                
- 
-        // Dentro del loop de establecimientos
-            $rawUrl = $establecimiento['image_url'];
-            $imgSrc = '../img/bricks0.jpg';
 
-            if (!empty($rawUrl) && $rawUrl != '../img/bricks0.jpg') {
-            // Extraemos solo la ruta (ej: /establecimientos/foto.jpg) borrando cualquier IP o dominio viejo
-            $path = parse_url($rawUrl, PHP_URL_PATH);
-             $imgSrc = rtrim($_ENV['MINIO_PUBLIC_URL'], '/') . $path;
-                }
-            ?>
-            <img src="<?= htmlspecialchars($imgSrc) ?>" ...>
-                            
-                            <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="Imagen local">
-                        </div>
 
-                        <div class="infoPrincipal">
-                            <div class="nombreEstablecimiento">
-                                <?php echo htmlspecialchars($establecimiento['nombre']); ?>
-                                
-                                <?php if ($establecimiento['has_wifi']): ?>
-                                    <i class="fas fa-wifi text-primary fs-6" title="WiFi"></i>
-                                <?php endif; ?>
-                                <?php if ($establecimiento['has_parking']): ?>
-                                    <i class="fas fa-parking text-secondary fs-6" title="Parking"></i>
-                                <?php endif; ?>
+                                // Dentro del loop de establecimientos
+                                $rawUrl = $establecimiento['image_url'];
+                                $imgSrc = '../img/bricks0.jpg';
+
+                                if (!empty($rawUrl) && $rawUrl != '../img/bricks0.jpg') {
+                                    // Extraemos solo la ruta (ej: /establecimientos/foto.jpg) borrando cualquier IP o dominio viejo
+                                    $path = parse_url($rawUrl, PHP_URL_PATH);
+                                    $imgSrc = rtrim($_ENV['MINIO_PUBLIC_URL'], '/') . $path;
+                                }
+                                ?>
+                                <img src="<?= htmlspecialchars($imgSrc) ?>" ...>
+
+                                <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="Imagen local">
                             </div>
 
-                            <p class="descripcionCorta">
-                                <?php echo htmlspecialchars(mb_strimwidth($establecimiento['descripcion'] ?? 'Sin descripción.', 0, 150, "...")); ?>
-                            </p>
-                            
-                            <p class="direccionFiscal mb-0">
-                                <i class="fas fa-map-marker-alt text-danger me-1"></i> 
-                                <?php echo htmlspecialchars($direccionFormateada); ?>, 
-                                <?php echo htmlspecialchars($establecimiento['localidad']); ?>
-                            </p>
-                        </div>
+                            <div class="infoPrincipal">
+                                <div class="nombreEstablecimiento">
+                                    <?php echo htmlspecialchars($establecimiento['nombre']); ?>
 
-                        <div class="accionesFila">
-                            <button class="btn btn-outline-secondary btn-accion bg-white" onclick="toggleDetails('<?php echo $establecimiento['id']; ?>')">
-                                <span id="toggle-text-<?php echo $establecimiento['id']; ?>">Ver detalles</span>
-                                <i class="fas fa-chevron-down ms-1" id="toggle-icon-<?php echo $establecimiento['id']; ?>"></i>
-                            </button>
-                            <a href="editarEstablecimiento.php?id=<?php echo $establecimiento['id']; ?>" class="btn btn-info text-white btn-accion">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <button class="btn btn-danger btn-accion" onclick="confirmarEliminacion('<?php echo $establecimiento['id']; ?>', '<?php echo htmlspecialchars($establecimiento['nombre']); ?>')">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-
-                        <div class="collapsed-content" id="details-<?php echo $establecimiento['id']; ?>">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong><i class="fas fa-align-left text-success me-2"></i>Descripción completa:</strong><br> <?php echo htmlspecialchars($establecimiento['descripcion']); ?></p>
-                                    <p><strong><i class="fas fa-map text-success me-2"></i>Provincia:</strong> <?php echo htmlspecialchars($establecimiento['provincia']); ?> (CP: <?php echo htmlspecialchars($establecimiento['codigo_postal']); ?>)</p>
-                                    
                                     <?php if ($establecimiento['has_wifi']): ?>
-                                        <p><strong><i class="fas fa-wifi text-success me-2"></i>WiFi:</strong> <span class="precio-tag"><i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['wifi_price'], 2); ?>/h</span></p>
+                                        <i class="fas fa-wifi text-primary fs-6" title="WiFi"></i>
                                     <?php endif; ?>
-
                                     <?php if ($establecimiento['has_parking']): ?>
-                                        <p><strong><i class="fas fa-parking text-success me-2"></i>Parking:</strong> <span class="precio-tag"><i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['parking_price'], 2); ?>/día</span></p>
+                                        <i class="fas fa-parking text-secondary fs-6" title="Parking"></i>
                                     <?php endif; ?>
                                 </div>
-                                
-                                <div class="col-md-6">
-                                    <div class="map-container-individual" id="map-<?php echo $establecimiento['id']; ?>"></div>
-                                </div>
 
-                                <?php if (!empty($establecimiento['gallery'])): ?>
-                                    <div class="col-12 mt-4">
-                                        <h6 class="fw-bold mb-2 text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">
-                                            <i class="fas fa-images text-primary me-2"></i> Galería de Fotos (<?php echo count($establecimiento['gallery']); ?>)
-                                        </h6>
-                                        <div class="galeria-establecimiento">
-                                            <?php foreach ($establecimiento['gallery'] as $img): 
-                                                $imgSrc = strpos($img['image_url'], 'http') === 0 
-                                                    ? $img['image_url'] 
-                                                    : 'http://' . $img['image_url'];
-                                            ?>
-                                                <img src="<?php echo htmlspecialchars($imgSrc); ?>" class="galeria-item shadow-sm" alt="Foto galería">
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
+                                <p class="descripcionCorta">
+                                    <?php echo htmlspecialchars(mb_strimwidth($establecimiento['descripcion'] ?? 'Sin descripción.', 0, 150, "...")); ?>
+                                </p>
+
+                                <p class="direccionFiscal mb-0">
+                                    <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                    <?php echo htmlspecialchars($direccionFormateada); ?>,
+                                    <?php echo htmlspecialchars($establecimiento['localidad']); ?>
+                                </p>
                             </div>
-                        </div>
 
-                    </div>
-                <?php endforeach; ?>
+                            <div class="accionesFila">
+                                <button class="btn btn-outline-secondary btn-accion bg-white" onclick="toggleDetails('<?php echo $establecimiento['id']; ?>')">
+                                    <span id="toggle-text-<?php echo $establecimiento['id']; ?>">Ver detalles</span>
+                                    <i class="fas fa-chevron-down ms-1" id="toggle-icon-<?php echo $establecimiento['id']; ?>"></i>
+                                </button>
+                                <a href="editarEstablecimiento.php?id=<?php echo $establecimiento['id']; ?>" class="btn btn-info text-white btn-accion">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger btn-accion" onclick="confirmarEliminacion('<?php echo $establecimiento['id']; ?>', '<?php echo htmlspecialchars($establecimiento['nombre']); ?>')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+
+                            <div class="collapsed-content" id="details-<?php echo $establecimiento['id']; ?>">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong><i class="fas fa-align-left text-success me-2"></i>Descripción completa:</strong><br> <?php echo htmlspecialchars($establecimiento['descripcion']); ?></p>
+                                        <p><strong><i class="fas fa-map text-success me-2"></i>Provincia:</strong> <?php echo htmlspecialchars($establecimiento['provincia']); ?> (CP: <?php echo htmlspecialchars($establecimiento['codigo_postal']); ?>)</p>
+
+                                        <?php if ($establecimiento['has_wifi']): ?>
+                                            <p><strong><i class="fas fa-wifi text-success me-2"></i>WiFi:</strong> <span class="precio-tag"><i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['wifi_price'], 2); ?>/h</span></p>
+                                        <?php endif; ?>
+
+                                        <?php if ($establecimiento['has_parking']): ?>
+                                            <p><strong><i class="fas fa-parking text-success me-2"></i>Parking:</strong> <span class="precio-tag"><i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['parking_price'], 2); ?>/día</span></p>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="map-container-individual" id="map-<?php echo $establecimiento['id']; ?>"></div>
+                                    </div>
+
+                                    <?php if (!empty($establecimiento['gallery'])): ?>
+                                        <div class="col-12 mt-4">
+                                            <h6 class="fw-bold mb-2 text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">
+                                                <i class="fas fa-images text-primary me-2"></i> Galería de Fotos (<?php echo count($establecimiento['gallery']); ?>)
+                                            </h6>
+                                            <div class="galeria-establecimiento">
+                                                <?php foreach ($establecimiento['gallery'] as $img):
+                                                    $imgSrc = strpos($img['image_url'], 'http') === 0
+                                                        ? $img['image_url']
+                                                        : 'http://' . $img['image_url'];
+                                                ?>
+                                                    <img src="<?php echo htmlspecialchars($imgSrc); ?>" class="galeria-item shadow-sm" alt="Foto galería">
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         <?php endif; ?>
@@ -532,7 +612,7 @@ function formatearDireccion($direccion, $piso = "")
             const toastMessage = document.getElementById('toastMessage');
 
             toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
-            
+
             if (tipo === 'success') {
                 toastEl.classList.add('bg-success');
                 mensaje = '✅ ' + mensaje;
@@ -542,7 +622,9 @@ function formatearDireccion($direccion, $piso = "")
             }
 
             toastMessage.textContent = mensaje;
-            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+            const toast = new bootstrap.Toast(toastEl, {
+                delay: 3500
+            });
             toast.show();
         }
 
@@ -575,7 +657,7 @@ function formatearDireccion($direccion, $piso = "")
 
             const establecimientos = <?php echo json_encode($establecimientos); ?>;
             const establecimiento = establecimientos.find(e => e.id === id);
-            
+
             if (!establecimiento || !establecimiento.latitude || !establecimiento.longitude) {
                 mapContainer.innerHTML = '<div class="alert alert-warning m-3">No hay coordenadas disponibles para mostrar el mapa</div>';
                 return;
@@ -600,13 +682,17 @@ function formatearDireccion($direccion, $piso = "")
 
             new mapboxgl.Marker(el)
                 .setLngLat([establecimiento.longitude, establecimiento.latitude])
-                .setPopup(new mapboxgl.Popup({ offset: 25 })
+                .setPopup(new mapboxgl.Popup({
+                        offset: 25
+                    })
                     .setHTML(`<h6 class="fw-bold m-0">${establecimiento.nombre}</h6><small>${establecimiento.direccion}</small>`))
                 .addTo(map);
 
             maps[id] = map;
-            
-            setTimeout(() => { map.resize(); }, 100);
+
+            setTimeout(() => {
+                map.resize();
+            }, 100);
         }
 
         function confirmarEliminacion(id, nombre) {
@@ -637,7 +723,7 @@ function formatearDireccion($direccion, $piso = "")
                 .then(data => {
                     bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
                     mostrarNotificacion("Establecimiento eliminado correctamente", "success");
-                    
+
                     // Esperamos a que se lea la notificación antes de recargar
                     setTimeout(() => {
                         location.reload();
