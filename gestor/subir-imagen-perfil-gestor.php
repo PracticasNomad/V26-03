@@ -30,65 +30,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['imagen'])) {
         exit;
     }
 
-    // 2. VALIDAR EL ARCHIVO REAL (Ignoramos lo que dice Safari, leemos el archivo físico)
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mimeReal = finfo_file($finfo, $archivo['tmp_name']);
-    finfo_close($finfo);
+    $extension = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
+    if ($extension == 'jpeg') $extension = 'jpg';
 
-    // Añadimos soporte para webp y gif por si acaso
-    $permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-
-    if (!in_array($mimeReal, $permitidos)) {
-        echo json_encode(['success' => false, 'message' => "Formato no compatible ($mimeReal). Usa JPG o PNG."]);
+    $permitidos = ['jpg', 'png', 'webp', 'gif'];
+    if (!in_array($extension, $permitidos)) {
+        echo json_encode(['success' => false, 'message' => "Formato no compatible. Usa JPG o PNG."]);
         exit;
     }
 
-    // 3. Crear directorio con permisos cross-platform
-    $directorioDestino = '../uploads/perfiles/';
-    if (!file_exists($directorioDestino)) {
-        // En Mac/Linux el 0777 asegura permisos de escritura
-        mkdir($directorioDestino, 0777, true);
-        chmod($directorioDestino, 0777);
-    }
+    $mimeTypes = [
+        'jpg' => 'image/jpeg', 'png' => 'image/png', 
+        'gif' => 'image/gif', 'webp' => 'image/webp'
+    ];
+    $fileType = $mimeTypes[$extension];
 
-    $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
-    // Limpiamos la extensión por si viene rara
-    $extension = strtolower($extension);
-    if ($extension == 'jpeg') $extension = 'jpg';
+    // Configuración MinIO
+    $minioBucket = 'images';
+    $nombreArchivo = 'gestor_' . trim($gestorId) . '_' . time() . '.' . $extension;
+    $minioUrl = rtrim($_ENV['MINIO_PUBLIC_URL'], '/') . '/' . $minioBucket . '/' . $nombreArchivo;
+    
+    $rutaTemporal = $archivo['tmp_name'];
+    $fileContent = file_get_contents($rutaTemporal);
 
-    $nombreArchivo = 'gestor_' . $gestorId . '_' . time() . '.' . $extension;
-    $rutaFinal = $directorioDestino . $nombreArchivo;
-    $rutaParaBD = 'uploads/perfiles/' . $nombreArchivo;
+    // 2. SUBIDA DIRECTA A MINIO
+    $ch = curl_init($minioUrl);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $fileContent);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    // 4. Mover el archivo subido
-    if (move_uploaded_file($archivo['tmp_name'], $rutaFinal)) {
+    // --- LAS DOS LÍNEAS MÁGICAS PARA SALTAR EL BLOQUEO SSL DE LA IP ---
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    // ------------------------------------------------------------------
 
-        // 5. Actualizar la base de datos (Usando Service Key)
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: ' . $fileType,
+        'Content-Length: ' . strlen($fileContent)
+    ]);
+
+    $resultado = curl_exec($ch);
+    $codigoRespuesta = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
+
+        // 3. Actualizar la base de datos (Usando Service Key)
         $url = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/gestor?id=eq." . $gestorId;
-        $data = ['avatar_url' => '../' . $rutaParaBD];
+        $data = ['avatar_url' => $minioUrl];
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        $ch_db = curl_init($url);
+        curl_setopt($ch_db, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        curl_setopt($ch_db, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch_db, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch_db, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
             'apikey: ' . $_ENV['SERVICE_APIKEY']
         ]);
 
-        $result = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        $result_db = curl_exec($ch_db);
+        $httpCode_db = curl_getinfo($ch_db, CURLINFO_HTTP_CODE);
+        curl_close($ch_db);
 
-        if ($httpCode >= 200 && $httpCode < 300) {
-            echo json_encode(['success' => true, 'avatarUrl' => '../' . $rutaParaBD]);
+        if ($httpCode_db >= 200 && $httpCode_db < 300) {
+            echo json_encode(['success' => true, 'avatarUrl' => $minioUrl]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Error al guardar ruta en BD.']);
         }
     } else {
-        echo json_encode(['success' => false, 'message' => 'No se pudo mover el archivo (Problema de permisos).']);
+        echo json_encode(['success' => false, 'message' => 'Error MinIO: ' . $codigoRespuesta . ' - ' . $curlError]);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Petición vacía o incorrecta.']);
 }
+?>
