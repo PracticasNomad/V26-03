@@ -25,23 +25,131 @@ $dotenv->load();
     </script>
 
     <style>
-        body { font-family: 'Nunito', sans-serif; background-color: #E3E1E1; background-size: 65% 80%; background-position: center; background-repeat: no-repeat; opacity: 0.9; padding-bottom: 15%; }
-        .btn-secondary { background-color: #6c757d !important; color: white !important; border: none; font-weight: bold; }
-        .btn-secondary:hover { background-color: #5a6268 !important; }
-        a, a:visited, a:active { color: black; text-decoration: none; }
-        #loading-spinner { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
-        .spinner-border { width: 3rem; height: 3rem; color: #81ba18 !important; }
-        .loading-text { margin-top: 1rem; font-weight: bold; color: #00B7CF; }
-        .card-header.bg-secondary { background-color: #6c757d !important; }
-        .header-tabs { overflow: hidden; border-radius: 12px; background-color: white; margin-bottom: 1rem; }
-        .header-tab { font-weight: bold; transition: all 0.3s ease; height: 100%; cursor: pointer; color: #00B7CF; background-color: white; border-bottom: 3px solid transparent; }
-        .header-tab-active { color: white; background-color: #81ba18; border-color: #BDE742; }
-        .header-tab-link { text-decoration: none; display: block; height: 100%; }
-        .header-tab:hover:not(.header-tab-active) { background-color: #f8f9fa; color: #4CCBD4; border-bottom: 3px solid #E3E1E1; }
-        .rounded-start { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-        .rounded-end { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
-        .img-container { position: relative; overflow: hidden; }
-        .img-container::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(45deg, rgba(0, 183, 207, 0.1), rgba(129, 186, 24, 0.1)); pointer-events: none; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f4f6f9;
+            background-size: 65% 80%;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            padding-bottom: 15%;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d !important;
+            color: white !important;
+            border: none;
+            font-weight: bold;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268 !important;
+        }
+
+        a,
+        a:visited,
+        a:active {
+            color: black;
+            text-decoration: none;
+        }
+
+        #loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #81ba18 !important;
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            font-weight: bold;
+            color: #00B7CF;
+        }
+
+        .card-header.bg-secondary {
+            background-color: #6c757d !important;
+        }
+
+        .header-tabs {
+            overflow: hidden;
+            border-radius: 12px;
+            background-color: white;
+            margin-bottom: 1rem;
+        }
+
+        .header-tab {
+            font-weight: bold;
+            transition: all 0.3s ease;
+            height: 100%;
+            cursor: pointer;
+            color: #00B7CF;
+            background-color: white;
+            border-bottom: 3px solid transparent;
+        }
+
+        .header-tab-active {
+            color: white;
+            background-color: #81ba18;
+            border-color: #BDE742;
+        }
+
+        .header-tab-link {
+            text-decoration: none;
+            display: block;
+            height: 100%;
+        }
+
+        .header-tab:hover:not(.header-tab-active) {
+            background-color: #f8f9fa;
+            color: #4CCBD4;
+            border-bottom: 3px solid #E3E1E1;
+        }
+
+        .rounded-start {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+        }
+
+        .rounded-end {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .img-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .img-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(0, 183, 207, 0.1), rgba(129, 186, 24, 0.1));
+            pointer-events: none;
+        }
+
+        .page-shell {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 
@@ -51,33 +159,14 @@ $dotenv->load();
         <p class="loading-text">Cargando tu historial de reservas...</p>
     </div>
 
-    <div class="container" id="container">
-        <div class="row py-3 mb-4">
-            <div class="col-12">
-                <div class="header-tabs shadow-sm">
-                    <div class="row g-0">
-                        <div class="col-6">
-                            <a href="nomada_reservas.php" class="header-tab-link">
-                                <div class="header-tab py-3 text-center rounded-start">
-                                    <i class="fas fa-calendar-check me-2"></i>RESERVAS
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <div class="header-tab header-tab-active py-3 text-center rounded-end">
-                                <i class="fas fa-history me-2"></i>HISTÓRICO
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="page-shell">
+        <?php include 'headerNomada.php'; ?>
     </div>
 
     <?php include 'footerNomada.php'; ?>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('loading-spinner').style.display = 'flex';
             const url = "getReservasNomada.php";
 
@@ -134,14 +223,14 @@ $dotenv->load();
 
                         const establecimientoId = data[i].space.establecimiento.id;
                         let imageUrl = galleryImages[establecimientoId] || defaultImage;
-                        
+
                         // PARCHE MAGICO DE URL
                         if (imageUrl !== defaultImage) {
                             try {
                                 let tempUrl = imageUrl.startsWith('http') ? imageUrl : 'http://' + imageUrl;
                                 let urlObj = new URL(tempUrl);
                                 imageUrl = MINIO_URL + urlObj.pathname;
-                            } catch(e) {}
+                            } catch (e) { }
                         }
 
                         const card = document.createElement("div");
@@ -171,8 +260,8 @@ $dotenv->load();
                                         </p>
                                         <div class="d-flex justify-content-between align-items-center mt-3">
                                             <div class="horario">
-                                                <span class="badge bg-info text-dark"><i class="far fa-clock me-1"></i> Inicio: ${data[i].start_time.substring(0,5)}</span>
-                                                <span class="badge bg-secondary ms-2"><i class="fas fa-hourglass-end me-1"></i> Fin: ${data[i].end_time.substring(0,5)}</span>
+                                                <span class="badge bg-info text-dark"><i class="far fa-clock me-1"></i> Inicio: ${data[i].start_time.substring(0, 5)}</span>
+                                                <span class="badge bg-secondary ms-2"><i class="fas fa-hourglass-end me-1"></i> Fin: ${data[i].end_time.substring(0, 5)}</span>
                                             </div>
                                             <a href="reservadetalles.php?nombre=${data[i].space.establecimiento.nombre}&direccion=${data[i].space.establecimiento.direccion}&poblacion=${data[i].space.establecimiento.localidad}+, ${data[i].space.establecimiento.provincia}&horaInicio=${data[i].start_time}&horaFinal=${data[i].end_time}&reservaId=${data[i].id}&anfitrionId=${data[i].space.host_id}&Id=${data[i].user_id}&coordinates0=${data[i].space.establecimiento.longitude}&coordinates1=${data[i].space.establecimiento.latitude}" 
                                             class="btn btn-secondary">
@@ -199,4 +288,5 @@ $dotenv->load();
         });
     </script>
 </body>
+
 </html>

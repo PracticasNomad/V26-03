@@ -200,6 +200,13 @@ if (isset($_POST['cerrar'])) {
             flex-grow: 0;
         }
 
+        .page-shell {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
         @media (max-width: 1400px) {
             .anfitrion {
                 width: calc(25% - 20px);
