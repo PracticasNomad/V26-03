@@ -519,7 +519,7 @@ $dotenv->load();
                 })
                // Dentro del .then(data => { ... }) del fetch de tuPerfil.php
 .then(data => {
-    let avatarUrl = '../img/perfil.png'; // Imagen por defecto
+    let Url = '../img/perfil.png'; // Imagen por defecto
     
     if (data.avatar_url && data.avatar_url !== '../img/perfil.png') {
         try {

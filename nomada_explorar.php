@@ -3,7 +3,9 @@ require_once 'verificar_sesion_guest.php';
 
 
 require './vendor/autoload.php';
+
 use Dotenv\Dotenv;
+
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -54,6 +56,13 @@ if (isset($_POST['cerrar'])) {
             background-color: #f4f6f9;
             min-height: 100vh;
             padding-bottom: 80px;
+        }
+
+        .page-shell {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+            box-sizing: border-box;
         }
 
         .contenedorAnfitriones {
@@ -178,12 +187,9 @@ if (isset($_POST['cerrar'])) {
         }
 
         #contenedor {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
+            display: grid;
             gap: 20px;
-            justify-content: flex-start;
-            width: 100%;
+            grid-template-columns: repeat(3, 1fr);
         }
 
         .anfitrion {
@@ -194,8 +200,6 @@ if (isset($_POST['cerrar'])) {
             position: relative;
             height: auto !important;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            width: calc(20% - 20px);
-            min-width: 220px;
             margin-bottom: 0 !important;
             flex-grow: 0;
         }
@@ -207,31 +211,21 @@ if (isset($_POST['cerrar'])) {
             box-sizing: border-box;
         }
 
-        @media (max-width: 1400px) {
-            .anfitrion {
-                width: calc(25% - 20px);
-            }
-        }
-
-        @media (max-width: 1200px) {
-            .anfitrion {
-                width: calc(33.333% - 20px);
-            }
-        }
-
         @media (max-width: 992px) {
-            .anfitrion {
-                width: calc(50% - 20px);
+            #contenedor {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            #contenedor {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (max-width: 576px) {
-            .anfitrion {
-                width: 100%;
-            }
-
-            .filters-container {
-                padding: 15px;
+            #contenedor {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -363,75 +357,77 @@ if (isset($_POST['cerrar'])) {
 </head>
 
 <body>
-    <div class="contenedorAnfitriones">
-        <div class="header hr my-3">
-            <img src="img/logoNomada.png" alt="">
-            <span class="logo">Encuentra tu espacio</span>
-        </div>
-
-        <div class="filters-container">
-            <div class="filters-title">
-                <i class="fas fa-filter"></i> Filtrar espacios
+    <div class="page-shell">
+        <div class="contenedorAnfitriones">
+            <div class="header hr my-3">
+                <img src="img/logoNomada.png" alt="">
+                <span class="logo">Encuentra tu espacio</span>
             </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="filter-group">
-                        <label class="filter-label">Localidad</label>
-                        <select id="filter-localidad" class="filter-select">
-                            <option value="">Todas las localidades</option>
-                        </select>
-                    </div>
+
+            <div class="filters-container">
+                <div class="filters-title">
+                    <i class="fas fa-filter"></i> Filtrar espacios
                 </div>
-                <div class="col-md-4">
-                    <div class="filter-group">
-                        <label class="filter-label">Provincia</label>
-                        <select id="filter-provincia" class="filter-select">
-                            <option value="">Todas las provincias</option>
-                        </select>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="filter-group">
+                            <label class="filter-label">Localidad</label>
+                            <select id="filter-localidad" class="filter-select">
+                                <option value="">Todas las localidades</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="filter-group">
-                        <label class="filter-label">Servicios</label>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <div class="filter-checkbox-group">
-                                    <input type="checkbox" id="filter-wifi" class="filter-checkbox">
-                                    <label for="filter-wifi" class="filter-checkbox-label"><i class="fas fa-wifi"></i>
-                                        WiFi</label>
+                    <div class="col-md-4">
+                        <div class="filter-group">
+                            <label class="filter-label">Provincia</label>
+                            <select id="filter-provincia" class="filter-select">
+                                <option value="">Todas las provincias</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="filter-group">
+                            <label class="filter-label">Servicios</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="filter-checkbox-group">
+                                        <input type="checkbox" id="filter-wifi" class="filter-checkbox">
+                                        <label for="filter-wifi" class="filter-checkbox-label"><i class="fas fa-wifi"></i>
+                                            WiFi</label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="filter-checkbox-group">
-                                    <input type="checkbox" id="filter-parking" class="filter-checkbox">
-                                    <label for="filter-parking" class="filter-checkbox-label"><i class="fas fa-car"></i>
-                                        Parking</label>
+                                <div class="col-6">
+                                    <div class="filter-checkbox-group">
+                                        <input type="checkbox" id="filter-parking" class="filter-checkbox">
+                                        <label for="filter-parking" class="filter-checkbox-label"><i class="fas fa-car"></i>
+                                            Parking</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="text-end mt-3">
+                    <button class="clear-filters-btn" onclick="clearAllFilters()">
+                        <i class="fas fa-times"></i> Limpiar filtros
+                    </button>
+                </div>
             </div>
-            <div class="text-end mt-3">
-                <button class="clear-filters-btn" onclick="clearAllFilters()">
-                    <i class="fas fa-times"></i> Limpiar filtros
-                </button>
+
+            <div class="results-count" id="results-count" style="display: none;"></div>
+
+            <div id="loading-spinner" class="text-center my-4">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-3 fw-bold text-secondary">Cargando espacios...</p>
             </div>
+
+            <div id="contenedor" style="display: none;"></div>
+
+            <?php include 'footerNomada.php'; ?>
+
         </div>
-
-        <div class="results-count" id="results-count" style="display: none;"></div>
-
-        <div id="loading-spinner" class="text-center my-4">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Cargando...</span>
-            </div>
-            <p class="mt-3 fw-bold text-secondary">Cargando espacios...</p>
-        </div>
-
-        <div id="contenedor" style="display: none; width: 100%; flex-wrap: wrap; gap: 20px;"></div>
-
-        <?php include 'footerNomada.php'; ?>
-
     </div>
 
     <script>
@@ -454,7 +450,7 @@ if (isset($_POST['cerrar'])) {
                 updateResultsCount();
 
                 document.getElementById("loading-spinner").style.display = "none";
-                document.getElementById("contenedor").style.display = "flex";
+                document.getElementById("contenedor").style.display = "grid";
                 document.getElementById("results-count").style.display = "block";
             })
             .catch(err => {
@@ -542,7 +538,7 @@ if (isset($_POST['cerrar'])) {
 
         function appendData(data) {
             var contenedor = document.getElementById("contenedor");
-            contenedor.style.display = 'flex';
+            contenedor.style.display = 'grid';
 
             data.forEach(anfitrion => {
                 var card = document.createElement("div");
@@ -558,7 +554,7 @@ if (isset($_POST['cerrar'])) {
                         let tempUrl = cleanUrl.startsWith('http') ? cleanUrl : 'http://' + cleanUrl;
                         let urlObj = new URL(tempUrl);
                         cleanUrl = MINIO_URL + urlObj.pathname;
-                    } catch (e) { }
+                    } catch (e) {}
 
                     imgContainer.style.backgroundImage = `url('${cleanUrl}')`;
                 } else {

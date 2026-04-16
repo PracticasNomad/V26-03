@@ -379,6 +379,11 @@ if (isset($_POST['insertar'])) {
             </p>
         </div>
 
+        <?php
+            $nombre_establecimiento = isset($_GET['nombre']) ? $_GET['nombre'] : null;
+            $id_establecimiento = isset($_GET['establecimiento_id']) ? $_GET['establecimiento_id'] : null;
+        ?>
+
         <div class="text-center mb-3">
             <img src="../img/espacio.png" width="80" alt="Logo Espacio de Trabajo" class="bg-light rounded-circle p-3">
         </div>
@@ -410,16 +415,13 @@ if (isset($_POST['insertar'])) {
             </div>
 
             <div class="mb-3">
-                <label for="establecimiento_id" class="form-label fw-bold">Establecimiento *</label>
-                <select class="form-select" id="establecimiento_id" name="establecimiento_id" required>
-                    <option value="" selected disabled>Selecciona un establecimiento</option>
-                    <?php foreach ($establecimientos as $establecimiento): ?>
-                        <option value="<?php echo $establecimiento['id']; ?>">
-                            <?php echo htmlspecialchars($establecimiento['nombre']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <div class="form-text">Selecciona el establecimiento al que pertenecerá este espacio de trabajo.</div>
+                <label class="form-label fw-bold">Establecimiento</label>
+                <div class="form-control bg-light">
+                    <?php echo htmlspecialchars($nombre_establecimiento ?? ''); ?>
+                </div>
+                <input type="hidden" id="establecimiento_id" name="establecimiento_id"
+                    value="<?php echo htmlspecialchars($id_establecimiento ?? ''); ?>">
+                <div class="form-text">Este espacio se creara en el establecimiento seleccionado.</div>
             </div>
 
             <div class="mb-4">

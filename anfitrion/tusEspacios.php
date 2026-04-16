@@ -504,7 +504,8 @@ if ($num_espacios >= $limites[$plan]) {
                                         <i class="fas fa-lock"></i>
                                     </a>
                                 <?php else: ?>
-                                    <a href="crearEspacio.php" class="add-btn">
+                                    <!-- Pasamos el ID y nombre del establecimiento para prellenar el formulario de creación de espacio -->
+                                    <a href="crearEspacio.php?establecimiento_id=<?php echo urlencode($establecimiento['id']); ?>&nombre=<?php echo urlencode($establecimiento['nombre']); ?>" class="add-btn"> 
                                         <i class="fas fa-plus"></i>
                                     </a>
                                 <?php endif; ?>
