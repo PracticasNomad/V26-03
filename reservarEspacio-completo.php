@@ -167,8 +167,11 @@ function limpiarSesionesReserva()
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+        crossorigin="anonymous"></script>
     <link rel="icon" href="favicon-color.png">
 
     <link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
@@ -333,7 +336,8 @@ function limpiarSesionesReserva()
 <body>
     <div class="container p-0">
         <div class="header-container">
-            <img class="header-img" src="https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg" alt="Confirmation Header">
+            <img class="header-img" src="https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg"
+                alt="Confirmation Header">
             <div class="header-overlay">
                 <div class="text-center">
                     <h1 class="fw-bold mb-2">
@@ -398,14 +402,17 @@ function limpiarSesionesReserva()
                                         <div class="info-value"><?php echo htmlspecialchars($space['name']); ?></div>
 
                                         <div class="info-label">Establecimiento</div>
-                                        <div class="info-value"><?php echo htmlspecialchars($space['establecimiento']['nombre']); ?></div>
+                                        <div class="info-value">
+                                            <?php echo htmlspecialchars($space['establecimiento']['nombre']); ?></div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <div class="info-label">Fecha</div>
-                                        <div class="info-value"><?php echo date('d/m/Y', strtotime($reserva['date'])); ?></div>
+                                        <div class="info-value"><?php echo date('d/m/Y', strtotime($reserva['date'])); ?>
+                                        </div>
 
                                         <div class="info-label">Horario</div>
-                                        <div class="info-value"><?php echo $reserva['startTime']; ?> - <?php echo $reserva['endTime']; ?></div>
+                                        <div class="info-value"><?php echo $reserva['startTime']; ?> -
+                                            <?php echo $reserva['endTime']; ?></div>
                                     </div>
                                 </div>
 
@@ -413,11 +420,13 @@ function limpiarSesionesReserva()
                                     <div class="row border-top pt-3 mt-2">
                                         <div class="col-md-6 mb-3">
                                             <div class="info-label">Importe Total (IVA incluido)</div>
-                                            <div class="info-value"><?php echo number_format($reserva['price']['total'], 2, ',', '.'); ?> €</div>
+                                            <div class="info-value">
+                                                <?php echo number_format($reserva['price']['total'], 2, ',', '.'); ?> €</div>
 
                                             <?php if (isset($reserva['price']['iva'])): ?>
                                                 <div class="small text-muted">
-                                                    Base: <?php echo number_format($reserva['price']['subtotal'], 2, ',', '.'); ?> € +
+                                                    Base: <?php echo number_format($reserva['price']['subtotal'], 2, ',', '.'); ?> €
+                                                    +
                                                     IVA (21%): <?php echo number_format($reserva['price']['iva'], 2, ',', '.'); ?> €
                                                 </div>
                                             <?php endif; ?>
@@ -425,23 +434,23 @@ function limpiarSesionesReserva()
                                         <div class="acciones-reserva">
                                             <h3>Acciones disponibles</h3>
 
-                                            <button
-                                                class="btn-descargar-pdf"
-                                                onclick="descargarPDF()"
+                                            <button class="btn-descargar-pdf" onclick="descargarPDF()"
                                                 title="Descargar factura en PDF">
                                                 📄 Descargar Factura PDF
                                             </button>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <div class="info-label">Estado del Pago</div>
-                                            <div class="info-value success-message"><i class="fas fa-check-circle me-1"></i> Completado</div>
+                                            <div class="info-value success-message"><i class="fas fa-check-circle me-1"></i>
+                                                Completado</div>
                                         </div>
                                     </div>
                                 <?php endif; ?>
                             </div>
 
                             <div class="alert alert-info">
-                                <i class="fas fa-envelope me-2"></i> Hemos enviado un correo electrónico con los detalles de tu reserva. Si no lo recibes en los próximos minutos, revisa tu carpeta de spam.
+                                <i class="fas fa-envelope me-2"></i> Hemos enviado un correo electrónico con los detalles de
+                                tu reserva. Si no lo recibes en los próximos minutos, revisa tu carpeta de spam.
                             </div>
                         <?php endif; ?>
 
@@ -480,9 +489,9 @@ function limpiarSesionesReserva()
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             <?php if ($_SESSION['reservaExitosa'] && ($correoEnviado || $reservaYaProcesada)): ?>
-                setTimeout(function() {
+                setTimeout(function () {
                     <?php
                     if ($sendEmail || $reservaYaProcesada) {
                     }

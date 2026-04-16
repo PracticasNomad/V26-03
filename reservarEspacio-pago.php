@@ -101,8 +101,11 @@ $_SESSION['reserva']['price'] = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+        crossorigin="anonymous"></script>
     <link rel="icon" href="favicon-color.png">
 
     <link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
@@ -264,7 +267,8 @@ $_SESSION['reserva']['price'] = [
 <body>
     <div class="container p-0">
         <div class="header-container">
-            <img class="header-img" src="https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg" alt="Payment Header">
+            <img class="header-img" src="https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg"
+                alt="Payment Header">
             <div class="header-overlay">
                 <div class="text-center">
                     <h1 class="fw-bold mb-2">Completar Pago</h1>
@@ -283,7 +287,7 @@ $_SESSION['reserva']['price'] = [
                         <h4 class="mb-0">Confirmar Reserva</h4>
                     </div>
                     <div class="card-body">
-                        <form id="paymentForm" method="POST" action="reservarEspacio-completo.php?sendEmail=true">
+                        <form id="paymentForm" method="POST" action="paylands/crearPagoPaylands.php">
                             <div class="reservation-info mb-4">
                                 <h5 class="mb-3">Resumen de tu Reserva</h5>
                                 <div class="row">
@@ -292,14 +296,20 @@ $_SESSION['reserva']['price'] = [
                                         <div class="info-value"><?php echo htmlspecialchars($space['name']); ?></div>
 
                                         <div class="info-label">Establecimiento</div>
-                                        <div class="info-value"><?php echo htmlspecialchars($space['establecimiento']['nombre']); ?></div>
+                                        <div class="info-value">
+                                            <?php echo htmlspecialchars($space['establecimiento']['nombre']); ?>
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <div class="info-label">Fecha</div>
-                                        <div class="info-value"><?php echo date('d/m/Y', strtotime($reserva['date'])); ?></div>
+                                        <div class="info-value">
+                                            <?php echo date('d/m/Y', strtotime($reserva['date'])); ?>
+                                        </div>
 
                                         <div class="info-label">Horario</div>
-                                        <div class="info-value"><?php echo $reserva['startTime']; ?> - <?php echo $reserva['endTime']; ?></div>
+                                        <div class="info-value"><?php echo $reserva['startTime']; ?> -
+                                            <?php echo $reserva['endTime']; ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -367,7 +377,8 @@ $_SESSION['reserva']['price'] = [
 
                         <div class="mt-3">
                             <small class="text-muted">
-                                Al completar esta reserva, aceptas nuestros términos de servicio y política de privacidad.
+                                Al completar esta reserva, aceptas nuestros términos de servicio y política de
+                                privacidad.
                                 El cargo aparecerá en tu cuenta como "NOMADAPP". <br>
                                 <strong>IVA incluido en el precio final.</strong>
                             </small>
