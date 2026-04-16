@@ -2,7 +2,9 @@
 require_once 'verificar_sesion_guest.php';
 
 require './vendor/autoload.php';
+
 use Dotenv\Dotenv;
+
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 ?>
@@ -138,6 +140,7 @@ $dotenv->load();
             background: linear-gradient(45deg, rgba(0, 183, 207, 0.1), rgba(129, 186, 24, 0.1));
             pointer-events: none;
         }
+
         .page-shell {
             max-width: 1400px;
             margin: 0 auto;
@@ -155,12 +158,14 @@ $dotenv->load();
     <div class="page-shell">
         <?php include 'headerNomada.php'; ?>
     </div>
-   
+
+    <div id="container" class="container mt-4" style="min-height: 50vh;">
+    </div>
 
     <?php include 'footerNomada.php'; ?>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('loading-spinner').style.display = 'flex';
             const url = "getReservasNomada.php";
 
@@ -182,6 +187,7 @@ $dotenv->load();
                 })
                 .catch(err => {
                     document.getElementById('loading-spinner').style.display = 'none';
+                    // Ahora esto no fallará porque el ID 'container' ya existe
                     document.getElementById('container').innerHTML += `
                         <div class="alert alert-danger mt-3" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>
@@ -207,7 +213,12 @@ $dotenv->load();
                 for (var i = 0; i < data.length; i++) {
                     if (data[i].day >= today && data[i].cancelada == false) {
                         const fecha = new Date(data[i].day);
-                        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                        const opciones = {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        };
                         const fechaFormateada = fecha.toLocaleDateString('es-ES', opciones);
                         const fechaFormateadaFinal = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
 
@@ -220,7 +231,7 @@ $dotenv->load();
                                 let tempUrl = imageUrl.startsWith('http') ? imageUrl : 'http://' + imageUrl;
                                 let urlObj = new URL(tempUrl);
                                 imageUrl = MINIO_URL + urlObj.pathname;
-                            } catch (e) { }
+                            } catch (e) {}
                         }
 
                         const card = document.createElement("div");
