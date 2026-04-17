@@ -24,7 +24,8 @@ $dotenv->load();
 
     <style>
         :root {
-            --primary-color: #09b2fb; /* Cyan Anfitrión */
+            --primary-color: #09b2fb;
+            /* Cyan Anfitrión */
             --primary-hover: #0084d6;
             --cancel-color: #dc3545;
             --light-bg: #f4f6f9;
@@ -131,7 +132,8 @@ $dotenv->load();
         }
 
         .info-icon {
-            background-color: #e0f8fb; /* Fondo cyan clarito */
+            background-color: #e0f8fb;
+            /* Fondo cyan clarito */
             color: var(--primary-color);
             width: 45px;
             height: 45px;
@@ -243,11 +245,23 @@ $dotenv->load();
         .modal-content {
             border-radius: var(--border-radius-lg);
             border: none;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         }
-        .modal-header { border-bottom: 1px solid #f1f1f1; padding: 20px 25px; }
-        .modal-body { padding: 25px; }
-        .modal-footer { border-top: none; padding: 15px 25px 25px; }
+
+        .modal-header {
+            border-bottom: 1px solid #f1f1f1;
+            padding: 20px 25px;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 15px 25px 25px;
+        }
+
         .form-control {
             border-radius: var(--border-radius-sm);
             padding: 12px 15px;
@@ -255,11 +269,13 @@ $dotenv->load();
             border: 1px solid #e9ecef;
             font-weight: 600;
         }
+
         .form-control:focus {
             background-color: #fff;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.25rem rgba(0, 183, 207, 0.25);
         }
+
         .custom-toast {
             border-radius: var(--border-radius-sm);
             font-family: 'Nunito', sans-serif;
@@ -273,18 +289,24 @@ $dotenv->load();
                 padding: 30px 20px;
                 margin: 20px 15px;
             }
-            .perfilFotoBotones { display: none; }
+
+            .perfilFotoBotones {
+                display: none;
+            }
+
             .fotoPerfilMovil {
                 display: block;
                 width: 100%;
                 text-align: center;
                 margin-bottom: 10px;
             }
+
             .perfilInfo {
                 width: 100%;
                 min-width: unset;
                 padding-left: 0;
             }
+
             .botonesMovil {
                 display: flex;
                 flex-direction: column;
@@ -392,7 +414,7 @@ $dotenv->load();
                     <div class="info-content">
                         <span class="info-label">Suscripción actual</span>
                         <span class="info-value">
-                            Plan <span id="val-plan" class="text-primary fw-bolder">...</span> 
+                            Plan <span id="val-plan" class="text-primary fw-bolder">...</span>
                             <small class="text-muted" style="font-size:0.8rem; margin-left: 5px;">(Válido hasta: <span id="val-planEnd">...</span>)</small>
                         </span>
                     </div>
@@ -494,7 +516,7 @@ $dotenv->load();
             const toastMessage = document.getElementById('toastMessage');
 
             toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
-            
+
             if (tipo === 'success') {
                 toastEl.classList.add('bg-success');
                 mensaje = '✅ ' + mensaje;
@@ -504,7 +526,9 @@ $dotenv->load();
             }
 
             toastMessage.textContent = mensaje;
-            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+            const toast = new bootstrap.Toast(toastEl, {
+                delay: 3500
+            });
             toast.show();
         }
 
@@ -514,32 +538,31 @@ $dotenv->load();
 
             fetch(url)
                 .then(response => {
-                    if (!response.ok) throw new Error('Error de red');
+                    if (!response.ok) throw new Error('Error de red al consultar el perfil');
                     return response.json();
                 })
-               // Dentro del .then(data => { ... }) del fetch de tuPerfil.php
-.then(data => {
-    let Url = '../img/perfil.png'; // Imagen por defecto
-    
-    if (data.avatar_url && data.avatar_url !== '../img/perfil.png') {
-        try {
-            // Cogemos la URL de la base de datos y extraemos solo el nombre del archivo
-            // Independientemente de si tiene IP o http
-            let tempUrl = data.avatar_url.startsWith('http') ? data.avatar_url : 'http://' + data.avatar_url;
-            let urlObj = new URL(tempUrl);
-            
-            // Construimos la URL final usando tu dominio del .env
-            // rtrim elimina barras sobrantes para que no quede // en la URL
-            const publicDomain = "<?php echo rtrim($_ENV['MINIO_PUBLIC_URL'], '/'); ?>";
-            avatarUrl = publicDomain + urlObj.pathname;
-        } catch(e) {
-            avatarUrl = data.avatar_url; // Fallback por seguridad
-        }
-    }
+                .then(data => {
+                    // --- CORRECCIÓN: Manejo de errores devueltos por el JSON ---
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    // ---------------------------------------------------------
 
-    document.getElementById("fotoPerfil").src = avatarUrl;
-    document.getElementById("fotoPerfilMovil").src = avatarUrl;
+                    let avatarUrl = '../img/perfil.png'; // Imagen por defecto
 
+                    if (data.avatar_url && data.avatar_url !== '../img/perfil.png') {
+                        try {
+                            let tempUrl = data.avatar_url.startsWith('http') ? data.avatar_url : 'http://' + data.avatar_url;
+                            let urlObj = new URL(tempUrl);
+                            const publicDomain = "<?php echo rtrim($_ENV['MINIO_PUBLIC_URL'], '/'); ?>";
+                            avatarUrl = publicDomain + urlObj.pathname;
+                        } catch (e) {
+                            avatarUrl = data.avatar_url;
+                        }
+                    }
+
+                    document.getElementById("fotoPerfil").src = avatarUrl;
+                    document.getElementById("fotoPerfilMovil").src = avatarUrl;
 
                     document.getElementById("val-nombre").textContent = data.name || "Sin especificar";
                     document.getElementById("val-email").textContent = data.email || "Sin especificar";
@@ -563,7 +586,7 @@ $dotenv->load();
                     document.getElementById("loadingContainer").innerHTML = `
                         <div class="alert alert-danger m-4 text-center">
                             <i class="fas fa-exclamation-triangle h3 mb-3 d-block"></i>
-                            Error al cargar los datos. Por favor, recarga la página.
+                            Error al cargar los datos: ${err.message}. <br> Por favor, recarga la página.
                         </div>`;
                 });
 
@@ -571,7 +594,7 @@ $dotenv->load();
             document.getElementById("btnGuardarCambios").addEventListener("click", function() {
                 const formData = new FormData(document.getElementById("formEditarPerfil"));
                 const btn = this;
-                
+
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
@@ -613,7 +636,7 @@ $dotenv->load();
                 }
             });
 
-            // Guardar Imagen (Llama al script arreglado)
+            // Guardar Imagen
             document.getElementById('btnGuardarImagen').addEventListener('click', function() {
                 const formData = new FormData();
                 const inputImagen = document.getElementById("inputImagen");
@@ -636,10 +659,9 @@ $dotenv->load();
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Gracias al script arreglado, data.avatarUrl ahora viene con https://minio.yonomad.app
                             document.getElementById("fotoPerfil").src = data.avatarUrl;
                             document.getElementById("fotoPerfilMovil").src = data.avatarUrl;
-                            
+
                             mostrarNotificacion("Foto actualizada correctamente", "success");
                             const modal = bootstrap.Modal.getInstance(document.getElementById('cambiarImagenModal'));
                             modal.hide();
@@ -671,4 +693,5 @@ $dotenv->load();
         }
     </script>
 </body>
+
 </html>

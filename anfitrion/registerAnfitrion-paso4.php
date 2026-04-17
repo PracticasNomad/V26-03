@@ -68,7 +68,7 @@ function guardarImagen($file, $upload_dir = 'uploads/establecimientos/')
 function subirImagenAMinio($tmpName, $fileName, $fileType)
 {
     try {
-        $minioHost = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['REPO_PORT'];
+        $minioHost = rtrim($_ENV['MINIO_PUBLIC_URL'], '/');
         $minioBucket = 'establecimientos';
 
         $minioUrl = $minioHost . '/' . $minioBucket . '/' . $fileName;
