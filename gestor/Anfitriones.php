@@ -29,8 +29,8 @@ $datosGestor = json_decode($resGestor, true);
 $cpGestor = $datosGestor[0]['codigo_postal'] ?? null;
 
 if ($cpGestor) {
-    // 2. BUSCAR ESTABLECIMIENTOS DE ESE CP Y EXTRAER SUS ANFITRIONES
-    $urlEstablecimientos = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=host_id,host(id,name,email,phone,empresa)&codigo_postal=eq." . urlencode($cpGestor);
+    // 2. BUSCAR ESTABLECIMIENTOS DE ESE CP Y EXTRAER SUS ANFITRIONES (Añadido avatar_url)
+    $urlEstablecimientos = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=host_id,host(id,name,email,phone,empresa,avatar_url)&codigo_postal=eq." . urlencode($cpGestor);
 
     $ch = curl_init($urlEstablecimientos);
     curl_setopt_array($ch, [
@@ -88,6 +88,11 @@ if ($cpGestor) {
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Gestión de Anfitriones</title>
+    
+    <script>
+        const MINIO_URL = "<?php echo rtrim($_ENV['MINIO_PUBLIC_URL'] ?? 'https://79.150.19.209:9000', '/'); ?>";
+    </script>
+
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -131,9 +136,16 @@ if ($cpGestor) {
             border-bottom: 5px solid #0056b3;
         }
 
-        .card-header-custom .icon-profile {
-            font-size: 4rem;
+        /* Nueve estilo para la imagen de perfil redonda en lugar del icono */
+        .card-header-custom .img-profile {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
             margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            background-color: white;
         }
 
         .card-body {
@@ -314,7 +326,8 @@ if ($cpGestor) {
                     <option value="<?php echo htmlspecialchars($anf['id']); ?>"
                         data-nombre="<?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?>"
                         data-email="<?php echo htmlspecialchars($anf['email'] ?? 'Sin email'); ?>"
-                        data-telefono="<?php echo htmlspecialchars($anf['phone'] ?? 'No registrado'); ?>">
+                        data-telefono="<?php echo htmlspecialchars($anf['phone'] ?? 'No registrado'); ?>"
+                        data-avatar="<?php echo htmlspecialchars($anf['avatar_url'] ?? ''); ?>">
                         <?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?> -
                         <?php echo htmlspecialchars($anf['email'] ?? ''); ?>
                     </option>
@@ -325,7 +338,7 @@ if ($cpGestor) {
         <div id="detalles-anfitrion" style="display: none;">
             <div class="anfitrion-card">
                 <div class="card-header-custom">
-                    <i class="fas fa-user-circle icon-profile"></i>
+                    <img id="card-avatar" src="../img/perfil.png" alt="Avatar" class="img-profile">
                     <h3 class="fw-bold m-0" id="card-nombre">Nombre Apellidos</h3>
                     <span class="badge bg-light text-dark mt-2">Perfil Anfitrión</span>
                 </div>
@@ -359,7 +372,6 @@ if ($cpGestor) {
                         <a href="#" id="btn-edit-anfitrion" class="btn btn-action btn-edit">
                             <i class="fas fa-user-edit"></i> Ver Establecimientos
                         </a>
-
                     </div>
                 </div>
             </div>
@@ -382,12 +394,30 @@ if ($cpGestor) {
                     anfitrionNombreActual = selectedOption.data('nombre');
                     var email = selectedOption.data('email');
                     var telefono = selectedOption.data('telefono');
+                    var avatarRaw = selectedOption.data('avatar'); // Leemos el avatar
 
                     // Rellenar la tarjeta
                     $('#card-nombre').text(anfitrionNombreActual);
                     $('#card-email').text(email);
                     $('#card-telefono').text(telefono);
                     $('#card-id').text('#' + id);
+
+                    // PROCESAR IMAGEN MINIO
+                    let finalAvatar = '../img/perfil.png';
+                    if (avatarRaw && avatarRaw !== '../img/perfil.png' && avatarRaw !== '') {
+                        if (avatarRaw.startsWith('../')) {
+                            finalAvatar = avatarRaw;
+                        } else {
+                            try {
+                                let tempUrl = avatarRaw.startsWith('http') ? avatarRaw : 'http://' + avatarRaw;
+                                let urlObj = new URL(tempUrl);
+                                finalAvatar = MINIO_URL + urlObj.pathname;
+                            } catch(e) {
+                                finalAvatar = avatarRaw;
+                            }
+                        }
+                    }
+                    $('#card-avatar').attr('src', finalAvatar);
 
                     // Redirigir a los establecimientos de ESE anfitrión
                     $('#btn-edit-anfitrion').attr('href', 'verEstablecimientos.php?host_id=' + id);

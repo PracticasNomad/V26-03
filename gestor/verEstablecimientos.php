@@ -190,6 +190,58 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
     $flashType = 'danger';
 }
 
+// ======= NUEVA LÓGICA DE FILTRADO Y OBTENCIÓN DE ANFITRIONES =======
+$filtro_host_id = $_GET['host_id'] ?? null;
+$nombresAnfitriones = [];
+$uniqueHostNames = []; // Para el desplegable
+
+// $establecimientos viene de establecimientos_logic.php
+if (isset($establecimientos) && is_array($establecimientos)) {
+    if ($filtro_host_id) {
+        $establecimientos = array_values(array_filter($establecimientos, function ($est) use ($filtro_host_id) {
+            return isset($est['host_id']) && $est['host_id'] === $filtro_host_id;
+        }));
+
+        $totalEstablecimientos = count($establecimientos);
+        $establecimientosAprobados = 0;
+        $establecimientosPendientes = 0;
+        foreach ($establecimientos as $est) {
+            $estado = $est['estaValidado'] ?? $est['estavalidado'] ?? null;
+            if ($estado === true || $estado === 'true' || $estado === 't' || $estado === 1 || $estado === '1') {
+                $establecimientosAprobados++;
+            } else if ($estado === false || $estado === 'false' || $estado === 'f' || $estado === 0 || $estado === '0') {
+            } else {
+                $establecimientosPendientes++;
+            }
+        }
+    }
+
+    $hostIds = array_unique(array_filter(array_column($establecimientos, 'host_id')));
+
+    if (!empty($hostIds)) {
+        $urlHosts = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/host?id=in.(" . implode(',', $hostIds) . ")&select=id,name";
+        $chH = curl_init($urlHosts);
+        curl_setopt_array($chH, [
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+                'apikey: ' . $_ENV['SERVICE_APIKEY']
+            ],
+            CURLOPT_RETURNTRANSFER => true
+        ]);
+        $resH = curl_exec($chH);
+        curl_close($chH);
+
+        $hostsData = json_decode($resH, true);
+        if (is_array($hostsData)) {
+            foreach ($hostsData as $h) {
+                $nombresAnfitriones[$h['id']] = $h['name'];
+                $uniqueHostNames[$h['name']] = $h['name']; // Guardamos para el select
+            }
+            sort($uniqueHostNames); // Ordenamos alfabéticamente
+        }
+    }
+}
+// ====================================================================
 ?>
 
 <!DOCTYPE html>
@@ -232,34 +284,66 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             padding: 0 20px;
         }
 
-        .header-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+        /* FILTROS */
+        .search-bar-wrapper {
+            margin: 0 auto 2rem;
+            max-width: 1400px;
+            padding: 0 15px;
         }
 
-        .btn-add {
-            background-color: #28a745;
-            border: none;
-            font-weight: 600;
-            padding: 0.6rem 1.2rem;
-            border-radius: 25px;
-            margin-bottom: 20px;
+        .search-bar-container {
+            background: white;
+            border-radius: 12px;
+            padding: 5px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(15, 76, 92, 0.1);
             transition: all 0.3s;
-            display: flex;
-            width: 100%;
-            max-width: 600px;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.95rem;
+            height: 100%;
         }
 
-        .btn-add:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .search-bar-container:focus-within {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border-color: #17a2b8;
+        }
+
+        .search-bar-icon {
+            color: #17a2b8;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+
+        .search-bar-input {
+            border: none;
+            box-shadow: none;
+            font-size: 1.05rem;
+            padding: 10px 0;
+            background: transparent;
+            width: 100%;
+            color: #2c3e50;
+        }
+
+        .search-bar-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .filter-select {
+            border-radius: 12px;
+            border: 1px solid rgba(15, 76, 92, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 12px 15px;
+            color: #2c3e50;
+            font-weight: 600;
+            height: 100%;
+            transition: all 0.3s;
+        }
+
+        .filter-select:focus {
+            border-color: #17a2b8;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            outline: none;
         }
 
         .establecimiento-card {
@@ -285,7 +369,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             display: flex;
             align-items: flex-end;
             background-color: #f8f9fa;
-            background-image: none;
         }
 
         .card-header.default-image {
@@ -378,7 +461,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
 
         .collapsed-content.show {
             max-height: 1500px;
-            /* Suficiente para contener todo el contenido */
             padding-top: 8px;
             margin-top: 8px;
             opacity: 1;
@@ -439,10 +521,12 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         .btn-edit {
             background-color: #17a2b8;
             border: none;
+            color: white;
         }
 
         .btn-edit:hover {
             background-color: #138496;
+            color: white;
         }
 
         .btn-delete {
@@ -492,12 +576,16 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             color: #ffffff;
             padding: 1.1rem 1.2rem;
             box-shadow: 0 14px 30px rgba(15, 76, 92, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .page-hero-title {
             font-size: 1.25rem;
             font-weight: 800;
             letter-spacing: 0.2px;
+            margin: 0;
         }
 
         .hero-title-row {
@@ -572,10 +660,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             margin-left: 8px;
         }
 
-        .modal-confirm {
-            color: #636363;
-        }
-
         .modal-confirm .modal-content {
             padding: 20px;
             border-radius: 15px;
@@ -601,30 +685,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             font-size: 26px;
             margin: 30px 0 -15px;
             color: #333;
-        }
-
-        .modal-confirm .form-control,
-        .modal-confirm .btn {
-            min-height: 40px;
-            border-radius: 10px;
-        }
-
-        .modal-confirm .close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #999;
-            opacity: 1;
-        }
-
-        .modal-confirm .modal-footer {
-            border: none;
-            text-align: center;
-            border-radius: 15px;
-            padding: 10px 15px 25px;
-            justify-content: center;
         }
 
         .modal-confirm .icon-box {
@@ -653,29 +713,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             margin-top: 80px;
         }
 
-        .trigger-btn {
-            display: inline-block;
-            margin: 100px auto;
-        }
-
-        .spinner-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-        }
-
         @media (max-width: 767px) {
-
-            .service-icons {
-                align-self: flex-end;
-            }
-
             .btn-actions {
                 flex-direction: column;
             }
@@ -684,176 +722,16 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                 width: 100%;
             }
 
-            .header-container {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 15px;
+            .search-bar-wrapper .row>div {
+                margin-bottom: 10px;
             }
-
-            .header-container h1 {
-                text-align: center;
-            }
-        }
-
-        #establecimiento-main {
-            width: 100%;
-            margin: 0;
         }
 
         body {
             padding-bottom: 15%;
         }
-
-        .footer {
-            color: black;
-            background-color: white;
-            width: 100%;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            bottom: 0;
-            font-size: 15px;
-            background: #E3E1E1;
-            text-align: center;
-            position: fixed;
-            z-index: 1000;
-        }
-
-        .footer input[type="radio"] {
-            display: none;
-        }
-
-        label,
-        .form-check input[type=checkbox] {
-            position: static;
-        }
-
-        #res:checked~#lbl_res,
-        #his:checked~#lbl_his,
-        #esp:checked~#lbl_esp,
-        #per:checked~#lbl_per {
-            color: #00B7CF !important;
-        }
-
-        a,
-        a:visited,
-        a:active {
-            color: black;
-            text-decoration: none;
-        }
-
-        .fecha {
-            border-radius: 0.5rem;
-        }
-
-        .espacio {
-            border-radius: 1rem;
-            background: #f3f3f3ff;
-        }
-
-        .hora {
-            color: #00B7CF;
-        }
-
-        .spinner-border {
-            color: #1976d2;
-        }
-
-        .footer-container {
-            background-color: white;
-            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-            padding-top: 1px !important;
-            padding-bottom: 1px !important;
-            height: auto;
-            z-index: 1001;
-        }
-
-        .footer-item {
-            padding: 8px 0;
-        }
-
-        .icon-container {
-            transition: transform 0.3s ease;
-            padding: 5px 0;
-        }
-
-        .footer-item:hover .icon-container {
-            transform: translateY(-7px);
-        }
-
-        .mensaje-limite {
-            background-color: #fff3cd;
-            /* Fondo amarillo claro */
-            border: 1px solid #ffeeba;
-            /* Borde amarillo más oscuro */
-            color: #856404;
-            /* Texto marrón oscuro para contraste */
-            padding: 15px;
-            /* Espaciado interno */
-            margin: 20px auto;
-            /* Margen superior e inferior, y centrado horizontal */
-            border-radius: 8px;
-            /* Bordes ligeramente redondeados */
-            text-align: center;
-            /* Texto centrado */
-            max-width: 650px;
-            /* Ancho máximo para el mensaje */
-            font-size: 1rem;
-            /* Tamaño de fuente */
-            line-height: 1.5;
-            /* Altura de línea */
-        }
-
-        .mensaje-limite a {
-            color: #0056b3;
-            /* Color azul para el enlace dentro del mensaje */
-            font-weight: bold;
-            /* Texto del enlace en negrita */
-            text-decoration: underline;
-            /* Subrayado del enlace */
-        }
-
-        .btn-add:disabled {
-            background-color: #cccccc;
-            /* Fondo gris claro */
-            cursor: not-allowed;
-            /* Cursor de "no permitido" */
-            transform: none;
-            /* Elimina la transformación al pasar el ratón */
-            box-shadow: none;
-            /* Elimina la sombra al pasar el ratón */
-        }
-
-        #per:checked~#lbl_per .icon-container,
-        #res:checked~#lbl_res .icon-container,
-        #his:checked~#lbl_his .icon-container,
-        #esp:checked~#lbl_esp .icon-container {
-            color: #007bff;
-        }
-
-        /* New hover styles for "Establecimientos" and "Perfil" */
-        #lbl_his:hover,
-        #lbl_per:hover,
-        #lbl_anf:hover,
-        #lbl_val:hover,
-        #lbl_res:hover,
-        #lbl_esp:hover {
-            color: #00B7CF !important;
-            /* For the text */
-        }
-
-        #lbl_his:hover .icon-container,
-        #lbl_per:hover .icon-container,
-        #lbl_anf:hover .icon-container,
-        #lbl_val:hover .icon-container,
-        #lbl_res:hover .icon-container,
-        #lbl_esp:hover .icon-container {
-            color: #007bff;
-            /* For the icon */
-        }
     </style>
     <script>
-        // Almacenar mapas inicializados para evitar recrearlos
         const mapasInicializados = {};
 
         function toggleDetails(establecimientoId) {
@@ -862,21 +740,18 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             const toggleIcon = document.getElementById('toggle-icon-' + establecimientoId);
 
             if (detailsElement.classList.contains('show')) {
-                // Ocultar detalles
                 detailsElement.classList.remove('show');
                 toggleText.textContent = 'Ver más detalles';
                 toggleIcon.className = 'fas fa-chevron-down';
             } else {
-                // Mostrar detalles
                 detailsElement.classList.add('show');
                 toggleText.textContent = 'Ver menos detalles';
                 toggleIcon.className = 'fas fa-chevron-up';
 
-                // Inicializar mapa si no está inicializado aún
                 if (!mapasInicializados[establecimientoId]) {
                     setTimeout(() => {
                         inicializarMapa(establecimientoId);
-                    }, 300); // Esperar a que termine la transición
+                    }, 300);
                     mapasInicializados[establecimientoId] = true;
                 }
             }
@@ -907,19 +782,13 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                 zoom: 14,
             });
 
-            new mapboxgl.Marker({
-                    color: '#28a745'
-                })
-                .setLngLat([lng, lat])
-                .addTo(map);
-
+            new mapboxgl.Marker({ color: '#28a745' }).setLngLat([lng, lat]).addTo(map);
             setTimeout(() => map.resize(), 250);
         }
 
-        // Función para confirmar eliminación
         function confirmarEliminacion(id, nombre) {
             document.getElementById('establecimiento-nombre').textContent = nombre;
-            document.getElementById('btn-confirmar-eliminar').onclick = function() {
+            document.getElementById('btn-confirmar-eliminar').onclick = function () {
                 window.location.href = 'establecimiento.php?id=' + id;
             };
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
@@ -941,9 +810,9 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             new bootstrap.Modal(document.getElementById('editModal')).show();
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function(el) {
+            tooltipTriggerList.forEach(function (el) {
                 new bootstrap.Tooltip(el);
             });
         });
@@ -954,7 +823,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
     <section class="page-hero">
         <div class="page-hero-inner">
             <div class="hero-title-row">
-                <div class="page-hero-title">Gestion de Establecimientos</div>
+                <div class="page-hero-title">Gestión de Establecimientos</div>
                 <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right"
                     title="Controla imagen, estado, ubicacion y datos clave de tus negocios desde un solo panel."><i
                         class="fas fa-info"></i></span>
@@ -962,30 +831,36 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         </div>
     </section>
 
+    <?php if ($filtro_host_id): ?>
+        <div class="container mt-3" style="max-width: 1400px; padding: 0 15px;">
+            <div class="alert alert-info d-flex justify-content-between align-items-center shadow-sm" role="alert"
+                style="border-radius: 15px;">
+                <div>
+                    <i class="fas fa-filter me-2"></i> Mostrando solo los establecimientos del anfitrión seleccionado.
+                </div>
+                <a href="verEstablecimientos.php" class="btn btn-sm btn-outline-info fw-bold"
+                    style="border-radius: 20px; border-width: 2px;">
+                    Ver todos
+                </a>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <?php if (!empty($flashMessage)): ?>
-        <div class="container mt-3" style="max-width: 900px;">
+        <div class="container mt-3" style="max-width: 1400px; padding: 0 15px;">
             <div class="alert alert-<?php echo $flashType === 'danger' ? 'danger' : 'success'; ?> alert-dismissible fade show"
-                role="alert">
+                role="alert" style="border-radius: 15px;">
                 <?php echo $flashMessage; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
     <?php endif; ?>
 
-    <?php if (!empty($errorEstablecimientos)): ?>
-        <div class="container mt-3" style="max-width: 900px;">
-            <div class="alert alert-warning" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($errorEstablecimientos); ?>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <!-- Estadísticas del gestor -->
     <div class="row mb-4 stats-grid" style="max-width: 1400px; margin: 1.2rem auto 1.5rem; padding: 0 15px;">
         <div class="col-md-4">
             <div class="card text-center">
                 <div class="card-body">
-                    <h5 class="card-title text-primary"><?php echo $totalEstablecimientos; ?></h5>
+                    <h5 class="card-title text-primary"><?php echo $totalEstablecimientos ?? 0; ?></h5>
                     <p class="card-text">Total Establecimientos</p>
                 </div>
             </div>
@@ -993,7 +868,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         <div class="col-md-4">
             <div class="card text-center">
                 <div class="card-body">
-                    <h5 class="card-title text-success"><?php echo $establecimientosAprobados; ?></h5>
+                    <h5 class="card-title text-success"><?php echo $establecimientosAprobados ?? 0; ?></h5>
                     <p class="card-text">Aprobados</p>
                 </div>
             </div>
@@ -1001,42 +876,73 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         <div class="col-md-4">
             <div class="card text-center">
                 <div class="card-body">
-                    <h5 class="card-title text-warning"><?php echo $establecimientosPendientes; ?></h5>
+                    <h5 class="card-title text-warning"><?php echo $establecimientosPendientes ?? 0; ?></h5>
                     <p class="card-text">Pendientes</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <?php if (empty($establecimientos)): ?>
-        <div class="no-establecimientos">
-            <img src="../img/establecimiento.png" width="80" alt="Logo Establecimiento" class="mb-3">
-            <h3 class="fw-bold mb-3">No tienes establecimientos asignados</h3>
-            <p class="text-muted">Los establecimientos que te sean asignados aparecerán aquí para su gestión.</p>
+    <?php if (!empty($establecimientos)): ?>
+        <div class="search-bar-wrapper">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <div class="search-bar-container">
+                        <i class="fas fa-search search-bar-icon"></i>
+                        <input type="text" id="searchInputEst" class="search-bar-input"
+                            placeholder="Buscar por nombre, localidad, estado...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="filterHostEst" class="form-select filter-select w-100">
+                        <option value="">Todos los Anfitriones</option>
+                        <?php foreach ($uniqueHostNames as $hName): ?>
+                            <option value="<?php echo htmlspecialchars($hName); ?>"><?php echo htmlspecialchars($hName); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div id="no-results-est" class="no-establecimientos mt-4" style="display: none;">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="fw-bold">Sin coincidencias</h4>
+                <p class="text-muted">No hemos encontrado ningún establecimiento que coincida con tus filtros.</p>
+            </div>
+        </div>
+    <?php endif; ?>
 
+    <?php if (empty($establecimientos)): ?>
+        <div class="no-establecimientos mx-3">
+            <img src="../img/establecimiento.png" width="80" alt="Logo Establecimiento" class="mb-3">
+            <h3 class="fw-bold mb-3">No hay establecimientos</h3>
+            <p class="text-muted">No se encontraron establecimientos con el filtro actual.</p>
         </div>
     <?php else: ?>
-        <div class="row establecimientos-grid" style="max-width: 1400px; margin: 0 auto;">
+        <div class="row establecimientos-grid" style="max-width: 1400px; margin: 0 auto; padding: 0 15px;">
             <?php foreach ($establecimientos as $index => $establecimiento):
-                $randomImage = $backgroundImages[$index % count($backgroundImages)];
-                $direccionFormateada = formatearDireccion(
-                    $establecimiento['direccion'],
-                    $establecimiento['piso']
-                );
-            ?>
-                <div class="col-12 col-md-6 col-xl-4 est-card-col">
+                $nombreAnfitrion = $nombresAnfitriones[$establecimiento['host_id']] ?? 'Anfitrión Desconocido';
+                $direccionFormateada = formatearDireccion($establecimiento['direccion'], $establecimiento['piso']);
+                ?>
+                <div class="col-12 col-md-6 col-xl-4 est-card-col"
+                    data-host-name="<?php echo htmlspecialchars($nombreAnfitrion); ?>">
                     <div id="establecimiento-main">
                         <div class="establecimiento-card" id="establecimiento-<?php echo $establecimiento['id']; ?>">
                             <div class="card-header<?php echo empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? '')) ? ' default-image' : ''; ?>"
                                 <?php if (!empty(getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''))): ?>
-                                style="background-image: url('<?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"
+                                    style="background-image: url('<?php echo getImagenUrl($establecimiento['banner_image_url'] ?? $establecimiento['image_url'] ?? ''); ?>');"
                                 <?php endif; ?>>
                                 <div class="card-header-overlay"></div>
                                 <div class="card-title">
-                                    <div><?php echo htmlspecialchars($establecimiento['nombre']); ?></div>
+                                    <div class="d-flex flex-column">
+                                        <span><?php echo htmlspecialchars($establecimiento['nombre']); ?></span>
+                                        <span
+                                            style="font-size: 0.85rem; font-weight: 500; margin-top: 4px; color: #e9ecef; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                            <i class="fas fa-user-tie me-1"></i> Creado por:
+                                            <?php echo htmlspecialchars($nombreAnfitrion); ?>
+                                        </span>
+                                    </div>
                                     <div class="service-icons">
                                         <?php
-                                        // Determinar el estado de validación
                                         $estadoValidacion = $establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null;
                                         if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidacion === 't' || $estadoValidacion === 1 || $estadoValidacion === '1') {
                                             $estadoClass = 'success';
@@ -1055,16 +961,16 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                         <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>"
                                             title="<?php echo $estadoText; ?>">
                                             <i class="fas fa-<?php echo $estadoIcon; ?>"></i>
+                                            <span class="d-none"><?php echo $estadoText; ?></span>
                                         </div>
                                         <?php if ($establecimiento['has_wifi']): ?>
                                             <div class="service-icon" title="WiFi disponible">
-                                                <i class="fas fa-wifi"></i>
+                                                <i class="fas fa-wifi"></i><span class="d-none">wifi</span>
                                             </div>
                                         <?php endif; ?>
-
                                         <?php if ($establecimiento['has_parking']): ?>
                                             <div class="service-icon" title="Parking disponible">
-                                                <i class="fas fa-parking"></i>
+                                                <i class="fas fa-parking"></i><span class="d-none">parking</span>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -1076,7 +982,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                     <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
                                     <div><?php echo htmlspecialchars($direccionFormateada); ?></div>
                                 </div>
-
                                 <div class="info-row">
                                     <div class="info-icon"><i class="fas fa-city"></i></div>
                                     <div><?php echo htmlspecialchars($establecimiento['localidad']); ?></div>
@@ -1093,13 +998,11 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                         <div><strong>Descripción:</strong>
                                             <?php echo htmlspecialchars($establecimiento['descripcion']); ?></div>
                                     </div>
-
                                     <div class="info-row">
                                         <div class="info-icon"><i class="fas fa-map"></i></div>
                                         <div><strong>Provincia:</strong>
                                             <?php echo htmlspecialchars($establecimiento['provincia']); ?></div>
                                     </div>
-
                                     <div class="info-row">
                                         <div class="info-icon"><i class="fas fa-map-pin"></i></div>
                                         <div><strong>Código Postal:</strong>
@@ -1109,29 +1012,21 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                     <?php if ($establecimiento['has_wifi']): ?>
                                         <div class="info-row">
                                             <div class="info-icon"><i class="fas fa-wifi"></i></div>
-                                            <div>
-                                                <strong>WiFi disponible</strong>
-                                                <span class="precio-tag">
-                                                    <i class="fas fa-euro-sign"></i>
-                                                    <?php echo number_format($establecimiento['wifi_price'], 2); ?>/hora
-                                                </span>
+                                            <div><strong>WiFi disponible</strong> <span class="precio-tag"><i
+                                                        class="fas fa-euro-sign"></i>
+                                                    <?php echo number_format($establecimiento['wifi_price'], 2); ?>/hora</span>
                                             </div>
                                         </div>
                                     <?php endif; ?>
-
                                     <?php if ($establecimiento['has_parking']): ?>
                                         <div class="info-row">
                                             <div class="info-icon"><i class="fas fa-parking"></i></div>
-                                            <div>
-                                                <strong>Parking disponible</strong>
-                                                <span class="precio-tag">
-                                                    <i class="fas fa-euro-sign"></i>
-                                                    <?php echo number_format($establecimiento['parking_price'], 2); ?>/día
-                                                </span>
+                                            <div><strong>Parking disponible</strong> <span class="precio-tag"><i
+                                                        class="fas fa-euro-sign"></i>
+                                                    <?php echo number_format($establecimiento['parking_price'], 2); ?>/día</span>
                                             </div>
                                         </div>
                                     <?php endif; ?>
-
                                     <?php if (!empty($establecimiento['piso'])): ?>
                                         <div class="info-row">
                                             <div class="info-icon"><i class="fas fa-building"></i></div>
@@ -1147,22 +1042,23 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                                 </div>
 
                                 <div class="btn-actions">
-                                    <a href="verEspacios.php" class="btn btn-action btn-spaces">
+                                    <a href="verEspacios.php?establecimiento_id=<?php echo htmlspecialchars($establecimiento['id']); ?>"
+                                        class="btn btn-action btn-spaces">
                                         <i class="fas fa-door-open"></i> Gestionar Espacios
                                     </a>
                                     <button class="btn btn-action btn-edit" type="button" onclick='abrirModalEditar(<?php echo json_encode([
-                                                                                                                        'id' => $establecimiento['id'],
-                                                                                                                        'nombre' => $establecimiento['nombre'] ?? '',
-                                                                                                                        'descripcion' => $establecimiento['descripcion'] ?? '',
-                                                                                                                        'direccion' => $establecimiento['direccion'] ?? '',
-                                                                                                                        'localidad' => $establecimiento['localidad'] ?? '',
-                                                                                                                        'provincia' => $establecimiento['provincia'] ?? '',
-                                                                                                                        'codigo_postal' => $establecimiento['codigo_postal'] ?? '',
-                                                                                                                        'piso' => $establecimiento['piso'] ?? '',
-                                                                                                                        'image_url' => $establecimiento['image_url'] ?? '',
-                                                                                                                        'latitude' => $establecimiento['latitude'] ?? '',
-                                                                                                                        'longitude' => $establecimiento['longitude'] ?? ''
-                                                                                                                    ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
+                                        'id' => $establecimiento['id'],
+                                        'nombre' => $establecimiento['nombre'] ?? '',
+                                        'descripcion' => $establecimiento['descripcion'] ?? '',
+                                        'direccion' => $establecimiento['direccion'] ?? '',
+                                        'localidad' => $establecimiento['localidad'] ?? '',
+                                        'provincia' => $establecimiento['provincia'] ?? '',
+                                        'codigo_postal' => $establecimiento['codigo_postal'] ?? '',
+                                        'piso' => $establecimiento['piso'] ?? '',
+                                        'image_url' => $establecimiento['image_url'] ?? '',
+                                        'latitude' => $establecimiento['latitude'] ?? '',
+                                        'longitude' => $establecimiento['longitude'] ?? ''
+                                    ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
                                         <i class="fas fa-edit"></i> Editar
                                     </button>
                                     <button class="btn btn-action btn-delete"
@@ -1177,7 +1073,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-    </div>
 
     <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -1192,49 +1087,28 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
                         <input type="hidden" id="edit-id" name="id">
 
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="edit-nombre" name="nombre" required>
+                            <div class="col-md-6"><label class="form-label">Nombre</label><input type="text"
+                                    class="form-control" id="edit-nombre" name="nombre" required></div>
+                            <div class="col-md-6"><label class="form-label">Dirección</label><input type="text"
+                                    class="form-control" id="edit-direccion" name="direccion" required></div>
+                            <div class="col-12"><label class="form-label">Descripción</label><textarea
+                                    class="form-control" id="edit-descripcion" name="descripcion" rows="2"></textarea>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Dirección</label>
-                                <input type="text" class="form-control" id="edit-direccion" name="direccion" required>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Descripción</label>
-                                <textarea class="form-control" id="edit-descripcion" name="descripcion"
-                                    rows="2"></textarea>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Localidad</label>
-                                <input type="text" class="form-control" id="edit-localidad" name="localidad">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Provincia</label>
-                                <input type="text" class="form-control" id="edit-provincia" name="provincia">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Código postal</label>
-                                <input type="text" class="form-control" id="edit-codigo-postal" name="codigo_postal">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Piso</label>
-                                <input type="text" class="form-control" id="edit-piso" name="piso">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Seleccionar nueva imagen</label>
-                                <input type="file" class="form-control" id="edit-image-file"
-                                    name="imagen_establecimiento" accept="image/jpeg,image/png,image/gif,image/webp">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Latitude</label>
-                                <input type="number" step="any" class="form-control" id="edit-latitude" name="latitude">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Longitude</label>
-                                <input type="number" step="any" class="form-control" id="edit-longitude"
-                                    name="longitude">
-                            </div>
+                            <div class="col-md-4"><label class="form-label">Localidad</label><input type="text"
+                                    class="form-control" id="edit-localidad" name="localidad"></div>
+                            <div class="col-md-4"><label class="form-label">Provincia</label><input type="text"
+                                    class="form-control" id="edit-provincia" name="provincia"></div>
+                            <div class="col-md-4"><label class="form-label">Código postal</label><input type="text"
+                                    class="form-control" id="edit-codigo-postal" name="codigo_postal"></div>
+                            <div class="col-md-4"><label class="form-label">Piso</label><input type="text"
+                                    class="form-control" id="edit-piso" name="piso"></div>
+                            <div class="col-12"><label class="form-label">Seleccionar nueva imagen</label><input
+                                    type="file" class="form-control" id="edit-image-file" name="imagen_establecimiento"
+                                    accept="image/jpeg,image/png,image/gif,image/webp"></div>
+                            <div class="col-md-4"><label class="form-label">Latitude</label><input type="number"
+                                    step="any" class="form-control" id="edit-latitude" name="latitude"></div>
+                            <div class="col-md-4"><label class="form-label">Longitude</label><input type="number"
+                                    step="any" class="form-control" id="edit-longitude" name="longitude"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1250,9 +1124,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
         <div class="modal-dialog modal-dialog-centered modal-confirm">
             <div class="modal-content">
                 <div class="modal-header delete">
-                    <div class="icon-box">
-                        <i class="fas fa-trash"></i>
-                    </div>
+                    <div class="icon-box"><i class="fas fa-trash"></i></div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
@@ -1269,7 +1141,43 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
     </div>
 
     <?php include 'footer.php'; ?>
-</body>
 
+    <script>
+        $(document).ready(function () {
+            // Lógica Combinada (Buscador + Select)
+            function filterEstablecimientos() {
+                const searchTerm = $('#searchInputEst').val().toLowerCase();
+                const hostTerm = $('#filterHostEst').val().toLowerCase();
+                let visibleCount = 0;
+
+                $('.est-card-col').each(function () {
+                    const cardText = $(this).text().toLowerCase();
+                    const cardHost = ($(this).data('host-name') || '').toLowerCase();
+
+                    const matchesSearch = cardText.includes(searchTerm);
+                    const matchesHost = hostTerm === '' || cardHost === hostTerm;
+
+                    if (matchesSearch && matchesHost) {
+                        $(this).show();
+                        visibleCount++;
+                    } else {
+                        $(this).hide();
+                    }
+                });
+
+                if (visibleCount === 0) {
+                    $('#no-results-est').show();
+                    $('.establecimientos-grid').hide();
+                } else {
+                    $('#no-results-est').hide();
+                    $('.establecimientos-grid').show();
+                }
+            }
+
+            $('#searchInputEst').on('input', filterEstablecimientos);
+            $('#filterHostEst').on('change', filterEstablecimientos);
+        });
+    </script>
+</body>
 
 </html>
