@@ -50,10 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['fecha_inicio'] = $fechaInicio;
 
         // Calcular fecha de fin y precios dinámicos según el plan
-        if ($_POST['subscriptionPlan'] === 'mensual') { 
+        if ($_POST['subscriptionPlan'] === 'mensual') {
             $fechaFin = date('Y-m-d', strtotime('+1 month'));
             $precio = $precioMensual;
-        } else { 
+        } else {
             $fechaFin = date('Y-m-d', strtotime('+1 year'));
             $precio = $precioAnual;
         }
@@ -89,26 +89,165 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Suscripción PRO</title>
 
     <style>
-        body { min-height: 100vh; font-family: 'Nunito', sans-serif; background-color: #f8f9fa; color: #333; }
-        .header-container { position: relative; width: 100%; height: 250px; overflow: hidden; margin-bottom: 0; }
-        .header-img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
-        .header-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(0, 183, 207, 0.7), rgba(0, 183, 207, 0.9)); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 1rem; }
-        .card { border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); margin-bottom: 1.5rem; border: none; overflow: hidden; }
-        .card-header { background-color: #00B7CF; color: white; font-weight: 600; padding: 1rem; border-bottom: none; }
-        .section-title { color: #00B7CF; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #BDE742; }
-        .btn-nomad { background-color: #00B7CF; color: white; border: none; border-radius: 50px; padding: 0.5rem 1.5rem; font-weight: 600; transition: all 0.3s ease; }
-        .btn-nomad:hover { background-color: #4CCBD4; color: white; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-        .form-control:focus { border-color: #00B7CF; box-shadow: 0 0 0 0.25rem rgba(0, 183, 207, 0.25); }
-        .custom-checkbox { position: relative; padding-left: 28px; cursor: pointer; font-size: 16px; user-select: none; display: flex; align-items: center; margin-bottom: 0.5rem; }
-        .custom-checkbox input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
-        .custom-control-label { position: relative; cursor: pointer; padding-left: 5px; }
-        .custom-control-label::before { content: ""; position: absolute; left: -28px; top: 2px; width: 20px; height: 20px; border: 2px solid #00B7CF; background-color: white; border-radius: 4px; transition: all 0.3s ease; }
-        .custom-control-input:checked~.custom-control-label::before { background-color: #00B7CF; border-color: #00B7CF; }
-        .custom-control-label::after { content: ""; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; opacity: 0; transition: all 0.3s ease; }
-        .custom-control-input:checked~.custom-control-label::after { opacity: 1; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; }
-        .terms-link { color: #00B7CF; font-weight: 600; text-decoration: none; position: relative; transition: all 0.3s ease; }
-        .terms-link:hover { color: #4CCBD4; }
-        .radio-option { margin-bottom: 1rem; }
+        body {
+            min-height: 100vh;
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .header-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+
+        .header-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.7);
+        }
+
+        .header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 183, 207, 0.7), rgba(0, 183, 207, 0.9));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 1rem;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            border: none;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #00B7CF;
+            color: white;
+            font-weight: 600;
+            padding: 1rem;
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: #00B7CF;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #BDE742;
+        }
+
+        .btn-nomad {
+            background-color: #00B7CF;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nomad:hover {
+            background-color: #4CCBD4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus {
+            border-color: #00B7CF;
+            box-shadow: 0 0 0 0.25rem rgba(0, 183, 207, 0.25);
+        }
+
+        .custom-checkbox {
+            position: relative;
+            padding-left: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .custom-control-label {
+            position: relative;
+            cursor: pointer;
+            padding-left: 5px;
+        }
+
+        .custom-control-label::before {
+            content: "";
+            position: absolute;
+            left: -28px;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00B7CF;
+            background-color: white;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .custom-control-input:checked~.custom-control-label::before {
+            background-color: #00B7CF;
+            border-color: #00B7CF;
+        }
+
+        .custom-control-label::after {
+            content: "";
+            position: absolute;
+            left: -24px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .custom-control-input:checked~.custom-control-label::after {
+            opacity: 1;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .terms-link {
+            color: #00B7CF;
+            font-weight: 600;
+            text-decoration: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .terms-link:hover {
+            color: #4CCBD4;
+        }
+
+        .radio-option {
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 
@@ -124,10 +263,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="container py-4">
-        <?php if(isset($errorMsg)): ?>
+        <?php if (isset($errorMsg)): ?>
             <div class="alert alert-danger"><?php echo $errorMsg; ?></div>
         <?php endif; ?>
-        
+
         <div class="row justify-content-center">
             <div class="col-lg-7 mb-4">
                 <div class="card">
@@ -135,7 +274,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Datos de Suscripción</h4>
                     </div>
                     <div class="card-body">
-                        <form id="subscriptionForm" method="POST" action="mejoraPro.php">
+                        <form id="subscriptionForm" method="POST" action="../paylands/crearPagoPaylands.php">
+                            <input type="hidden" name="tipo_operacion" value="suscripcion_host"> <input type="hidden" name="plan" value="Pro"> <input type="hidden" name="amount" id="paylandsAmount" value="">
+
                             <h5 class="section-title"><i class="fas fa-map-marker-alt me-2"></i>Dirección</h5>
 
                             <div class="mb-3">
@@ -147,7 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <div class="radio-option">
                                 <div class="custom-checkbox">
-                                    <input type="radio" id="planMensual" name="subscriptionPlan" value="mensual" class="custom-control-input" required>
+                                    <input type="radio" id="planMensual" name="subscriptionPlan" value="mensual" class="custom-control-input plan-selector" data-amount="<?php echo round($precioMensual * 100); ?>" required>
                                     <label for="planMensual" class="custom-control-label">
                                         Plan Mensual - <?php echo number_format($precioMensual, 2); ?> €
                                     </label>
@@ -156,9 +297,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <div class="radio-option mb-4">
                                 <div class="custom-checkbox">
-                                    <input type="radio" id="planAnual" name="subscriptionPlan" value="anual" class="custom-control-input" required>
+                                    <input type="radio" id="planAnual" name="subscriptionPlan" value="anual" class="custom-control-input plan-selector" data-amount="<?php echo round($precioAnual * 100); ?>" required>
                                     <label for="planAnual" class="custom-control-label">
-                                        Plan Anual - <?php echo number_format($precioAnual, 2); ?> € 
+                                        Plan Anual - <?php echo number_format($precioAnual, 2); ?> €
                                         <span class="text-success fw-bold">(¡Ahorra <?php echo number_format($ahorro, 2); ?> €!)</span>
                                     </label>
                                 </div>
@@ -174,14 +315,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-nomad me-3" id="continueToPaymentBtn">
-                                    <i class="fas fa-credit-card me-2"></i>Continuar con el Pago
+                                <button type="submit" class="btn btn-nomad me-3" id="continueToPaymentBtn" style="background-color: #09b2fb; border: none; color: white;">
+                                    <i class="fas fa-credit-card me-2"></i>Continuar al Pago Seguro
                                 </button>
                                 <a href="Suscripciones.php" class="btn btn-secondary">
                                     <i class="fas fa-times-circle me-2"></i>Cancelar
                                 </a>
                             </div>
                         </form>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const radioButtons = document.querySelectorAll('.plan-selector');
+                                const amountInput = document.getElementById('paylandsAmount');
+
+                                radioButtons.forEach(radio => {
+                                    radio.addEventListener('change', function() {
+                                        amountInput.value = this.getAttribute('data-amount');
+                                    });
+                                });
+                            });
+                        </script>
                     </div>
                 </div>
             </div>

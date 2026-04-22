@@ -531,16 +531,14 @@ HTML;
             </div>
 
             <div class="info-card" style="border-color: #cce5ff;">
-                <div class="info-icon" style="background-color: var(--primary-color); color: white;"><i
-                        class="fas fa-crown"></i></div>
+                <div class="info-icon" style="background-color: var(--primary-color); color: white;"><i class="fas fa-crown"></i></div>
                 <div class="info-content">
                     <span class="info-label">Suscripción actual</span>
                     <span class="info-value">
-                        Plan <span
-                            class="text-primary fw-bolder"><?= htmlspecialchars($gestora['plan'] ?? 'Básico') ?></span>
+                        Plan <span class="text-primary fw-bolder"><?= htmlspecialchars($gestora['plan'] ?? 'Básico') ?></span>
                         <small class="text-muted" style="font-size:0.8rem; margin-left: 5px;">
                             (Válido hasta:
-                            <?= !empty($gestora['fin_plan']) ? date('d/m/Y', strtotime($gestora['fin_plan'])) : 'N/A' ?>)
+                            <?= !empty($gestora['plan_end']) ? date('d/m/Y', strtotime($gestora['plan_end'])) : 'N/A' ?>)
                         </small>
                     </span>
                 </div>
@@ -708,15 +706,22 @@ HTML;
             const toastMessage = document.getElementById('toastMessage');
             toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
 
-            if (tipo === 'success') { toastEl.classList.add('bg-success'); mensaje = '✅ ' + mensaje; }
-            else if (tipo === 'error') { toastEl.classList.add('bg-danger'); mensaje = '⚠️ ' + mensaje; }
+            if (tipo === 'success') {
+                toastEl.classList.add('bg-success');
+                mensaje = '✅ ' + mensaje;
+            } else if (tipo === 'error') {
+                toastEl.classList.add('bg-danger');
+                mensaje = '⚠️ ' + mensaje;
+            }
 
             toastMessage.textContent = mensaje;
-            new bootstrap.Toast(toastEl, { delay: 3500 }).show();
+            new bootstrap.Toast(toastEl, {
+                delay: 3500
+            }).show();
         }
 
         document.querySelectorAll('.botonEditar').forEach(boton => {
-            boton.addEventListener('click', function () {
+            boton.addEventListener('click', function() {
                 document.getElementById("editNombre").value = document.getElementById("val-nombre").textContent !== 'Sin especificar' ? document.getElementById("val-nombre").textContent : "";
                 document.getElementById("editEmail").value = document.getElementById("val-email").textContent;
                 document.getElementById("editEmpresa").value = document.getElementById("val-empresa").textContent !== 'Sin especificar' ? document.getElementById("val-empresa").textContent : "";
@@ -731,13 +736,16 @@ HTML;
             });
         });
 
-        document.getElementById("btnGuardarCambios").addEventListener("click", function () {
+        document.getElementById("btnGuardarCambios").addEventListener("click", function() {
             const formData = new FormData(document.getElementById("formEditarPerfil"));
             const btn = this;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-            fetch("actualizarGestor.php", { method: "POST", body: formData })
+            fetch("actualizarGestor.php", {
+                    method: "POST",
+                    body: formData
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -762,16 +770,21 @@ HTML;
                         mostrarNotificacion("Perfil fiscal actualizado correctamente.", "success");
                         bootstrap.Modal.getInstance(document.getElementById('editarPerfilModal')).hide();
 
-                        setTimeout(() => { location.reload(); }, 1500);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
                     } else {
                         mostrarNotificacion("Error: " + data.message, "error");
                     }
                 })
                 .catch(error => mostrarNotificacion("Ha ocurrido un error de conexión.", "error"))
-                .finally(() => { btn.disabled = false; btn.textContent = "Guardar cambios"; });
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = "Guardar cambios";
+                });
         });
 
-        document.getElementById('inputImagen').addEventListener('change', function (event) {
+        document.getElementById('inputImagen').addEventListener('change', function(event) {
             if (event.target.files[0]) {
                 const reader = new FileReader();
                 reader.onload = e => document.getElementById('previewImagen').src = e.target.result;
@@ -779,7 +792,7 @@ HTML;
             }
         });
 
-        document.getElementById('btnGuardarImagen').addEventListener('click', function () {
+        document.getElementById('btnGuardarImagen').addEventListener('click', function() {
             const inputImagen = document.getElementById("inputImagen");
             if (inputImagen.files.length === 0) return mostrarNotificacion("Debes seleccionar una imagen primero", "error");
 
@@ -791,7 +804,10 @@ HTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-            fetch("subir-imagen-perfil-gestor.php", { method: "POST", body: formData })
+            fetch("subir-imagen-perfil-gestor.php", {
+                    method: "POST",
+                    body: formData
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -804,7 +820,10 @@ HTML;
                     }
                 })
                 .catch(error => mostrarNotificacion("Ha ocurrido un error al guardar la imagen", "error"))
-                .finally(() => { btn.disabled = false; btn.textContent = "Guardar foto"; });
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = "Guardar foto";
+                });
         });
     </script>
 </body>

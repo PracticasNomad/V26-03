@@ -253,10 +253,10 @@ $ahorro = ($precioMensual * 12) - $precioAnual;
                         <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Datos de Suscripción</h4>
                     </div>
                     <div class="card-body">
-                        <form id="subscriptionForm" method="POST" action="procesarSuscripcionGestor.php">
-                            <input type="hidden" name="tipoSuscripcion" value="Pro">
-                            <h5 class="section-title"><i class="fas fa-map-marker-alt me-2"></i>Dirección de Facturación
-                            </h5>
+                        <form id="subscriptionForm" method="POST" action="../paylands/crearPagoPaylands.php">
+                            <input type="hidden" name="tipo_operacion" value="suscripcion_gestor"> <input type="hidden" name="plan" value="Pro"> <input type="hidden" name="amount" id="paylandsAmount" value="">
+
+                            <h5 class="section-title"><i class="fas fa-map-marker-alt me-2"></i>Dirección</h5>
 
                             <div class="mb-3">
                                 <label for="address" class="form-label">Dirección</label>
@@ -265,47 +265,56 @@ $ahorro = ($precioMensual * 12) - $precioAnual;
 
                             <h5 class="section-title"><i class="fas fa-money-check-alt me-2"></i>Selecciona tu Plan</h5>
 
-                            <div class="radio-option mb-3">
+                            <div class="radio-option">
                                 <div class="custom-checkbox">
-                                    <input type="radio" id="planMensual" name="subscriptionPlan" value="mensual"
-                                        class="custom-control-input" required>
+                                    <input type="radio" id="planMensual" name="subscriptionPlan" value="mensual" class="custom-control-input plan-selector" data-amount="<?php echo round($precioMensual * 100); ?>" required>
                                     <label for="planMensual" class="custom-control-label">
-                                        Plan Mensual - €<?php echo number_format($precioMensual, 0, ',', '.'); ?>
+                                        Plan Mensual - <?php echo number_format($precioMensual, 2); ?> €
                                     </label>
                                 </div>
                             </div>
 
                             <div class="radio-option mb-4">
                                 <div class="custom-checkbox">
-                                    <input type="radio" id="planAnual" name="subscriptionPlan" value="anual"
-                                        class="custom-control-input" required>
+                                    <input type="radio" id="planAnual" name="subscriptionPlan" value="anual" class="custom-control-input plan-selector" data-amount="<?php echo round($precioAnual * 100); ?>" required>
                                     <label for="planAnual" class="custom-control-label">
-                                        Plan Anual - €<?php echo number_format($precioAnual, 0, ',', '.'); ?> 
-                                        <span class="text-success fw-bold">(¡Ahorra €<?php echo number_format($ahorro, 0, ',', '.'); ?>!)</span>
+                                        Plan Anual - <?php echo number_format($precioAnual, 2); ?> €
+                                        <span class="text-success fw-bold">(¡Ahorra <?php echo number_format($ahorro, 2); ?> €!)</span>
                                     </label>
                                 </div>
                             </div>
 
                             <div class="checkbox-container mb-3">
                                 <div class="custom-checkbox">
-                                    <input type="checkbox" name="termsSubscription" id="termsSubscription"
-                                        class="custom-control-input" required>
+                                    <input type="checkbox" name="termsSubscription" id="termsSubscription" class="custom-control-input" required>
                                     <label for="termsSubscription" class="custom-control-label">
-                                        Acepto los <a href="../condiciones/condicionesSuscripcion.php" target="_blank"
-                                            class="terms-link">términos de suscripción</a>
+                                        Acepto los <a href="../condiciones/condicionesSuscripcion.php" target="_blank" class="terms-link">términos de suscripción</a>
                                     </label>
                                 </div>
                             </div>
 
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-nomad me-3" id="continueToPaymentBtn">
-                                    <i class="fas fa-credit-card me-2"></i>Continuar con el Pago
+                                <button type="submit" class="btn btn-nomad me-3" id="continueToPaymentBtn" style="background-color: #09b2fb; border: none; color: white;">
+                                    <i class="fas fa-credit-card me-2"></i>Continuar al Pago Seguro
                                 </button>
                                 <a href="Suscripciones.php" class="btn btn-secondary">
                                     <i class="fas fa-times-circle me-2"></i>Cancelar
                                 </a>
                             </div>
                         </form>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const radioButtons = document.querySelectorAll('.plan-selector');
+                                const amountInput = document.getElementById('paylandsAmount');
+
+                                radioButtons.forEach(radio => {
+                                    radio.addEventListener('change', function() {
+                                        amountInput.value = this.getAttribute('data-amount');
+                                    });
+                                });
+                            });
+                        </script>
                     </div>
                 </div>
             </div>
