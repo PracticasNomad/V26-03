@@ -1,5 +1,5 @@
 <?php
-require_once 'verificar_sesion_gestor.php';
+require_once 'verificar_sesion_admin.php';
 require '../vendor/autoload.php';
 use Dotenv\Dotenv;
 
