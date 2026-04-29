@@ -119,6 +119,8 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: flex-start;
+            height: auto !important;
+            overflow-y: visible !important;
         }
 
         .fotoPerfilMovil {
@@ -158,6 +160,8 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
             min-width: 300px;
             text-align: left;
             padding-left: 20px;
+            height: auto !important;
+            overflow-y: visible !important;
         }
 
         .perfil-header {
@@ -397,6 +401,7 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
 </head>
 
 <body>
+    <!-- TOAST DE NOTIFICACIONES -->
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
         <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert"
             aria-live="assertive" aria-atomic="true">
@@ -407,128 +412,128 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
         </div>
     </div>
 
-    <div class="contenedorPerfil">
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="page-shell">
+        <div class="contenedorPerfil mt-4">
 
-        <div class="fotoPerfilMovil">
-            <span class="badge-admin"><i class="fas fa-shield-alt me-1"></i> Global Admin</span>
-            <div class="profile-image-container">
-                <img id="fotoPerfilMovil" src="<?= htmlspecialchars($avatarUrl) ?>" alt="Profile Image">
-            </div>
-        </div>
-
-        <div class="perfilFotoBotones">
-            <span class="badge-admin"><i class="fas fa-shield-alt me-1"></i> Global Admin</span>
-            <div class="profile-image-container">
-                <img id="fotoPerfil" src="<?= htmlspecialchars($avatarUrl) ?>" alt="Profile Image">
-            </div>
-            <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal"
-                data-bs-target="#cambiarImagenModal">
-                <i class="fas fa-camera"></i> Cambiar imagen
-            </button>
-            <button type="button" class="btn-custom btn-brand botonEditar" data-bs-toggle="modal"
-                data-bs-target="#editarPerfilModal">
-                <i class="fas fa-file-signature"></i> Información legal
-            </button>
-            <button type="button" class="btn-custom btn-logout mt-2"
-                onclick="window.location.href='cerrarSesion.php'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </button>
-        </div>
-
-        <div class="perfilInfo">
-            <div class="perfil-header">
-                <h4><i class="fas fa-user-cog text-muted"></i> Tu perfil de Administrador</h4>
-            </div>
-
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-user"></i></div>
-                <div class="info-content">
-                    <span class="info-label">Nombre completo</span>
-                    <span class="info-value"
-                        id="val-nombre"><?= htmlspecialchars($admin['name'] ?? 'Sin especificar') ?></span>
+            <!-- VISTA MÓVIL (AVATAR) -->
+            <div class="fotoPerfilMovil">
+                <span class="badge-admin d-block mb-3"><i class="fas fa-shield-alt me-1"></i> Global Admin</span>
+                <div class="profile-image-container">
+                    <img id="fotoPerfilMovil" src="<?= htmlspecialchars($avatarUrl) ?>" alt="Profile Image">
                 </div>
             </div>
 
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                <div class="info-content">
-                    <span class="info-label">E-mail de Contacto</span>
-                    <span class="info-value"
-                        id="val-email"><?= htmlspecialchars($admin['email'] ?? 'Sin especificar') ?></span>
+            <!-- VISTA ESCRITORIO (AVATAR Y BOTONES FIJOS) -->
+            <div class="perfilFotoBotones">
+                <span class="badge-admin"><i class="fas fa-shield-alt me-1"></i> Global Admin</span>
+                <div class="profile-image-container">
+                    <img id="fotoPerfil" src="<?= htmlspecialchars($avatarUrl) ?>" alt="Profile Image">
                 </div>
+
+                <!-- Botones fijos y limpios, sin desplegables que se rallan -->
+                <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+                    <i class="fas fa-camera"></i> Cambiar imagen
+                </button>
+                <button type="button" class="btn-custom btn-brand botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                    <i class="fas fa-file-signature"></i> Editar Info Legal
+                </button>
+                <button type="button" class="btn-custom btn-logout mt-2" onclick="window.location.href='cerrarSesion.php'">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
             </div>
 
-            <div class="row w-100 g-0">
-                <div class="col-md-6 pe-md-2">
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
-                        <div class="info-content">
-                            <span class="info-label">Teléfono Legal</span>
-                            <span class="info-value"
-                                id="val-telefono"><?= htmlspecialchars($admin['phone'] ?? 'Sin especificar') ?></span>
+            <!-- TARJETAS DE INFORMACIÓN DEL PERFIL -->
+            <div class="perfilInfo">
+                <div class="perfil-header">
+                    <h4><i class="fas fa-user-cog text-muted"></i> Tu perfil de Administrador</h4>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-user"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">Nombre completo</span>
+                        <span class="info-value" id="val-nombre"><?= htmlspecialchars($admin['name'] ?? 'Sin especificar') ?></span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">E-mail de Contacto</span>
+                        <span class="info-value" id="val-email"><?= htmlspecialchars($admin['email'] ?? 'Sin especificar') ?></span>
+                    </div>
+                </div>
+
+                <div class="row w-100 g-0">
+                    <div class="col-md-6 pe-md-2">
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
+                            <div class="info-content">
+                                <span class="info-label">Teléfono Legal</span>
+                                <span class="info-value" id="val-telefono"><?= htmlspecialchars($admin['phone'] ?? 'Sin especificar') ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 ps-md-2">
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-id-card"></i></div>
+                            <div class="info-content">
+                                <span class="info-label">CIF/NIF</span>
+                                <span class="info-value" id="val-cif"><?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? 'Sin especificar') ?></span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 ps-md-2">
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fas fa-id-card"></i></div>
-                        <div class="info-content">
-                            <span class="info-label">CIF/NIF</span>
-                            <span class="info-value"
-                                id="val-cif"><?= htmlspecialchars($admin['cif'] ?? $admin['nif'] ?? 'Sin especificar') ?></span>
-                        </div>
+
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-building"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">Empresa / Razón Social</span>
+                        <span class="info-value" id="val-empresa"><?= htmlspecialchars($admin['empresa'] ?? 'Sin especificar') ?></span>
                     </div>
                 </div>
-            </div>
 
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-building"></i></div>
-                <div class="info-content">
-                    <span class="info-label">Empresa / Razón Social</span>
-                    <span class="info-value"
-                        id="val-empresa"><?= htmlspecialchars($admin['empresa'] ?? 'Sin especificar') ?></span>
+                <div class="info-card">
+                    <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="info-content">
+                        <span class="info-label">Dirección de Facturación Global</span>
+                        <span class="info-value" id="val-direccion-completa">
+                            <?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? 'Sin dirección') ?>,
+                            <?= htmlspecialchars($admin['localidad'] ?? 'Sin localidad') ?>,
+                            <?= htmlspecialchars($admin['provincia'] ?? 'Sin provincia') ?>
+                            (<?= htmlspecialchars($admin['codigo_postal'] ?? 'CP') ?>)
+                        </span>
+                    </div>
                 </div>
+
+                <!-- Campos ocultos para llenar el Modal -->
+                <input type="hidden" id="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
+                <input type="hidden" id="raw-direccion" value="<?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? '') ?>">
+                <input type="hidden" id="raw-localidad" value="<?= htmlspecialchars($admin['localidad'] ?? '') ?>">
+                <input type="hidden" id="raw-provincia" value="<?= htmlspecialchars($admin['provincia'] ?? '') ?>">
+                <input type="hidden" id="raw-cp" value="<?= htmlspecialchars($admin['codigo_postal'] ?? '') ?>">
             </div>
 
-            <div class="info-card">
-                <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                <div class="info-content">
-                    <span class="info-label">Dirección de Facturación Global</span>
-                    <span class="info-value" id="val-direccion-completa">
-                        <?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? 'Sin dirección') ?>,
-                        <?= htmlspecialchars($admin['localidad'] ?? 'Sin localidad') ?>,
-                        <?= htmlspecialchars($admin['provincia'] ?? 'Sin provincia') ?>
-                        (<?= htmlspecialchars($admin['codigo_postal'] ?? 'CP') ?>)
-                    </span>
-                </div>
+            <!-- VISTA MÓVIL (BOTONES INFERIORES) -->
+            <div class="botonesMovil">
+                <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal" data-bs-target="#cambiarImagenModal">
+                    <i class="fas fa-camera"></i> Cambiar imagen
+                </button>
+                <button type="button" class="btn-custom btn-brand botonEditar" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                    <i class="fas fa-file-signature"></i> Editar Info Legal
+                </button>
+                <button type="button" class="btn-custom btn-logout mt-3" onclick="window.location.href='cerrarSesion.php'">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
             </div>
-
-            <input type="hidden" id="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
-            <input type="hidden" id="raw-direccion"
-                value="<?= htmlspecialchars($admin['domicilio_social'] ?? $admin['direccion'] ?? '') ?>">
-            <input type="hidden" id="raw-localidad" value="<?= htmlspecialchars($admin['localidad'] ?? '') ?>">
-            <input type="hidden" id="raw-provincia" value="<?= htmlspecialchars($admin['provincia'] ?? '') ?>">
-            <input type="hidden" id="raw-cp" value="<?= htmlspecialchars($admin['codigo_postal'] ?? '') ?>">
-        </div>
-
-        <div class="botonesMovil">
-            <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal"
-                data-bs-target="#cambiarImagenModal">
-                <i class="fas fa-camera"></i> Cambiar imagen
-            </button>
-            <button type="button" class="btn-custom btn-brand botonEditar" data-bs-toggle="modal"
-                data-bs-target="#editarPerfilModal">
-                <i class="fas fa-file-signature"></i> Información legal
-            </button>
-            <button type="button" class="btn-custom btn-logout mt-3"
-                onclick="window.location.href='../cerrarSesion.php'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-            </button>
         </div>
     </div>
 
+    <!-- INCLUIMOS EL FOOTER -->
     <?php include 'footerAdmin.php'; ?>
 
+    <!-- MODAL: EDITAR PERFIL -->
     <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
@@ -540,13 +545,11 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
                     <form id="formEditarPerfil">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Nombre del
-                                    Admin</label>
+                                <label class="form-label text-muted small text-uppercase fw-bold">Nombre del Admin</label>
                                 <input type="text" class="form-control" id="editNombre" name="nombre">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label text-muted small text-uppercase fw-bold">E-mail (No
-                                    editable)</label>
+                                <label class="form-label text-muted small text-uppercase fw-bold">E-mail (No editable)</label>
                                 <input disabled type="email" class="form-control" id="editEmail">
                             </div>
                         </div>
@@ -566,8 +569,7 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
                             </div>
                         </div>
 
-                        <h6 class="mt-4 mb-3 fw-bold border-bottom pb-2 text-danger"><i
-                                class="fas fa-map-marker-alt me-1"></i> Dirección de Facturación Global</h6>
+                        <h6 class="mt-4 mb-3 fw-bold border-bottom pb-2 text-danger"><i class="fas fa-map-marker-alt me-1"></i> Dirección de Facturación Global</h6>
 
                         <div class="mb-3">
                             <label class="form-label text-muted small text-uppercase fw-bold">Dirección Completa</label>
@@ -590,24 +592,20 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
                         </div>
 
                         <div class="legal-info-wrapper mt-3">
-                            <span
-                                class="form-label text-muted small text-uppercase fw-bold d-block text-start mb-2">Información
-                                Legal Generada</span>
-                            <div class="legal-info-box" id="legalInfoDisplay"><?php echo $informacionLegal ?? ''; ?>
-                            </div>
+                            <span class="form-label text-muted small text-uppercase fw-bold d-block text-start mb-2">Información Legal Generada</span>
+                            <div class="legal-info-box" id="legalInfoDisplay"><?php echo $informacionLegal ?? ''; ?></div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold"
-                        data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;"
-                        id="btnGuardarCambios">Guardar cambios</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;" id="btnGuardarCambios">Guardar cambios</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- MODAL: CAMBIAR IMAGEN -->
     <div class="modal fade" id="cambiarImagenModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -621,19 +619,15 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
                             <img id="previewImagen" src="<?= htmlspecialchars($avatarUrl) ?>" alt="Vista previa">
                         </div>
                         <div class="text-start mb-2">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Selecciona una
-                                imagen</label>
+                            <label class="form-label fw-bold text-muted small text-uppercase">Selecciona una imagen</label>
                             <input type="file" class="form-control" id="inputImagen" name="imagen" accept="image/*">
-                            <input type="hidden" id="imagenAdminId" name="adminId"
-                                value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
+                            <input type="hidden" id="imagenAdminId" name="adminId" value="<?= htmlspecialchars($admin['id'] ?? '') ?>">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold"
-                        data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;"
-                        id="btnGuardarImagen">Guardar foto</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;" id="btnGuardarImagen">Guardar foto</button>
                 </div>
             </div>
         </div>
@@ -645,15 +639,22 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
             const toastMessage = document.getElementById('toastMessage');
             toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
 
-            if (tipo === 'success') { toastEl.classList.add('bg-success'); mensaje = '✅ ' + mensaje; }
-            else if (tipo === 'error') { toastEl.classList.add('bg-danger'); mensaje = '⚠️ ' + mensaje; }
+            if (tipo === 'success') {
+                toastEl.classList.add('bg-success');
+                mensaje = '✅ ' + mensaje;
+            } else if (tipo === 'error') {
+                toastEl.classList.add('bg-danger');
+                mensaje = '⚠️ ' + mensaje;
+            }
 
             toastMessage.textContent = mensaje;
-            new bootstrap.Toast(toastEl, { delay: 3500 }).show();
+            new bootstrap.Toast(toastEl, {
+                delay: 3500
+            }).show();
         }
 
         document.querySelectorAll('.botonEditar').forEach(boton => {
-            boton.addEventListener('click', function () {
+            boton.addEventListener('click', function() {
                 document.getElementById("editNombre").value = document.getElementById("val-nombre").textContent !== 'Sin especificar' ? document.getElementById("val-nombre").textContent : "";
                 document.getElementById("editEmail").value = document.getElementById("val-email").textContent;
                 document.getElementById("editEmpresa").value = document.getElementById("val-empresa").textContent !== 'Sin especificar' ? document.getElementById("val-empresa").textContent : "";
@@ -667,13 +668,16 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
             });
         });
 
-        document.getElementById("btnGuardarCambios").addEventListener("click", function () {
+        document.getElementById("btnGuardarCambios").addEventListener("click", function() {
             const formData = new FormData(document.getElementById("formEditarPerfil"));
             const btn = this;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-            fetch("actualizarAdmin.php", { method: "POST", body: formData })
+            fetch("actualizarAdmin.php", {
+                    method: "POST",
+                    body: formData
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -701,10 +705,13 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
                     }
                 })
                 .catch(error => mostrarNotificacion("Ha ocurrido un error de conexión.", "error"))
-                .finally(() => { btn.disabled = false; btn.textContent = "Guardar cambios"; });
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = "Guardar cambios";
+                });
         });
 
-        document.getElementById('inputImagen').addEventListener('change', function (event) {
+        document.getElementById('inputImagen').addEventListener('change', function(event) {
             if (event.target.files[0]) {
                 const reader = new FileReader();
                 reader.onload = e => document.getElementById('previewImagen').src = e.target.result;
@@ -712,7 +719,7 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
             }
         });
 
-        document.getElementById('btnGuardarImagen').addEventListener('click', function () {
+        document.getElementById('btnGuardarImagen').addEventListener('click', function() {
             const inputImagen = document.getElementById("inputImagen");
             if (inputImagen.files.length === 0) return mostrarNotificacion("Debes seleccionar una imagen", "error");
 
@@ -724,7 +731,10 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-            fetch("subir-imagen-perfil-admin.php", { method: "POST", body: formData })
+            fetch("subir-imagen-perfil-admin.php", {
+                    method: "POST",
+                    body: formData
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -737,7 +747,10 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
                     }
                 })
                 .catch(error => mostrarNotificacion("Ha ocurrido un error al guardar la imagen", "error"))
-                .finally(() => { btn.disabled = false; btn.textContent = "Guardar foto"; });
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = "Guardar foto";
+                });
         });
     </script>
 </body>

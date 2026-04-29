@@ -85,11 +85,11 @@ if ($tipo_operacion === 'suscripcion_host' && $user_id) {
     // 3. LÓGICA SI PAGÓ UNA RESERVA
     // -------------------------------------------------------------
 } elseif ($tipo_operacion === 'reserva') {
-    // Aquí ejecutarías el POST a procesarReserva.php o la inserción directa en tu tabla "reservas"
-    // usando los datos que tienes en $_SESSION['reserva_temp']
 
     unset($_SESSION['pending_op']);
-    header("Location: ../reservarEspacio-completo.php");
+
+    // ¡EL ARREGLO ESTÁ AQUÍ! Añadimos ?sendEmail=true a la redirección
+    header("Location: ../reservarEspacio-completo.php?sendEmail=true");
     exit;
 } else {
     // Por si se accede al archivo sin operación pendiente
