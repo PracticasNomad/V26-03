@@ -11,6 +11,25 @@ $anfitriones = [];
 $error_db = null;
 $mensaje_exito = null;
 
+// --- MANEJO DE MENSAJES TRAS REDIRECCIÓN (Patrón PRG) ---
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] === 'updated') {
+        $mensaje_exito = "Datos del anfitrión actualizados correctamente.";
+    } elseif ($_GET['msg'] === 'downgraded') {
+        $mensaje_exito = "Se ha cancelado la suscripción. El anfitrión ahora tiene el Plan Básico.";
+    }
+}
+if (isset($_GET['error'])) {
+    if ($_GET['error'] === 'update') {
+        $error_db = "Error al actualizar los datos del anfitrión. Inténtalo de nuevo.";
+    } elseif ($_GET['error'] === 'downgrade') {
+        $error_db = "Fallo en la BD al intentar forzar el plan básico.";
+    }
+}
+// --------------------------------------------------------
+
+
+// --- LÓGICA: EDITAR DATOS DEL ANFITRIÓN ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'editar_anfitrion') {
     $edit_id = $_POST['edit_id'] ?? '';
     $edit_name = $_POST['edit_name'] ?? '';
@@ -34,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
                 'apikey: ' . $_ENV['SERVICE_APIKEY'],
                 'Content-Type: application/json',
-                'Prefer: return=representation'
+                'Prefer: return=representation' // Le pedimos que nos devuelva la fila modificada
             ],
             CURLOPT_RETURNTRANSFER => true,
         ]);
@@ -43,18 +62,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $codigoUpdate = curl_getinfo($chUpdate, CURLINFO_HTTP_CODE);
         curl_close($chUpdate);
 
-        if ($codigoUpdate >= 200 && $codigoUpdate < 300) {
-            $mensaje_exito = "Datos del anfitrión actualizados correctamente.";
+        $filasModificadas = json_decode($resUpdate, true);
+
+        // AHORA COMPROBAMOS QUE REALMENTE SE HAYA MODIFICADO AL MENOS 1 FILA
+        if ($codigoUpdate >= 200 && $codigoUpdate < 300 && is_array($filasModificadas) && count($filasModificadas) > 0) {
+            header("Location: verAnfitriones.php?msg=updated");
+            exit;
         } else {
-            $error_db = "Error al actualizar el anfitrión (Código: $codigoUpdate).";
+            header("Location: verAnfitriones.php?error=update");
+            exit;
         }
     } else {
         $error_db = "El nombre y el correo electrónico son obligatorios.";
     }
 }
 
-// AÑADIDO: avatar_url en el select
-$urlEstablecimientos = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=host_id,host(id,name,email,phone,empresa,avatar_url)";
+// --- LÓGICA: BAJAR A PLAN BÁSICO ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'bajar_plan_basico') {
+    $host_id = $_POST['host_id'] ?? '';
+    
+    if (!empty($host_id)) {
+        $urlDowngrade = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/host?id=eq." . urlencode($host_id);
+
+        $datosDowngrade = [
+            'plan' => 'Basico',
+            'plan_end' => null // Borramos el límite
+        ];
+
+        $chDowngrade = curl_init($urlDowngrade);
+        curl_setopt_array($chDowngrade, [
+            CURLOPT_CUSTOMREQUEST => "PATCH",
+            CURLOPT_POSTFIELDS => json_encode($datosDowngrade),
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY'],
+                'apikey: ' . $_ENV['SERVICE_APIKEY'],
+                'Content-Type: application/json',
+                'Prefer: return=representation' // Le pedimos que nos devuelva la fila modificada
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+        ]);
+
+        $resDowngrade = curl_exec($chDowngrade);
+        $codigoDowngrade = curl_getinfo($chDowngrade, CURLINFO_HTTP_CODE);
+        curl_close($chDowngrade);
+
+        $filasModificadas = json_decode($resDowngrade, true);
+
+        // AHORA COMPROBAMOS QUE REALMENTE SE HAYA MODIFICADO AL MENOS 1 FILA
+        if ($codigoDowngrade >= 200 && $codigoDowngrade < 300 && is_array($filasModificadas) && count($filasModificadas) > 0) {
+            header("Location: verAnfitriones.php?msg=downgraded");
+            exit;
+        } else {
+            header("Location: verAnfitriones.php?error=downgrade");
+            exit;
+        }
+    }
+}
+
+
+// OBTENCIÓN DE DATOS 
+$urlEstablecimientos = "http://" . $_ENV['SERVER_IP'] . ":" . $_ENV['DATABASE_PORT'] . "/rest/v1/establecimiento?select=host_id,host(id,name,email,phone,empresa,avatar_url,plan)";
 
 $ch = curl_init($urlEstablecimientos);
 curl_setopt_array($ch, [
@@ -119,7 +186,6 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     <style>
         :root {
             --primary-color: #dc3545;
-            /* Rojo admin */
             --bg: #f4f7fb;
             --ink: #1f2933;
             --line: #d8e1ea;
@@ -128,196 +194,41 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
             --accent-soft: #fce8e5;
         }
 
-        .page-shell {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 15px;
-            box-sizing: border-box;
-        }
+        .page-shell { max-width: 1400px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; }
+        .page-hero { max-width: 100%; margin: 1.2rem 0 0.5rem; padding: 0; box-sizing: border-box; }
+        .page-hero-inner { border-radius: 20px; background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%); color: #ffffff; padding: 1.1rem 1.2rem; box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24); border: 1px solid rgba(255, 255, 255, 0.18); }
+        .page-hero-title { font-size: 1.35rem; font-weight: 800; letter-spacing: 0.2px; }
+        .hero-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-        .page-hero {
-            max-width: 100%;
-            margin: 1.2rem 0 0.5rem;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        body { font-family: 'Nunito', sans-serif; background: #eef2f5; color: var(--ink); padding-bottom: 120px; }
+        .contenedor-principal { max-width: 100%; margin: 2rem 0 0; padding: 0; box-sizing: border-box; }
 
-        .page-hero-inner {
-            border-radius: 20px;
-            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%);
-            color: #ffffff;
-            padding: 1.1rem 1.2rem;
-            box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
+        .select-container { width: 100%; max-width: 980px; margin: 0 auto 30px auto; background-color: rgba(255, 255, 255, 0.92); padding: 20px 22px; border-radius: 18px; box-shadow: 0 14px 28px rgba(31, 41, 51, 0.1); border: 1px solid rgba(216, 225, 234, 0.8); backdrop-filter: blur(8px); }
+        .select-toolbar-title { font-size: 1.05rem; margin-bottom: 0.25rem; }
+        .select-toolbar-subtitle { margin-bottom: 0.9rem; color: #5f6d79; font-size: 0.92rem; font-weight: 600; }
 
-        .page-hero-title {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: 0.2px;
-        }
+        .select2-container .select2-selection--single { height: 50px !important; padding: 10px 15px; border: 1px solid #d7dfe8; border-radius: 12px; font-size: 1rem; box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04); background-color: #fff; }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 48px !important; right: 15px !important; }
+        .select2-container--default .select2-selection--single .select2-selection__rendered { color: #2f3c4a; line-height: 30px; font-weight: 600; }
 
-        .hero-title-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .anfitrion-card { background-color: white; border-radius: 20px; box-shadow: 0 18px 36px rgba(31, 41, 51, 0.12); margin-bottom: 2rem; overflow: hidden; transition: all 0.3s; width: 100%; max-width: 980px; margin: 0 auto; border: 1px solid var(--line); }
+        .card-header-custom { background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 55%, #df786c 100%); padding: 30px 20px; color: white; text-align: center; border-bottom: 5px solid var(--accent-dark); }
+        .card-header-custom .img-profile { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid white; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background-color: white; }
+        .card-body { padding: 30px; }
 
-        body {
-            font-family: 'Nunito', sans-serif;
-            background: #eef2f5;
-            color: var(--ink);
-            padding-bottom: 120px;
-        }
+        .info-row { display: flex; align-items: center; margin-bottom: 15px; gap: 15px; font-size: 1.1rem; }
+        .info-icon { color: var(--accent-mid); width: 30px; text-align: center; font-size: 1.3rem; }
 
-        .contenedor-principal {
-            max-width: 100%;
-            margin: 2rem 0 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        .btn-actions { display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap; }
+        .btn-action { flex: 1; border-radius: 10px; padding: 0.75rem 1rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; color: white !important; }
+        .btn-view-est { background-color: #17a2b8; }
+        .btn-view-est:hover { background-color: #138496; }
+        .btn-edit-data { background-color: #ffc107; color: #212529 !important; }
+        .btn-edit-data:hover { background-color: #e0a800; }
+        .btn-downgrade { background-color: #dc3545; }
+        .btn-downgrade:hover { background-color: #c82333; }
 
-        .select-container {
-            width: 100%;
-            max-width: 980px;
-            margin: 0 auto 30px auto;
-            background-color: rgba(255, 255, 255, 0.92);
-            padding: 20px 22px;
-            border-radius: 18px;
-            box-shadow: 0 14px 28px rgba(31, 41, 51, 0.1);
-            border: 1px solid rgba(216, 225, 234, 0.8);
-            backdrop-filter: blur(8px);
-        }
-
-        .select-toolbar-title {
-            font-size: 1.05rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .select-toolbar-subtitle {
-            margin-bottom: 0.9rem;
-            color: #5f6d79;
-            font-size: 0.92rem;
-            font-weight: 600;
-        }
-
-        /* Ajustes para que Select2 se vea bien con Bootstrap */
-        .select2-container .select2-selection--single {
-            height: 50px !important;
-            padding: 10px 15px;
-            border: 1px solid #d7dfe8;
-            border-radius: 12px;
-            font-size: 1rem;
-            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
-            background-color: #fff;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 48px !important;
-            right: 15px !important;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #2f3c4a;
-            line-height: 30px;
-            font-weight: 600;
-        }
-
-        .anfitrion-card {
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 18px 36px rgba(31, 41, 51, 0.12);
-            margin-bottom: 2rem;
-            overflow: hidden;
-            transition: all 0.3s;
-            width: 100%;
-            max-width: 980px;
-            margin: 0 auto;
-            border: 1px solid var(--line);
-        }
-
-        .card-header-custom {
-            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 55%, #df786c 100%);
-            padding: 30px 20px;
-            color: white;
-            text-align: center;
-            border-bottom: 5px solid var(--accent-dark);
-        }
-
-        /* AÑADIDO: Estilos para la imagen de perfil redonda */
-        .card-header-custom .img-profile {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid white;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            background-color: white;
-        }
-
-        .card-body {
-            padding: 30px;
-        }
-
-        .info-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            gap: 15px;
-            font-size: 1.1rem;
-        }
-
-        .info-icon {
-            color: var(--accent-mid);
-            width: 30px;
-            text-align: center;
-            font-size: 1.3rem;
-        }
-
-        .btn-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            flex: 1;
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s;
-            color: white !important;
-        }
-
-        .btn-view-est {
-            background-color: #17a2b8;
-        }
-
-        .btn-view-est:hover {
-            background-color: #138496;
-        }
-
-        .btn-edit-data {
-            background-color: #ffc107;
-            color: #212529 !important;
-        }
-
-        .btn-edit-data:hover {
-            background-color: #e0a800;
-        }
-
-        a,
-        a:visited,
-        a:active {
-            text-decoration: none;
-        }
+        a, a:visited, a:active { text-decoration: none; }
     </style>
 </head>
 
@@ -365,7 +276,9 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                             data-nombre="<?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?>"
                             data-email="<?php echo htmlspecialchars($anf['email'] ?? 'Sin email'); ?>"
                             data-telefono="<?php echo htmlspecialchars($anf['phone'] ?? ''); ?>"
-                            data-avatar="<?php echo htmlspecialchars($anf['avatar_url'] ?? ''); ?>"> <?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?> -
+                            data-plan="<?php echo htmlspecialchars($anf['plan'] ?? 'Basico'); ?>"
+                            data-avatar="<?php echo htmlspecialchars($anf['avatar_url'] ?? ''); ?>"> 
+                            <?php echo htmlspecialchars($anf['name'] ?? 'Sin nombre'); ?> -
                             <?php echo htmlspecialchars($anf['email'] ?? ''); ?>
                         </option>
                     <?php endforeach; ?>
@@ -377,7 +290,10 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                     <div class="card-header-custom">
                         <img id="card-avatar" src="../img/perfil.png" alt="Avatar" class="img-profile">
                         <h3 class="fw-bold m-0" id="card-nombre">Nombre Apellidos</h3>
-                        <span class="badge bg-light text-dark mt-2">Perfil Anfitrión</span>
+                        <div class="mt-2">
+                            <span class="badge bg-light text-dark">Perfil Anfitrión</span>
+                            <span id="card-plan-badge" class="badge bg-secondary ms-1">Plan Básico</span>
+                        </div>
                     </div>
 
                     <div class="card-body">
@@ -407,11 +323,13 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
 
                         <div class="btn-actions mt-4">
                             <a href="#" id="btn-view-est" class="btn btn-action btn-view-est">
-                                <i class="fas fa-building"></i> Ver Establecimientos
+                                <i class="fas fa-building"></i> Establecimientos
                             </a>
-                            <button type="button" class="btn btn-action btn-edit-data" data-bs-toggle="modal"
-                                data-bs-target="#modalEditarAnfitrion">
-                                <i class="fas fa-user-edit"></i> Editar Datos
+                            <button type="button" class="btn btn-action btn-edit-data" data-bs-toggle="modal" data-bs-target="#modalEditarAnfitrion">
+                                <i class="fas fa-user-edit"></i> Editar
+                            </button>
+                            <button type="button" id="btn-bajar-plan" class="btn btn-action btn-downgrade" style="display: none;">
+                                <i class="fas fa-level-down-alt"></i> Forzar Básico
                             </button>
                         </div>
                     </div>
@@ -421,16 +339,13 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
     </div>
 
     <?php include 'footerAdmin.php'; ?>
-    <div class="modal fade" id="modalEditarAnfitrion" tabindex="-1" aria-labelledby="modalEditarAnfitrionLabel"
-        aria-hidden="true">
+
+    <div class="modal fade" id="modalEditarAnfitrion" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white" style="background-color: var(--primary-color) !important;">
-                    <h5 class="modal-title" id="modalEditarAnfitrionLabel">
-                        <i class="fas fa-edit me-2"></i>Editar Anfitrión
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Anfitrión</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form method="POST" action="">
                     <div class="modal-body">
@@ -438,15 +353,15 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                         <input type="hidden" name="edit_id" id="form_edit_id">
 
                         <div class="mb-3">
-                            <label for="form_edit_name" class="form-label fw-bold">Nombre</label>
+                            <label class="form-label fw-bold">Nombre</label>
                             <input type="text" class="form-control" id="form_edit_name" name="edit_name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="form_edit_email" class="form-label fw-bold">Correo Electrónico</label>
+                            <label class="form-label fw-bold">Correo Electrónico</label>
                             <input type="email" class="form-control" id="form_edit_email" name="edit_email" required>
                         </div>
                         <div class="mb-3">
-                            <label for="form_edit_phone" class="form-label fw-bold">Teléfono</label>
+                            <label class="form-label fw-bold">Teléfono</label>
                             <input type="text" class="form-control" id="form_edit_phone" name="edit_phone">
                         </div>
                     </div>
@@ -459,16 +374,59 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
         </div>
     </div>
 
+    <div class="modal fade" id="modalBajarPlan" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Forzar Plan Básico</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="">
+                    <div class="modal-body text-center p-4">
+                        <input type="hidden" name="action" value="bajar_plan_basico">
+                        <input type="hidden" name="host_id" id="form_bajar_host_id">
+                        
+                        <h4 class="mb-3 text-dark">¿Estás seguro?</h4>
+                        <p class="text-muted mb-3">Vas a cancelar la suscripción actual de <strong id="bajar_nombre_anfitrion" class="text-dark"></strong> y cambiar su plan a <strong>Básico</strong>.</p>
+                        <div class="alert alert-warning small text-start">
+                            <i class="fas fa-info-circle me-1"></i> Esto eliminará su periodo de finalización y el anfitrión quedará sujeto a los límites del plan básico (1 establecimiento máximo).
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center border-0 mb-2">
+                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger px-4">Sí, bajar plan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function() {
+
+            // --- AUTO-OCULTAR ALERTAS DE ÉXITO O ERROR ---
+            setTimeout(function() {
+                $('.alert-success, .alert-danger').fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 4000);
+
+            // --- MAGIA: LIMPIAR LA URL (QUITA EL ?msg=... PARA QUE NO SE REPITA AL RECARGAR) ---
+            if (window.history.replaceState) {
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('msg') || url.searchParams.has('error')) {
+                    url.searchParams.delete('msg');
+                    url.searchParams.delete('error');
+                    window.history.replaceState(null, null, url);
+                }
+            }
+
             $('#select-anfitrion').select2({
                 placeholder: "-- Busca o selecciona un anfitrión --",
                 allowClear: true,
                 width: '100%',
                 language: {
-                    noResults: function() {
-                        return "No se encontró ningún anfitrión";
-                    }
+                    noResults: function() { return "No se encontró ningún anfitrión"; }
                 }
             });
 
@@ -480,18 +438,34 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
                     var nombre = selectedOption.data('nombre');
                     var email = selectedOption.data('email');
                     var telefono = selectedOption.data('telefono');
-                    var avatarRaw = selectedOption.data('avatar'); // AÑADIDO: Obtenemos el avatar crudo
+                    var avatarRaw = selectedOption.data('avatar');
+                    var plan = selectedOption.data('plan') || 'Basico';
 
                     $('#card-nombre').text(nombre);
                     $('#card-email').text(email);
                     $('#card-telefono').text(telefono ? telefono : 'No registrado');
                     $('#card-id').text('#' + id);
 
-                    // LÓGICA MINIO PARA EL AVATAR
+                    let badgeClass = 'bg-secondary';
+                    if(plan === 'Premium') badgeClass = 'bg-success';
+                    else if(plan === 'Pro') badgeClass = 'bg-primary';
+                    $('#card-plan-badge').text('Plan ' + plan).removeClass('bg-secondary bg-success bg-primary').addClass(badgeClass);
+
+                    if(plan === 'Basico') {
+                        $('#btn-bajar-plan').hide();
+                    } else {
+                        $('#btn-bajar-plan').show();
+                        $('#btn-bajar-plan').off('click').on('click', function() {
+                            $('#form_bajar_host_id').val(id);
+                            $('#bajar_nombre_anfitrion').text(nombre);
+                            new bootstrap.Modal(document.getElementById('modalBajarPlan')).show();
+                        });
+                    }
+
                     let finalAvatar = '../img/perfil.png';
                     if (avatarRaw && avatarRaw !== '../img/perfil.png' && avatarRaw !== '') {
                         if (avatarRaw.startsWith('../')) {
-                            finalAvatar = avatarRaw; // Archivo local antiguo
+                            finalAvatar = avatarRaw; 
                         } else {
                             try {
                                 let tempUrl = avatarRaw.startsWith('http') ? avatarRaw : 'http://' + avatarRaw;

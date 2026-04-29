@@ -20,7 +20,9 @@ $correo_admin = $_ENV['SUPPORT_EMAIL'] ?? "desarrolloweb@yonomad.app";
 
 $mensaje_alerta = '';
 $tipo_alerta = '';
+$enviado_exitoso = false; // Chivato para la redirección
 
+// 3. AUTORRELLENAR DATOS
 $nombre_usuario = $_SESSION['nombre'] ?? $_SESSION['name'] ?? '';
 $email_usuario = $_SESSION['email'] ?? '';
 
@@ -34,7 +36,6 @@ $traduccionesAsuntos = [
 ];
 $asunto_mostrar = $traduccionesAsuntos[$asunto_get] ?? $asunto_get;
 
-// Procesar el envío con PHPMailer
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = trim($_POST['nombre'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -45,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $mail = new PHPMailer(true);
         try {
-            // Configuración del servidor SMTP basada en tu proyecto
             $mail->isSMTP();
             $mail->CharSet = 'UTF-8';
             $mail->Host = $_ENV['SMTP_HOST'];
@@ -55,29 +55,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = $_ENV['EMAIL_PORT'];
 
-            // Remitente y Destinatario
             $mail->setFrom('noreply@yonomad.app', 'TheNomadApp Web'); 
-            $mail->addAddress($correo_admin); // Te lo enviamos a ti (el admin)
-            $mail->addReplyTo($email, $nombre); // Si le das a "Responder", le contestas al usuario
+            $mail->addAddress($correo_admin); 
+            $mail->addReplyTo($email, $nombre); 
 
-            // Contenido
-            $mail->isHTML(false); // Texto plano para correos de soporte
+            $mail->isHTML(false);
             $mail->Subject = "Soporte TheNomadApp: " . $asunto;
-            $mail->Body = "Has recibido un nuevo mensaje de contacto desde la plataforma:\n\n" .
-                          "👤 Remitente: $nombre\n" .
-                          "📧 Email de contacto: $email\n" .
-                          "📌 Asunto: $asunto\n\n" .
-                          "💬 MENSAJE:\n$mensaje\n\n" .
-                          "----------------------------------------\n" .
-                          "Puedes responder directamente a este correo para contestar al usuario.";
+            $mail->Body = "Has recibido un nuevo mensaje de contacto:\n\n👤 Remitente: $nombre\n📧 Email: $email\n📌 Asunto: $asunto\n\n💬 MENSAJE:\n$mensaje";
 
             $mail->send();
             
-            $mensaje_alerta = "Tu mensaje ha sido enviado correctamente. Nuestro equipo de soporte te contactará lo antes posible.";
+            $mensaje_alerta = "Tu mensaje ha sido enviado correctamente. Redirigiéndote...";
             $tipo_alerta = "success";
+            $enviado_exitoso = true; // Activamos la redirección
             
         } catch (Exception $e) {
-            $mensaje_alerta = "Error al intentar enviar el correo. Por favor, inténtalo más tarde. (Detalle: {$mail->ErrorInfo})";
+            $mensaje_alerta = "Error al enviar el correo. Por favor, inténtalo más tarde.";
             $tipo_alerta = "danger";
         }
     } else {
@@ -99,54 +92,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="favicon-color.png">
     <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 15px;
-        }
-
-        .contact-container {
-            max-width: 900px;
-            width: 100%;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            overflow: hidden;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .contact-info {
-            background: linear-gradient(135deg, #123b49 0%, #0f4c5c 100%);
-            color: white;
-            padding: 40px;
-            flex: 1;
-            min-width: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
+        body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 15px; }
+        .contact-container { max-width: 900px; width: 100%; background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-wrap: wrap; }
+        .contact-info { background: linear-gradient(135deg, #123b49 0%, #0f4c5c 100%); color: white; padding: 40px; flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: space-between; }
         .contact-info h3 { font-weight: 800; margin-bottom: 20px; }
-        .contact-info p { opacity: 0.9; font-size: 1.05rem; line-height: 1.6; }
-        .info-item { display: flex; align-items: center; margin-top: 25px; gap: 15px; }
-        .info-item i { background: rgba(255,255,255,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.2rem; }
-
+        .info-item { display: flex; align-items: center; margin-top: 30px; gap: 20px; }
+        .info-item i { background: rgba(255,255,255,0.15); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.3rem; flex-shrink: 0; }
         .contact-form { padding: 40px; flex: 2; min-width: 300px; background: white; }
-        .form-label { font-weight: 600; color: #4a5568; margin-bottom: 8px; }
-        .form-control { border-radius: 10px; padding: 12px 15px; border: 1px solid #e2e8f0; background-color: #f8fafc; transition: all 0.3s; }
-        .form-control:focus { border-color: #0f4c5c; box-shadow: 0 0 0 0.2rem rgba(15, 76, 92, 0.15); background-color: white; }
-        .btn-submit { background-color: #0f4c5c; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 700; width: 100%; transition: all 0.3s; margin-top: 10px; }
-        .btn-submit:hover { background-color: #123b49; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(15, 76, 92, 0.2); color: white; }
-
-        @media (max-width: 768px) {
-            .contact-container { flex-direction: column; }
-            .contact-info, .contact-form { padding: 30px; }
-        }
+        .form-control { border-radius: 10px; padding: 12px 15px; border: 1px solid #e2e8f0; background-color: #f8fafc; }
+        .btn-submit { background-color: #0f4c5c; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 700; width: 100%; transition: all 0.3s; }
+        .btn-submit:hover { background-color: #123b49; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(15, 76, 92, 0.2); }
+        @media (max-width: 768px) { .contact-container { flex-direction: column; } .contact-info, .contact-form { padding: 30px; } }
     </style>
 </head>
 <body>
@@ -160,25 +116,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3>¿Necesitas ayuda?</h3>
                 <p>Si deseas cambiar tu plan de suscripción, reportar un problema o resolver cualquier duda, nuestro equipo de soporte está aquí para ayudarte.</p>
                 
-                <div class="info-item mt-5">
+                <div class="info-item">
                     <i class="fas fa-envelope"></i>
                     <div>
-                        <small class="d-block opacity-75">Envíanos un correo directamente</small>
-                        <strong><?php echo htmlspecialchars($correo_admin); ?></strong>
+                        <small class="d-block opacity-75">Correo electrónico</small>
+                        <strong style="word-break: break-all;"><?php echo htmlspecialchars($correo_admin); ?></strong>
                     </div>
                 </div>
 
                 <div class="info-item">
                     <i class="fas fa-clock"></i>
                     <div>
-                        <small class="d-block opacity-75">Horario de atención</small>
-                        <strong>Lunes a Viernes (9:00 - 18:00)</strong>
+                        <small class="d-block opacity-75">Atención al cliente</small>
+                        <strong>Lun - Vie (9:00 - 18:00)</strong>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-5 text-center opacity-75">
-                <img src="favicon-negro.png" width="40" alt="Logo TheNomadApp" style="filter: brightness(0) invert(1);">
+            <div class="mt-5 text-center">
+                <img src="favicon-negro.png" width="45" alt="Logo TheNomadApp" style="filter: brightness(0) invert(1); opacity: 0.8;">
             </div>
         </div>
 
@@ -187,8 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if (!empty($mensaje_alerta)): ?>
                 <div class="alert alert-<?php echo $tipo_alerta; ?> alert-dismissible fade show" role="alert">
-                    <?php if($tipo_alerta === 'success') echo '<i class="fas fa-check-circle me-2"></i>'; ?>
-                    <?php if($tipo_alerta === 'danger') echo '<i class="fas fa-exclamation-circle me-2"></i>'; ?>
+                    <i class="fas <?php echo $tipo_alerta === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'; ?> me-2"></i>
                     <?php echo htmlspecialchars($mensaje_alerta); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -197,23 +152,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST" action="contactanos.php">
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Tu Nombre</label>
-                        <input type="text" class="form-control" name="nombre" placeholder="Ej. Ana Gómez" value="<?php echo htmlspecialchars($nombre_usuario); ?>" required>
+                        <label class="form-label fw-600">Tu Nombre</label>
+                        <input type="text" class="form-control" name="nombre" value="<?php echo htmlspecialchars($nombre_usuario); ?>" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Email de Contacto</label>
-                        <input type="email" class="form-control" name="email" placeholder="tucorreo@empresa.com" value="<?php echo htmlspecialchars($email_usuario); ?>" required>
+                        <label class="form-label fw-600">Email de Contacto</label>
+                        <input type="email" class="form-control" name="email" value="<?php echo htmlspecialchars($email_usuario); ?>" required>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Asunto</label>
-                    <input type="text" class="form-control" name="asunto" value="<?php echo htmlspecialchars($asunto_mostrar); ?>" placeholder="¿En qué podemos ayudarte?" required>
+                    <label class="form-label fw-600">Asunto</label>
+                    <input type="text" class="form-control" name="asunto" value="<?php echo htmlspecialchars($asunto_mostrar); ?>" required>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">Mensaje</label>
-                    <textarea class="form-control" name="mensaje" rows="5" placeholder="Escribe aquí los detalles de tu consulta..." required></textarea>
+                    <label class="form-label fw-600">Mensaje</label>
+                    <textarea class="form-control" name="mensaje" rows="5" placeholder="Escribe aquí los detalles..." required></textarea>
                 </div>
 
                 <button type="submit" class="btn-submit">
@@ -222,6 +177,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </div>
+
+    <?php if ($enviado_exitoso): ?>
+    <script>
+        // Si el envío fue bien, esperamos 3 segundos y volvemos atrás
+        setTimeout(function() {
+            window.history.go(-2); // Redirige a la página de suscripciones
+        }, 3000);
+    </script>
+    <?php endif; ?>
 
 </body>
 </html>
