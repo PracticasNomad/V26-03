@@ -617,9 +617,10 @@ $premiumPriceParts = getWholeAndDecimal($precioMensualPremium);
                 btnPremium.classList.remove("disabled");
                 btnPremium.innerHTML = '<i class="fas fa-envelope"></i> Contactar para salir';
 
+                // REDIRECCIÓN AL FORMULARIO CENTRALIZADO
                 btnPremium.addEventListener('click', function (e) {
                     e.preventDefault();
-                    window.location.href = "mailto:aquitenemosqueponerelcorreo?subject=Solicitud para cancelar plan Premium";
+                    window.location.href = "../contactanos.php?asunto=CancelarPlanPremiumAnfitrion";
                 });
 
             } else if (currentPlan == "Basico") {
