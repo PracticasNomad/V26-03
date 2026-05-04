@@ -6,6 +6,7 @@ use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
+
 ?>
 
 <!DOCTYPE html>
@@ -467,7 +468,7 @@ $dotenv->load();
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-muted small text-uppercase fw-bold">NIF</label>
-                            <input type="text" class="form-control" id="editNIF" name="nif">
+                            <input type="text" class="form-control" id="editNIF" name="nif" pattern="^[0-9]{8}[A-Za-z]$" maxlength="9" placeholder="Ejemplo: 12345678A">
                         </div>
                         <input type="hidden" id="editAnfitrionId" name="anfitrionId">
                     </form>
@@ -592,6 +593,17 @@ $dotenv->load();
 
             // Guardar Cambios
             document.getElementById("btnGuardarCambios").addEventListener("click", function() {
+
+                // Validacion NIF
+                const nif = document.getElementById("editNIF").value.trim();
+                const nifExpresionRegular = /^[0-9]{8}[A-Z]$/i;
+
+                if(!nifExpresionRegular.test(nif)){ 
+                    mostrarNotificacion("El formato de NIF no es válido.", "error"); 
+                    return; 
+                }
+                
+
                 const formData = new FormData(document.getElementById("formEditarPerfil"));
                 const btn = this;
 

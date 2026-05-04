@@ -1,4 +1,5 @@
 <?php
+// Prueba Yon
 session_start();
 
 require './vendor/autoload.php';

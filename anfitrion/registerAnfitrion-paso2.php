@@ -56,6 +56,12 @@ if (isset($_POST['siguiente'])) {
         $emailError = true;
     }
 
+    // Validación del NIF 8 números 1 letra
+    if (!preg_match('/^[0-9]{8}[A-Z]$/i', $nif)){
+        $errors[] = 'El formato de NIF no es válido.';
+        $nifError = true;
+    }
+
     if (!empty($errors)) {
         $formError = implode(' ', $errors);
     } else {
@@ -396,8 +402,9 @@ if (isset($_POST['siguiente'])) {
                 <div class="col-md-6">
                     <label for="input_nif" class="form-label fw-bold">NIF/CIF *</label>
                     <input type="text" class="form-control" id="input_nif" name="nif" required placeholder="Ejemplo: 12345678A"
-                        value="<?php echo isset($_SESSION['host']['nif']) ? htmlspecialchars($_SESSION['host']['nif']) : ''; ?>">
-                </div>
+                        value="<?php echo isset($_SESSION['host']['nif']) ? htmlspecialchars($_SESSION['host']['nif']) : ''; ?>" 
+                        oninput="this.value = this.value.toUpperCase()" pattern="^[0-9]{8}[A-Za-z]$" maxlength="9"> 
+                </div>  
 
                 <div class="col-md-6" style="margin-right: 5px;">
                     <label for="input_razonsocial" class="form-label fw-bold">Razón Social *</label>

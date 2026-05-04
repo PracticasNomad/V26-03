@@ -21,6 +21,14 @@ $empresa = $_POST['empresa'];
 $telefono = $_POST['telefono'];
 $nif = $_POST['nif'];
 
+// Validación del NIF
+if (!preg_match('/^[0-9]{8}[A-Z]$/i', $nif)) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Formato de NIF no es válido']);
+    exit; 
+}
+
+
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/host?id=eq.' . $_SESSION['user_id'];
 $ch = curl_init($url);
 
