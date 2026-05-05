@@ -107,6 +107,9 @@ if (isset($_POST['enviar'])) {
             $_SESSION['password_guest'] = $password;
         }
 
+        // Vaciamos el código antiguo, así cuando cuando vayamos a verificarRegister.php envíe un nuevo mail
+        unset($_SESSION['verification_code_guest']);
+
         header('Location: verificarRegister.php');
         exit();
     }

@@ -18,9 +18,9 @@ $success_message = '';
 
 function sendVerificationEmail(): void
 {
-    $url = '../emails/codigoEmailGuest.php?email=' . urlencode($_SESSION['email_guest']);
+    $url = '../emails/codigoEmailGuest.php?email=' . urlencode($_SESSION['email_guest']) . '&nombre=' . urlencode($_SESSION['nombre_guest']);
     header('Location: ' . $url);
-    exit;
+    exit;   
 }
 
 // CAMBIO: Ahora puede devolver true (éxito) o un string (con el error)
@@ -120,14 +120,17 @@ function insertarDatos(): string|bool
 if (isset($_GET['sent']) && $_GET['sent'] === '1') {
     $success_message = 'Se ha enviado un nuevo código de verificación a tu correo electrónico';
 }
+// Si el usuario entra a la página 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // CASO A: El usuario pulsó el botón "Reenviar"
     if (isset($_GET['resend']) && $_GET['resend'] === 'true') {
         $_SESSION['verification_code_guest'] = sprintf('%06d', random_int(100000, 999999));
         $success_message = 'Se ha solicitado el reenvío del código de verificación.';
         sendVerificationEmail();
+    // CASO B: Es la primera vez que entra
     } elseif (!isset($_SESSION['verification_code_guest'])) {
         $_SESSION['verification_code_guest'] = sprintf('%06d', random_int(100000, 999999));
-        sendVerificationEmail();
+        sendVerificationEmail(); 
     }
 }
 

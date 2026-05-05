@@ -12,6 +12,7 @@ $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
 $destiny = $_GET['email'];
+$nombre = $_GET['nombre'] ?? ''; 
 
 if (isset($destiny) && isset($_SESSION['verification_code'])) {
     $mail = new PHPMailer(true);
@@ -55,7 +56,7 @@ if (isset($destiny) && isset($_SESSION['verification_code'])) {
         $mail->Port = $_ENV['EMAIL_PORT'];
 
         $mail->setFrom('noreply@yonomad.app', 'no-reply');
-        $mail->addAddress($destiny, 'Nombre Destinatario');
+        $mail->addAddress($destiny, $nombre);
         // Cargar imágenes embebidas
         $mail->AddEmbeddedImage('../img/logo.jpg', 'logo', 'logo.jpg');
         $mail->AddEmbeddedImage('../img/facebook.png', 'facebook', 'facebook.png');
