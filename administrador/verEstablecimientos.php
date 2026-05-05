@@ -384,12 +384,12 @@ if (!empty($establecimientos)) {
             color: var(--brand-ink);
         }
 
-        .page-shell {
+        /* .page-shell {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 15px;
             box-sizing: border-box;
-        }
+        } */
 
         /* FILTROS */
         .search-bar-wrapper {
@@ -667,27 +667,27 @@ if (!empty($establecimientos)) {
             row-gap: 0.2rem;
         }
 
-        .page-hero {
+        /* .page-hero {
             width: 100%;
             margin: 1.2rem 0 0.5rem;
             padding: 0;
             box-sizing: border-box;
-        }
+        } */
 
-        .page-hero-inner {
+        /* .page-hero-inner {
             border-radius: 20px;
             background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%);
             color: #ffffff;
             padding: 1.1rem 1.2rem;
             box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
             border: 1px solid rgba(255, 255, 255, 0.18);
-        }
+        } */
 
-        .page-hero-title {
+        /* .page-hero-title {
             font-size: 1.35rem;
             font-weight: 800;
             letter-spacing: 0.2px;
-        }
+        } */
 
         .stats-grid .card {
             border: 1px solid rgba(15, 76, 92, 0.08);
@@ -810,14 +810,15 @@ if (!empty($establecimientos)) {
 
 <body>
     <div class="page-shell">
-        <section class="page-hero">
+    <?php include 'headerAdmin.php'; ?>
+    <!-- <section class="page-hero">
             <div class="page-hero-inner">
                 <div class="hero-title-row">
                     <div class="page-hero-title"><i class="fas fa-building me-2"></i>Gestión Global de Establecimientos
                     </div>
                 </div>
             </div>
-        </section>
+        </section> -->
 
         <?php if (!empty($flashMessage)): ?>
             <div class="mt-3">

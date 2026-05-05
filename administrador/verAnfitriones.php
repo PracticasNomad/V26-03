@@ -1,4 +1,5 @@
 <?php
+require_once 'verificar_sesion_admin.php';
 
 require '../vendor/autoload.php';
 
@@ -193,12 +194,8 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
             --accent-mid: #c44536;
             --accent-soft: #fce8e5;
         }
+        
 
-        .page-shell { max-width: 1400px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; }
-        .page-hero { max-width: 100%; margin: 1.2rem 0 0.5rem; padding: 0; box-sizing: border-box; }
-        .page-hero-inner { border-radius: 20px; background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%); color: #ffffff; padding: 1.1rem 1.2rem; box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24); border: 1px solid rgba(255, 255, 255, 0.18); }
-        .page-hero-title { font-size: 1.35rem; font-weight: 800; letter-spacing: 0.2px; }
-        .hero-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
         body { font-family: 'Nunito', sans-serif; background: #eef2f5; color: var(--ink); padding-bottom: 120px; }
         .contenedor-principal { max-width: 100%; margin: 2rem 0 0; padding: 0; box-sizing: border-box; }
@@ -234,14 +231,8 @@ if ($codigoRespuesta >= 200 && $codigoRespuesta < 300) {
 
 <body>
     <div class="page-shell">
+        <?php include 'headerAdmin.php'; ?>
 
-        <section class="page-hero">
-            <div class="page-hero-inner">
-                <div class="hero-title-row">
-                    <div class="page-hero-title"><i class="fas fa-users me-2"></i>Todos los Anfitriones</div>
-                </div>
-            </div>
-        </section>
 
         <div class="contenedor-principal">
             <?php if ($error_db): ?>

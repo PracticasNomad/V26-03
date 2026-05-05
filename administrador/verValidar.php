@@ -250,52 +250,6 @@ function formatearDireccion($dir, $piso)
             padding-bottom: 120px;
         }
 
-        /* ESTILOS DEL HERO (CABECERA ADMIN) */
-        .page-hero {
-            max-width: 1400px;
-            margin: 1.2rem auto 0.5rem;
-            padding: 0 15px;
-        }
-
-        .page-hero-inner {
-            border-radius: 20px;
-            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%);
-            color: #ffffff;
-            padding: 1.1rem 1.2rem;
-            box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .page-hero-title {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: 0.2px;
-            margin: 0;
-        }
-
-        .info-hint-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.45);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.12);
-            cursor: pointer;
-            transition: 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .info-hint-btn:hover {
-            background: rgba(255, 255, 255, 0.22);
-            transform: translateY(-1px);
-        }
-
         /* ESTILOS DE TABS (PESTAÑAS) */
         .nav-tabs {
             border-bottom: 2px solid #dee2e6;
@@ -500,13 +454,7 @@ function formatearDireccion($dir, $piso)
 </head>
 
 <body>
-    <section class="page-hero">
-        <div class="page-hero-inner">
-            <div class="hero-title-row">
-                <div class="page-hero-title"><i class="fas fa-check-circle me-2"></i>Gestión Global de Validaciones</div>
-            </div>
-        </div>
-    </section>
+    <?php include 'headerAdmin.php'; ?>
 
     <div class="container-fluid pb-5 px-3 px-md-4 validation-shell mt-3">
         <?php if (!empty($error_db)): ?>

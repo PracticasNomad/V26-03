@@ -1,5 +1,6 @@
 <?php
 
+require_once 'verificar_sesion_admin.php';
 // carga variables de entorno
 require '../vendor/autoload.php';
 

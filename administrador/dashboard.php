@@ -101,13 +101,6 @@ $topEstablecimientos = [
             padding-bottom: 120px;
         }
 
-        .header-admin {
-            background: linear-gradient(135deg, #1f2933 0%, #364152 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
         .kpi-card {
             background: white;
             border-radius: 16px;
@@ -251,22 +244,7 @@ $topEstablecimientos = [
 </head>
 
 <body>
-
-    <header class="header-admin mb-4">
-        <div class="container-fluid px-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-3">
-                    <img src="../img/logo.jpg" alt="Nomadapp" style="height: 45px; border-radius: 10px;">
-                    <div>
-                        <h4 class="mb-0 fw-bold">Dashboard TheNomadapp</h4>
-                        <small class="text-white-50">Estadísticas </small>
-                    </div>
-                </div>
-                <a href="cerrarSesion.php" class="btn btn-outline-light btn-sm rounded-pill px-3"><i
-                        class="fas fa-sign-out-alt me-1"></i> Salir</a>
-            </div>
-        </div>
-    </header>
+    <?php include 'headerAdmin.php'; ?>
 
     <div class="container-fluid px-4">
 

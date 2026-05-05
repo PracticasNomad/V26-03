@@ -604,86 +604,6 @@ $postalCoverage = count($activePostalCodes);
             padding: 22px 16px 0;
         }
 
-        .hero {
-            background: linear-gradient(135deg, #962d22 0%, #c44536 52%, #df786c 100%);
-            color: #fff;
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
-            margin-bottom: 20px;
-        }
-
-        .hero-title {
-            font-size: 1.85rem;
-            font-weight: 800;
-            margin: 0 0 6px;
-        }
-
-        .title-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .info-hint-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.48);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.12);
-            cursor: pointer;
-            transition: 0.2s ease;
-            font-size: 0.92rem;
-            font-weight: 800;
-        }
-
-        .info-hint-btn:hover {
-            background: rgba(255, 255, 255, 0.22);
-            transform: translateY(-1px);
-        }
-
-        .hero-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 14px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 8px 14px;
-            font-weight: 700;
-            letter-spacing: 0.2px;
-        }
-
-        .hero-actions {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-        .btn-hero-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.28);
-            background: rgba(255, 255, 255, 0.16);
-            color: #ffffff;
-            font-weight: 800;
-            padding: 12px 18px;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .btn-hero-primary:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.24);
-            transform: translateY(-1px);
-        }
-
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1068,24 +988,7 @@ $postalCoverage = count($activePostalCodes);
 
 <body>
     <div class="page-shell">
-        <section class="hero">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                <div>
-                    <div class="title-row">
-                        <h1 class="hero-title"><i class="fas fa-user-tie me-2"></i>Vista Global de Gestoras</h1>
-                        <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right"
-                            title="Lista, filtra y administra las gestiones activas. Cada tarjeta resume la zona asignada por codigo postal y permite editar datos, reasignar cobertura, ver estadisticas y eliminar el perfil.">?</span>
-                    </div>
-                    <div class="hero-pill"><i class="fas fa-map-marked-alt"></i> Cobertura activa en
-                        <?php echo $postalCoverage; ?> codigos postales</div>
-                </div>
-                <div class="hero-actions">
-                    <button type="button" class="btn btn-hero-primary" id="openInviteGestora">
-                        <i class="fas fa-paper-plane"></i>Invitar gestora
-                    </button>
-                </div>
-            </div>
-        </section>
+        <?php include 'headerAdmin.php'; ?>
 
         <?php if ($flash): ?>
             <div class="alert alert-<?php echo htmlspecialchars($flash['type']); ?> shadow-sm rounded-4 border-0 mb-4">

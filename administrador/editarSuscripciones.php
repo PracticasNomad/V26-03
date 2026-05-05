@@ -121,35 +121,7 @@ if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
             font-family: 'Nunito', sans-serif;
             background: #eef2f5;
             padding-bottom: 120px;
-            color: var(--brand-ink);
-        }
-
-        .page-hero {
-            max-width: 1400px;
-            margin: 1.2rem auto 0.5rem;
-            padding: 0 15px;
-        }
-
-        .page-hero-inner {
-            border-radius: 20px;
-            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent-mid) 52%, #df786c 100%);
-            color: #ffffff;
-            padding: 1.1rem 1.2rem;
-            box-shadow: 0 18px 40px rgba(140, 28, 19, 0.24);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-
-        .page-hero-title {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: 0.2px;
-        }
-
-        .hero-title-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            color: var(--brand-ink); 
         }
 
         .plan-card {
@@ -238,13 +210,7 @@ if (is_array($planesObtenidos) && !isset($planesObtenidos['error'])) {
 </head>
 
 <body>
-    <section class="page-hero">
-        <div class="page-hero-inner">
-            <div class="hero-title-row">
-                <div class="page-hero-title"><i class="fas fa-tags me-2"></i>Gestión de Precios y Suscripciones</div>
-            </div>
-        </div>
-    </section>
+    <?php include 'headerAdmin.php'; ?>
 
     <div class="container mt-3" style="max-width: 1400px;">
         <?php if (!empty($flashMessage)): ?>

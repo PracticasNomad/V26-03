@@ -414,6 +414,7 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
 
     <!-- CONTENEDOR PRINCIPAL -->
     <div class="page-shell">
+        <?php include 'headerAdmin.php'; ?> <!--Añadimos el header-->
         <div class="contenedorPerfil mt-4">
 
             <!-- VISTA MÓVIL (AVATAR) -->
