@@ -7,6 +7,9 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
+// AÑADE ESTA LÍNEA AQUÍ:
+require_once '../emails/notificacionesAnfitrion.php';
+
 function generateUuidV4()
 {
     $data = random_bytes(16);
@@ -169,6 +172,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($httpCode === 201) {
         $galleryResult = insertarImagenesEnGallery($establecimientoId, $imagenesSubidas, $_SESSION['token']);
+
+        // --- AÑADIDO: ENVIAR CORREO AL ANFITRIÓN ---
+        // Necesitamos el email del anfitrión (asumiendo que lo tienes en la sesión)
+        // Si no está en la sesión, tendrías que consultarlo, pero lo normal es que esté:
+        $emailDestinatario = $_SESSION['email'] ?? null; 
+        
+        if ($emailDestinatario) {
+            enviarCorreoEstablecimientoSinEspacio(
+                $emailDestinatario, 
+                $formData['nombre'], // El nombre que acaba de escribir en el formulario
+                $establecimientoId // El ID que acabamos de generar
+            );
+        } else {
+            error_log("No se pudo enviar el correo de establecimiento: email no encontrado en la sesión.");
+        }
 
         $_SESSION['success_message'] = 'Establecimiento creado exitosamente';
         if (isset($_GET['redirect']) && !empty($_GET['redirect'])) {

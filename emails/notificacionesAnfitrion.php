@@ -26,29 +26,44 @@ function enviarCorreoEstablecimientoSinEspacio($destinatario, $nombreEstablecimi
 
         $mail->isHTML(true);
         $mail->Subject = '[TheNomadapp] Has creado un nuevo establecimiento';
+        // Magia para detectar si estás en localhost, en la IP de Plesk o en un dominio
+        $protocolo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http");
+        $host_actual = $_SERVER['HTTP_HOST'] ?? 'yonomad.app';
+        $enlace_dinamico = $protocolo . "://" . $host_actual . "/anfitrion/tusEspacios.php";
+
         $mail->Body = "
-            Hola,<br><br>
-            Has creado exitosamente el establecimiento <b>" . htmlspecialchars($nombreEstablecimiento) . "</b>.<br>
-            Recuerda que para que tu establecimiento esté disponible para reservas, debes añadirle al menos un espacio de trabajo.<br><br>
-            <a href='http://tu_dominio.com/anfitrion/crearEspacio.php?establecimiento_id=" . $establecimientoId . "'>Añadir espacio ahora</a><br><br>
-            Atentamente,<br>
-            El equipo de TheNomadApp<br><br>
-            <img src='cid:logo' alt='TheNomadapp Logo' style='width: 120px; margin-top: 20px;'><br>
-            <div style='display: flex; gap: 10px; align-items: center;'>
-             <a href='https://www.facebook.com/profile.php?id=100067482289201' target='_blank'>
-            <img src='cid:facebook' style='width: 50px; margin-right: 10px;'>
-        </a>
-        <a href='https://x.com/The_Nomadapp' target='_blank'>
-        <img src='cid:twitter' style='width: 50px; margin-right: 10px'>
-        </a>
-        <a href='https://www.linkedin.com/showcase/the-nomadapp/' target='_blank'>
-            <img src='cid:linkedin' style='width: 50px; margin-right: 10px'>
-        </a>
-        <a href='https://www.instagram.com/yonomadapp/' target='_blank'>
-            <img src='cid:instagram' style='width: 50px;'>
-        </a>
-    </div>
-    
+            <div style='font-family: Arial, sans-serif; color: #333333; line-height: 1.6; max-width: 600px;'>
+                Hola,<br><br>
+                Has creado exitosamente el establecimiento <b>" . htmlspecialchars($nombreEstablecimiento) . "</b>.<br>
+                Recuerda que para que tu establecimiento esté disponible para reservas, debes añadirle al menos un espacio de trabajo.<br><br>
+                
+                <div style='text-align: left; margin: 30px 0;'>
+                    <a href='" . $enlace_dinamico . "' 
+                       style='background-color: #0f4c5c; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;'>
+                       Ir a mis espacios
+                    </a>
+                </div>
+                
+                Atentamente,<br>
+                El equipo de TheNomadApp<br><br>
+                
+                <img src='cid:logo' alt='TheNomadapp Logo' style='width: 140px; margin-top: 20px;'><br>
+                
+                <div style='display: flex; gap: 10px; align-items: center; margin-top: 15px;'>
+                    <a href='https://www.facebook.com/profile.php?id=100067482289201' target='_blank'>
+                        <img src='cid:facebook' style='width: 40px; margin-right: 10px;'>
+                    </a>
+                    <a href='https://x.com/The_Nomadapp' target='_blank'>
+                        <img src='cid:twitter' style='width: 40px; margin-right: 10px;'>
+                    </a>
+                    <a href='https://www.linkedin.com/showcase/the-nomadapp/' target='_blank'>
+                        <img src='cid:linkedin' style='width: 40px; margin-right: 10px;'>
+                    </a>
+                    <a href='https://www.instagram.com/yonomadapp/' target='_blank'>
+                        <img src='cid:instagram' style='width: 40px;'>
+                    </a>
+                </div>
+            </div>
         ";
 
         $mail->send();
