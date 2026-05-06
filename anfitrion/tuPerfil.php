@@ -360,6 +360,9 @@ $dotenv->load();
                 <button type="button" class="btn-custom btn-brand" onclick="location.href='Suscripciones.php'">
                     <i class="fas fa-crown"></i> Cambiar plan
                 </button>
+                <button type="button" class="btn-custom btn-brand" onclick="location.href='configurar_cobros_host.php'">
+                    <i class="fas fa-university"></i> Datos bancarios
+                </button>
                 <button type="button" class="btn-custom btn-logout mt-2" onclick="location.href='./logoutHost.php'">
                     <i class="fas fa-sign-out-alt"></i> Cerrar sesión
                 </button>
@@ -421,6 +424,22 @@ $dotenv->load();
                     </div>
                 </div>
 
+                <!-- NUEVA TARJETA ESTADO DE COBROS (Oculta por defecto hasta que cargue JS) -->
+                <div class="info-card" id="card-cobros" style="display: none; border-color: #ffc107;">
+                    <div class="info-icon" id="icon-cobros" style="background-color: #fff3cd; color: #856404;">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="info-content" style="flex-grow: 1;">
+                        <span class="info-label">Estado de Facturación</span>
+                        <span class="info-value text-warning fw-bold" id="val-cobros" style="font-size: 0.95rem;">Pendiente de configuración</span>
+                    </div>
+                    <div class="ms-auto ps-2" id="btn-cobros-container">
+                        <a href="configurar_cobros_host.php" class="btn btn-sm btn-warning rounded-pill fw-bold px-3 shadow-sm text-dark" style="white-space: nowrap;">
+                            Configurar Ahora
+                        </a>
+                    </div>
+                </div>
+
                 <input type="hidden" id="anfitrionId" name="anfitrionId">
             </div>
 
@@ -434,6 +453,9 @@ $dotenv->load();
                 <button type="button" class="btn-custom btn-brand" onclick="location.href='Suscripciones.php'">
                     <i class="fas fa-crown"></i> Cambiar plan
                 </button>
+                <button type="button" class="btn-custom btn-brand" onclick="location.href='configurar_cobros_host.php'">
+                    <i class="fas fa-university"></i> Datos bancarios
+                </button>
                 <button type="button" class="btn-custom btn-logout mt-3" onclick="location.href='./logoutHost.php'">
                     <i class="fas fa-sign-out-alt"></i> Cerrar sesión
                 </button>
@@ -441,6 +463,7 @@ $dotenv->load();
         </div>
     </div>
 
+    <!-- MODALES OMITIDOS PARA AHORRAR ESPACIO (Se mantienen exactamente igual a tu código original) -->
     <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -543,13 +566,11 @@ $dotenv->load();
                     return response.json();
                 })
                 .then(data => {
-                    // --- CORRECCIÓN: Manejo de errores devueltos por el JSON ---
                     if (data.error) {
                         throw new Error(data.error);
                     }
-                    // ---------------------------------------------------------
 
-                    let avatarUrl = '../img/perfil.png'; // Imagen por defecto
+                    let avatarUrl = '../img/perfil.png';
 
                     if (data.avatar_url && data.avatar_url !== '../img/perfil.png') {
                         try {
@@ -578,6 +599,34 @@ $dotenv->load();
                         document.getElementById("val-planEnd").textContent = "N/A";
                     }
 
+                    // --- LÓGICA DE LA NUEVA TARJETA DE COBROS ---
+                    const cardCobros = document.getElementById("card-cobros");
+                    const iconCobros = document.getElementById("icon-cobros");
+                    const valCobros = document.getElementById("val-cobros");
+                    const btnCobros = document.getElementById("btn-cobros-container");
+
+                    // Mostrar la tarjeta ahora que tenemos los datos
+                    cardCobros.style.display = 'flex';
+
+                    if (data.paylands_merchant_id && data.paylands_merchant_id.trim() !== '') {
+                        // Estado Activo (Verde)
+                        cardCobros.style.borderColor = '#28a745';
+                        iconCobros.style.backgroundColor = '#d4edda';
+                        iconCobros.style.color = '#155724';
+                        valCobros.className = 'info-value text-success fw-bold';
+                        valCobros.textContent = 'Cuenta activada y lista';
+                        btnCobros.style.display = 'none'; // Ocultamos el botón
+                    } else {
+                        // Estado Pendiente (Naranja)
+                        cardCobros.style.borderColor = '#ffc107';
+                        iconCobros.style.backgroundColor = '#fff3cd';
+                        iconCobros.style.color = '#856404';
+                        valCobros.className = 'info-value text-warning fw-bold';
+                        valCobros.textContent = 'Pendiente de configuración';
+                        btnCobros.style.display = 'block'; // Mostramos el botón
+                    }
+                    // ---------------------------------------------
+
                     document.getElementById("anfitrionId").value = data.id;
                     sessionStorage.setItem('anfitrionId', data.id);
 
@@ -594,15 +643,13 @@ $dotenv->load();
             // Guardar Cambios
             document.getElementById("btnGuardarCambios").addEventListener("click", function() {
 
-                // Validacion NIF
                 const nif = document.getElementById("editNIF").value.trim();
                 const nifExpresionRegular = /^[0-9]{8}[A-Z]$/i;
 
-                if(!nifExpresionRegular.test(nif)){ 
-                    mostrarNotificacion("El formato de NIF no es válido.", "error"); 
-                    return; 
+                if (!nifExpresionRegular.test(nif)) {
+                    mostrarNotificacion("El formato de NIF no es válido.", "error");
+                    return;
                 }
-                
 
                 const formData = new FormData(document.getElementById("formEditarPerfil"));
                 const btn = this;
