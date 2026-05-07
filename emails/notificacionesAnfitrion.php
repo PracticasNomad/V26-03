@@ -125,7 +125,7 @@ function enviarCorreoNuevoEspacio($destinatario, $nombreEspacio)
     }
 }
 
-function enviarCorreoAnfitrionSinEstablecimiento($destinatario, $nombreAnfitrion)
+function enviarCorreoAnfitrionSinEstablecimiento($destinatario, $nombreAnfitrion, $token)
 {
     $mail = new PHPMailer(true);
     try {
@@ -147,6 +147,8 @@ function enviarCorreoAnfitrionSinEstablecimiento($destinatario, $nombreAnfitrion
         $mail->AddEmbeddedImage('../img/twitter.png', 'twitter', 'twitter.png');
         $mail->AddEmbeddedImage('../img/linkedin.png', 'linkedin', 'linkedin.png');
         $mail->AddEmbeddedImage('../img/instagram.png', 'instagram', 'instagram.png');
+        // Enlace dinamico para 
+        $enlace_dinamico = ($_ENV['APP_URL']) . "/anfitrion/resumenRegistro.php";
 
         $mail->isHTML(true);
         $mail->Subject = '[TheNomadapp] Continua tu registro: Añade tu establecimiento';
@@ -155,7 +157,7 @@ function enviarCorreoAnfitrionSinEstablecimiento($destinatario, $nombreAnfitrion
             Vimos que empezaste a crear tu perfil de anfitrión, pero te quedaste a medias.<br>
             Para poder empezar a recibir nómadas digitales y generar ingresos, necesitamos que registres los datos de tu establecimiento.<br><br>
             Es un proceso muy rápido. Haz clic en el siguiente enlace para continuar justo donde lo dejaste:<br><br>
-            <a href='http://localhost:8000/anfitrion/registerAnfitrion-paso3.php' style='display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>Continuar mi registro</a><br><br>
+            <a href='" . $enlace_dinamico . "?token=" . ($token ?? '') . "' style='display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>Continuar mi registro</a><br><br>
             ¡Te esperamos!<br>
             El equipo de TheNomadApp<br><br>
             <img src='cid:logo' alt='TheNomadapp Logo' style='width: 120px; margin-top: 20px;'><br>

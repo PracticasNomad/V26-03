@@ -36,16 +36,15 @@ function revisarYEnviarAbandonos()
 
     // Si hay gente que lo dejó a medias...
     if (is_array($abandonos) && count($abandonos) > 0) {
-        $protocolo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        $dominio = $_SERVER['HTTP_HOST'];
-        $carpeta = rtrim(dirname($_SERVER['REQUEST_URI']), '/');
-
+        $dominioBase = $_ENV['APP_URL']; // APP_URL=https://nomadappme.yonomad.app
+        
         foreach ($abandonos as $usuario) {
             $email = $usuario['email'];
             $nombre = $usuario['nombre'];
             $token = $usuario['token'];
 
-            $enlaceMagico = $protocolo . $dominio . $carpeta . "/resumeRegistro.php?token=" . $token;
+            // Creamos el enlace mágico
+            $enlaceMagico = $dominioBase . "/anfitrion/resumeRegistro.php?token=" . $token;
 
             // Enviamos el correo
             $envio = enviarCorreoBorrador($email, $nombre, $enlaceMagico);
@@ -68,7 +67,7 @@ function revisarYEnviarAbandonos()
                 curl_exec($chUpd);
                 curl_close($chUpd);
             }
-        }
+        }   
     }
 }
 

@@ -83,7 +83,8 @@ if (isset($_POST['siguiente'])) {
 
             $tokenResumen = bin2hex(random_bytes(16));
 
-            $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados';
+            // On conlict para que si está duplicado sepa donde mirar
+            $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/registros_abandonados?on_conflict=email';
             $ch = curl_init($url);
             $data = [
                 'email' => $email,
@@ -99,20 +100,35 @@ if (isset($_POST['siguiente'])) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
                 'apikey: ' . $_ENV['DATABASE_APIKEY'],
+                'Authorization: Bearer ' . $_ENV['DATABASE_APIKEY'], // Cabecera que evita el Error 409
                 'Prefer: resolution=merge-duplicates'
             ]);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_exec($ch);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);        
+            // Ejecución y captura de errores
+            $respuesta_db = curl_exec($ch);
+            $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-            // AUTO-GENERADOR DE URL PARA EL EMAIL
-            $protocolo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-            $dominio = $_SERVER['HTTP_HOST'];
-            $carpeta = rtrim(dirname($_SERVER['REQUEST_URI']), '/');
-            $enlaceMagico = $protocolo . $dominio . $carpeta . "/resumeRegistro.php?token=" . $tokenResumen;
+            // // --- BLOQUE PARA TESTEAR DESPUÉS DEL PASO 2 PARA NO TENER QUE ESPERAR 30 minutos para el mail de continuar registro ---
+            // $dominioBase = "https://nomadappme.yonomad.app"; 
+            // $enlaceMagicoTest = $dominioBase . "/anfitrion/resumeRegistro.php?token=" . $tokenResumen;
+            
+            // $resultado = enviarCorreoBorrador($email, $nombre, $enlaceMagicoTest);
 
-            // 2. ¡ENVIAMOS EL CORREO REAL! 📨
-            enviarCorreoBorrador($email, $nombre, $enlaceMagico);
+            // if ($resultado['success'] === false) {
+            //     // Si falla, detenemos todo y mostramos el error de PHPMailer
+            //     die("FALLO EN EL ENVÍO: " . $resultado['message']);
+            // } else {
+            //     // Si funciona, mostramos confirmación antes de redirigir
+            //     echo "Correo enviado con éxito a $email. Redirigiendo en 3 segundos...";
+            //     header("Refresh: 1; url=registerAnfitrion-paso3.php");
+            //     exit();
+            // }
+            // // --- 
+            // // Verificación de éxito
+            // if ($codigo_http >= 400) {
+            //     die("ERROR: Supabase sigue fallando. Código: $codigo_http. Respuesta: $respuesta_db");
+            // }
 
             header('Location: registerAnfitrion-paso3.php');
             exit();
