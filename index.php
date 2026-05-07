@@ -8,11 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    <!-- Mapa -->
     <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
     <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
-
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
@@ -81,16 +79,17 @@
         </div>
 
         <div class="bienvenida izquierda sombra">
-
             <div class="textoBienvenida" id="textoBienvenida">
                 <br>ENCUENTRA <br>UN ESPACIO DE TRABAJO <br>DONDE TÚ QUIERAS.
                 <br><br>
                 <button class="btn-index btn-primary fw-bold" onclick="location.href='anfitrion/inicio_sesion_anfitrion.php'">Tengo un espacio</button>
                 <button class="btn-index btn-success fw-bold" onclick="location.href='login.php'">Busco un espacio</button>
             </div>
-
         </div>
+        
+        <!-- Mapa div -->
         <div id="map" class="map derecha flex"></div>
+        
         <div class="botonesMovil">
             <button class="btn-index btn-primary fw-bold" type="button" onclick="location.href='anfitrion/inicio_sesion_anfitrion.php'">Tengo un espacio</button>
             <button class="btn-index btn-success fw-bold" type="button" onclick="location.href='login.php'">Busco un espacio</button>
@@ -115,7 +114,12 @@
         });
 
         let latitud, longitud, zoom;
-        navigator.geolocation.getCurrentPosition(showPosition, positionError);
+        // positionError(); // Prueba españa
+        navigator.geolocation.getCurrentPosition(showPosition, positionError, {
+            enableHighAccuracy: false,
+            timeout: 3000,             // <-- Si en 3 segundos no te encuentra, salta al error (España).
+            maximumAge: 600000         // <-- Usa una ubicación que tenga hasta 10 minutos de antigüedad.
+        });
 
         function positionError() {
             latitud = 40.46;

@@ -139,8 +139,20 @@ function formatearDireccion($direccion, $piso = "")
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet'>
     <link rel="icon" href="../favicon-color.png">
     <title>Tus Establecimientos</title>
+    <!-- Mapa -->
+    <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
 
     <style>
+        #map { 
+            height: 400px; 
+            width: 100%; 
+            border-radius: 15px; 
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            margin-top: 0px;
+        }
+
         :root {
             --host-accent: #10bfeb;
             --host-accent-dark: #0a95b7;
@@ -148,7 +160,7 @@ function formatearDireccion($direccion, $piso = "")
 
         body {
             font-family: 'Nunito', sans-serif;
-            padding-bottom: 15%;
+            padding-bottom: 7%;
             background-color: #f4f6f9;
         }
 
@@ -578,6 +590,7 @@ function formatearDireccion($direccion, $piso = "")
                 </div>
             </div>
         <?php endif; ?>
+        <div id="map"></div>
     </div>
 
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
@@ -603,6 +616,49 @@ function formatearDireccion($direccion, $piso = "")
     <?php include 'footerAnfitrion.php'; ?>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+                showMap();
+        });
+
+        function showMap() {
+            // Tu token
+            L.mapbox.accessToken = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
+
+            // Configuración inicial (España centrada)
+            var map = L.mapbox.map('map')
+                .setView([40.416775, -3.703790], 6)
+                .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
+
+            // Icono (Corregido el ../ para salir de la carpeta anfitrion)
+            var myIcon = L.icon({
+                iconUrl: '../img/posicionAnfitrion.png',
+                iconSize: [30, 30],
+                iconAnchor: [15, 32],
+            });
+
+            const misSitios = <?php echo json_encode($establecimientos); ?>;
+
+            misSitios.forEach(element => {
+                if (element.latitude != null && element.longitude != null) {
+                    var popupContent = 
+                        '<div class="text-center">' +
+                            '<b style="color: #0f4c5c;">' + (element.nombre || 'Sin nombre') + '</b><br>' +
+                            '<small>' + (element.direccion || '') + '</small>' +
+                        '</div>';
+
+                    var myPopup = L.popup({
+                        offset: L.point(0, -20)
+                    }).setContent(popupContent);
+                    
+                    L.marker([element.latitude, element.longitude])
+                        .addTo(map)
+                        .setIcon(myIcon)
+                        .bindPopup(myPopup);
+                }
+            });
+        }
+        
         const MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg";
         const maps = {};
 

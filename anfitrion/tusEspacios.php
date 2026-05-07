@@ -100,11 +100,23 @@ if ($num_espacios >= $limites[$plan]) {
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Tus Espacios</title>
+    <!-- Mapa -->
+    <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
     <style>
+        #map { 
+            height: 400px; 
+            width: 100%; 
+            border-radius: 15px; 
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            margin-top: 25px;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #f8f9fa;
-            padding-bottom: 15%;
+            padding-bottom: 7%;
         }
 
         .page-shell {
@@ -647,6 +659,7 @@ if ($num_espacios >= $limites[$plan]) {
                 </div>
             </div>
         </div>
+        <div id="map"></div>
     </div>
 
     <div class="modal fade modal-confirm" id="avisoEstablecimientoModal" tabindex="-1" aria-hidden="true">
@@ -698,6 +711,48 @@ if ($num_espacios >= $limites[$plan]) {
     <?php include 'footerAnfitrion.php'; ?>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+                showMap();
+        });
+        function showMap() {
+            // Tu token
+            L.mapbox.accessToken = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
+
+            // Configuración inicial (España centrada)
+            var map = L.mapbox.map('map')
+                .setView([40.416775, -3.703790], 6)
+                .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
+
+            // Icono (Corregido el ../ para salir de la carpeta anfitrion)
+            var myIcon = L.icon({
+                iconUrl: '../img/posicionAnfitrion.png',
+                iconSize: [30, 30],
+                iconAnchor: [15, 32],
+            });
+
+            // Cargamos los datos que PHP ya filtró para este usuario
+            const misSitios = <?php echo json_encode($establecimientos); ?>;
+
+            misSitios.forEach(element => {
+                if (element.latitude != null && element.longitude != null) {
+                    var popupContent = 
+                        '<div class="text-center">' +
+                            '<b style="color: #0f4c5c;">' + (element.nombre || 'Sin nombre') + '</b><br>' +
+                            '<small>' + (element.direccion || '') + '</small>' +
+                        '</div>';
+
+                    var myPopup = L.popup({
+                        offset: L.point(0, -20)
+                    }).setContent(popupContent);
+                    
+                    L.marker([element.latitude, element.longitude])
+                        .addTo(map)
+                        .setIcon(myIcon)
+                        .bindPopup(myPopup);
+                }
+            });
+        }
+
         $(document).ready(function() {
             $('.toggle-horarios').click(function() {
                 const espacioId = $(this).data('espacio-id');
