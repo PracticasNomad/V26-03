@@ -73,13 +73,17 @@ a{
 
 .bienvenida{
     width:38%;
-    height: 85%;
+    min-height: 85%;
+    height: auto;
     padding: 5vmin;
     margin-top: 6vmin;
     border-radius: 30px;
     text-align: center;
     background-color: rgba(255, 255, 255, 0.5) ;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .25), 0 8px 16px rgba(0, 0, 0, .25);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .map{
@@ -92,7 +96,7 @@ a{
 
 .textoBienvenida{
     font-family: "Bebas Neue";
-    font-size: 4vw;
+    font-size: 7vmin;
     z-index: 0;
     display: block;
 }
@@ -424,19 +428,12 @@ width:fit-content !important;
         height: 70vh;
         float:none;
     }
-    .botonesMovil{
-        display: block;
-        width:100%;
-        height: fit-content;
-        margin-top: 15px;
-        text-align: center;
-        padding:0;
-    }
-
     .botonesMovil button {
         text-align: center;
-        display:inline-block;
-        width: 48%;
+        display: inline-block;
+        width: 48%;  
+        margin-top: 15px;
+        margin-bottom: 10px;
         font-size: 3.5vw;
         padding: 15px 10px;
     }
