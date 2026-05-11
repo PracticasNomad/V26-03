@@ -232,7 +232,18 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
             color: var(--dark-text);
             word-break: break-word;
         }
+        
+        .btn-light {
+            background-color: #e9ecef !important;
+            color: var(--dark-text) !important; /* Fuerza el texto a color oscuro */
+            border: 1px solid #dee2e6;
+        }
 
+        .btn-light:hover {
+            background-color: #d3d9df !important;
+            color: #000 !important; /* Texto negro al pasar el ratón */
+        }
+        
         /* Botones */
         .btn-custom {
             transition: all 0.3s ease;
@@ -361,6 +372,16 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
         .legal-rich-content a {
             color: var(--primary-color);
             text-decoration: none;
+        }
+
+        .modal-footer .btn-light {
+            margin: 0 15px 0 0 !important; /* Le quita el automático y le da 15px de separación a la derecha */
+            width: auto !important;
+        }
+
+        .modal-footer .btn-brand {
+            margin: 0 !important; /* Le quita el automático para que no salga volando */
+            width: auto !important;
         }
 
         @media (max-width: 768px) {
