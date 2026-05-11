@@ -141,7 +141,7 @@ $fecha_nac  = $host['fecha_nac'] ?? '';
         <div class="form-container">
 
             <div class="header-cobros">
-                <a href="inicio_anfitrion.php" class="btn-back"><i class="fas fa-arrow-left me-2"></i> Volver al perfil</a>
+                <a href="tuPerfil.php" class="btn-back"><i class="fas fa-arrow-left me-2"></i> Volver al perfil</a>
                 <h3 class="fw-bold m-0"><i class="fas fa-university me-2 text-primary"></i> Datos de Facturación</h3>
             </div>
 
