@@ -73,7 +73,7 @@
     }
 
     /* Adaptación para móviles: ocultar texto para que quepan 6 botones */
-    @media (max-width: 400px) {
+    @media (max-width: 600px) {
         .footer-text {
             display: none;
         }
