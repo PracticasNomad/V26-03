@@ -46,11 +46,23 @@ if (isset($_POST['cerrar'])) {
     <link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Explorar espacios</title>
 
+    <!-- Mapa -->
+     <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
+
     <script>
         const MINIO_URL = "<?php echo rtrim($_ENV['MINIO_PUBLIC_URL'] ?? 'http://127.0.0.1:9000', '/'); ?>";
     </script>
 
     <style>
+        #map { 
+            height: 400px; 
+            width: 100%; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #f4f6f9;
@@ -412,8 +424,10 @@ if (isset($_POST['cerrar'])) {
                         <i class="fas fa-times"></i> Limpiar filtros
                     </button>
                 </div>
-            </div>
+            </div> 
 
+            <div id="map"></div>
+            
             <div class="results-count" id="results-count" style="display: none;"></div>
 
             <div id="loading-spinner" class="text-center my-4">
@@ -436,6 +450,44 @@ if (isset($_POST['cerrar'])) {
 
         const url = "./mapaLerrApi.php";
 
+        L.mapbox.accessToken = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
+        var map = L.mapbox.map('map')
+            .setView([40.416775, -3.703790], 6) // Centrado en España
+            .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
+
+        var myIcon = L.icon({
+            iconUrl: 'img/posicionAnfitrion.png', // Ruta del icono (desde la raíz)
+            iconSize: [30, 30],
+            iconAnchor: [15, 32],
+        });
+
+        var markersLayer = new L.LayerGroup().addTo(map); // Capa para poder borrar los marcadores al filtrar
+
+        function updateMap(data) {
+            markersLayer.clearLayers(); // Borramos los marcadores anteriores
+            data.forEach(element => {
+                if (element.latitude != null && element.longitude != null) {
+                    
+                    // 1. Recreamos la misma URL exacta que usan las tarjetas
+                    var urlDetalles = 'anfitrion.php?nombre=' + element.nombre + '&id=' + element.id + '&direccion=' + element.direccion + ", " + element.localidad + '&coordinates0=' + element.longitude + '&coordinates1=' + element.latitude + '&fromIndex=false';
+
+                    // 2. Añadimos el botón al final del popup con estilos inline para no tocar el CSS general
+                    var popupContent = 
+                        '<div class="text-center">' +
+                            '<b style="color: #28a745;">' + (element.nombre || 'Sin nombre') + '</b><br>' +
+                            '<small>' + (element.direccion || '') + '</small><br>' +
+                            '<a href="' + urlDetalles + '" style="display:inline-block; margin-top:10px; padding:4px 12px; background-color:#28a745; color:white; border-radius:20px; text-decoration:none; font-weight:bold; font-size:13px;">Ver detalles</a>' +
+                        '</div>';
+
+                    var myPopup = L.popup({ offset: L.point(0, -20) }).setContent(popupContent);
+                    
+                    L.marker([element.latitude, element.longitude], {icon: myIcon})
+                        .addTo(markersLayer)
+                        .bindPopup(myPopup);
+                }
+            });
+        }
+
         document.getElementById("loading-spinner").style.display = "block";
         document.getElementById("contenedor").style.display = "none";
 
@@ -447,11 +499,16 @@ if (isset($_POST['cerrar'])) {
 
                 populateFilters(data);
                 appendData(filteredAnfitriones);
+                updateMap(filteredAnfitriones); // Añadido el mapa
                 updateResultsCount();
 
                 document.getElementById("loading-spinner").style.display = "none";
                 document.getElementById("contenedor").style.display = "grid";
                 document.getElementById("results-count").style.display = "block";
+
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
             })
             .catch(err => {
                 console.log(err);
@@ -502,6 +559,7 @@ if (isset($_POST['cerrar'])) {
             } else {
                 appendData(filteredAnfitriones);
             }
+            updateMap(filteredAnfitriones); // Se añade el mapa
             updateResultsCount();
         }
 
@@ -514,6 +572,7 @@ if (isset($_POST['cerrar'])) {
             filteredAnfitriones = [...allAnfitriones];
             document.getElementById("contenedor").innerHTML = '';
             appendData(filteredAnfitriones);
+            updateMap(filteredAnfitriones); // Se añade el mapa
             updateResultsCount();
         }
 
