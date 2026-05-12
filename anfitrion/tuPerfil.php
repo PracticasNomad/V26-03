@@ -282,6 +282,25 @@ $dotenv->load();
             font-family: 'Nunito', sans-serif;
             z-index: 10500;
         }
+        /* Ajuste estricto para encoger el modal en móviles pequeños (iPhone SE) */
+        @media (max-width: 400px) {
+            .modal-dialog {
+                margin: 20px !important;
+            }
+            .modal-header, .modal-body { 
+                padding: 15px !important;
+            }
+            .modal-footer { 
+                padding: 10px 15px 15px !important; 
+                justify-content: center !important; 
+                gap: 10px; 
+            }
+            .modal-footer .btn { 
+                padding-left: 15px !important; 
+                padding-right: 15px !important; 
+                font-size: 0.85rem !important;
+            }
+        }
 
         @media (max-width: 768px) {
             .contenedorPerfil {
