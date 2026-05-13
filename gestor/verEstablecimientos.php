@@ -820,7 +820,7 @@ if (isset($establecimientos) && is_array($establecimientos)) {
 </head>
 
 <body>
-    <section class="page-hero">
+    <!-- <section class="page-hero">
         <div class="page-hero-inner">
             <div class="hero-title-row">
                 <div class="page-hero-title">Gestión de Establecimientos</div>
@@ -829,7 +829,8 @@ if (isset($establecimientos) && is_array($establecimientos)) {
                         class="fas fa-info"></i></span>
             </div>
         </div>
-    </section>
+    </section> -->
+    <?php include 'headerGestor.php'; ?>
 
     <?php if ($filtro_host_id): ?>
         <div class="container mt-3" style="max-width: 1400px; padding: 0 15px;">

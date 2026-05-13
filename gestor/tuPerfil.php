@@ -424,7 +424,7 @@ HTML;
 </head>
 
 <body>
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
+    <!-- <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
         <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert"
             aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -432,8 +432,8 @@ HTML;
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
-    </div>
-
+    </div> -->
+    <?php include 'headerGestor.php'; ?>
     <div class="contenedorPerfil mt-5">
 
         <div class="fotoPerfilMovil">

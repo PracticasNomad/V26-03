@@ -576,7 +576,7 @@ if ($cpGestor) {
 </head>
 
 <body>
-    <header class="page-header">
+    <!-- <header class="page-header">
         <div class="page-header-inner">
             <div class="title-row">
                 <h1 class="page-title">Espacios de tu zona</h1>
@@ -585,8 +585,9 @@ if ($cpGestor) {
                         class="fas fa-info"></i></span>
             </div>
         </div>
-    </header>
-
+    </header> -->
+    <?php include 'headerGestor.php'; ?>
+    
     <div class="contenedorLista mt-4">
 
         <?php if ($filtro_establecimiento_id || $filtro_host_id): ?>

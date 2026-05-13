@@ -388,7 +388,7 @@ require_once 'verificar_sesion_gestor.php';
 </head>
 
 <body>
-    <header>
+    <!-- <header>
         <div class="container-fluid text-center" style="background: linear-gradient(120deg, #1565c0 0%, #1976d2 55%, #42a5f5 100%); padding: 18px 0 14px; margin-bottom: 4px; box-shadow: 0 4px 16px rgba(21,101,192,0.18);">
             <div class="row">
                 <div class="col fw-bold pt-1 pb-1" style="color:#ffffff; font-size:1.3rem; font-family:'Nunito',sans-serif; letter-spacing:0.2px;">
@@ -396,32 +396,33 @@ require_once 'verificar_sesion_gestor.php';
                 </div>
             </div>
         </div>
-    </header>
-
-    <div class="row py-3 mb-4 header-main">
-        <div class="col-12">
-            <div class="header-tabs shadow-sm">
-                <div class="row g-0">
-                    <div class="col-6">
-                        <div class="header-tab header-tab-active py-3 text-center rounded-start">
-                            <i class="fas fa-calendar-check me-2"></i>RESERVAS
+    </header> -->
+    <?php include 'headerGestor.php'; ?>
+    <div class="container" style="max-width: 1400px; margin-top: 20px;">
+        <div class="row py-3 mb-4 header-main">
+            <div class="col-12">
+                <div class="header-tabs shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-6">
+                            <div class="header-tab header-tab-active py-3 text-center rounded-start">
+                                <i class="fas fa-calendar-check me-2"></i>RESERVAS
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <a href="tusHistorias.php" class="header-tab-link">
+                                <div class="header-tab py-3 text-center rounded-end">
+                                    <i class="fas fa-history me-2"></i>HISTÓRICO
+                                </div>
+                            </a>
                         </div>
                     </div>
-                    <div class="col-6">
-                        <a href="tusHistorias.php" class="header-tab-link">
-                            <div class="header-tab py-3 text-center rounded-end">
-                                <i class="fas fa-history me-2"></i>HISTÓRICO
-                            </div>
-                        </a>
-                    </div>
                 </div>
-            </div>
+            </div> 
+        </div>
+
+        <div class="container" id="container">
         </div>
     </div>
-
-    <div class="container" id="container">
-    </div>
-
     <?php include 'footer.php'; ?>
 </body>
 

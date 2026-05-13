@@ -292,7 +292,7 @@ if ($cpGestor) {
 </head>
 
 <body>
-    <header>
+    <!-- <header>
         <div class="container-fluid info text-center">
             <div class="row">
                 <div class="col color-white h2 fw-bold pt-3 pb-2">
@@ -300,8 +300,9 @@ if ($cpGestor) {
                 </div>
             </div>
         </div>
-    </header>
-
+    </header> -->
+    <?php include 'headerGestor.php'; ?>
+    
     <div class="contenedor-principal">
         <?php if (isset($error_db)): ?>
             <div class="alert alert-danger text-center shadow-sm rounded-pill mb-4">

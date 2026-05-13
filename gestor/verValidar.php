@@ -293,14 +293,15 @@ function formatearDireccion($dir, $piso) {
 </head>
 
 <body>
-    <header class="page-header">
+    <!-- <header class="page-header">
         <div class="page-header-inner">
             <div class="title-row">
                 <h1 class="page-title">Gestión de Validaciones</h1>
                 <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right" title="Revisa y clasifica establecimientos con una vista clara y ordenada."><i class="fas fa-info"></i></span>
             </div>
         </div>
-    </header>
+    </header> -->
+    <?php include 'headerGestor.php'; ?>
 
     <div class="container-fluid pb-5 px-3 px-md-4 validation-shell">
         <?php if (!empty($error_db)): ?>

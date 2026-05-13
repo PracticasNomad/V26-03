@@ -170,7 +170,7 @@ require_once 'verificar_sesion_gestor.php';
 
         body {
             padding-bottom: 15%;
-            background: linear-gradient(160deg, #eef2f5 0%, #f5f5f5 50%, #f0f4f8 100%);
+            background: linear-gradient(160deg, #e8f1fb 0%, #f0f5ff 50%, #e6f4f1 100%) !important;
             min-height: 100vh;
             font-family: 'Nunito', sans-serif;
         }
@@ -375,7 +375,7 @@ require_once 'verificar_sesion_gestor.php';
 </head>
 
 <body>
-    <header>
+    <!-- <header>
         <div class="container-fluid text-center" style="background: linear-gradient(120deg, #2e3f4c 0%, #455a68 55%, #607d8b 100%); padding: 18px 0 14px; margin-bottom: 4px; box-shadow: 0 4px 16px rgba(46,63,76,0.18);">
             <div class="row">
                 <div class="col fw-bold pt-1 pb-1" style="color:#ffffff; font-size:1.3rem; font-family:'Nunito',sans-serif; letter-spacing:0.2px;">
@@ -383,31 +383,35 @@ require_once 'verificar_sesion_gestor.php';
                 </div>
             </div>
         </div>
-    </header>
-
-    <div class="row py-3 mb-4 header-main">
-        <div class="col-12">
-            <div class="header-tabs shadow-sm">
-                <div class="row g-0">
-                    <div class="col-6">
-                        <a href="verReservas.php" class="header-tab-link">
-                            <div class="header-tab py-3 text-center rounded-start">
-                                <i class="fas fa-calendar-check me-2"></i>RESERVAS
+    </header> -->
+    <?php include 'headerGestor.php'; ?>
+    
+    <div class="container" style="max-width: 1400px; margin-top: 20px;">
+        <div class="row py-3 mb-4 header-main">
+            <div class="col-12">
+                <div class="header-tabs shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-6">
+                            <a href="verReservas.php" class="header-tab-link">
+                                <div class="header-tab py-3 text-center rounded-start">
+                                    <i class="fas fa-calendar-check me-2"></i>RESERVAS
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <div class="header-tab header-tab-active py-3 text-center rounded-end">
+                                <i class="fas fa-history me-2"></i>HISTÓRICO
                             </div>
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <div class="header-tab header-tab-active py-3 text-center rounded-end">
-                            <i class="fas fa-history me-2"></i>HISTÓRICO
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="container" id="container">
+        </div>
     </div>
 
-    <div class="container" id="container">
-    </div>
 
     <div class="container-fluid footer mt-5 p-3">
         <div class="row text-center fixed-bottom bg-blanco pt-1 px-2 footer-container">
@@ -455,6 +459,7 @@ require_once 'verificar_sesion_gestor.php';
             </label>
         </div>
     </div>
+    <?php include 'footer.php'; ?>
 </body>
 
 </html>
