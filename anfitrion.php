@@ -169,13 +169,13 @@ $_SESSION['anfitrion_id'] = $_GET['id'];
     </div>
 
     <div class="container-fluid" style="max-width: 1300px;">
-        <div class="row g-4">
+<div class="row g-4">
             
             <div class="col-lg-7">
                 
                 <div id="dynamic_carousel" class="carousel slide modern-card p-0" data-bs-ride="carousel">
                     <div class="carousel-indicators" id="carousel-indicators-container">
-                        </div>
+                    </div>
                     <div class="carousel-inner" id="carousel-inner-container">
                         <div class="text-center p-5 text-muted" id="carousel-loading">
                             <i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>Cargando imágenes...
@@ -195,11 +195,30 @@ $_SESSION['anfitrion_id'] = $_GET['id'];
 
                     <h5 class="fw-bold mb-3" style="color: var(--text-main);"><i class="fas fa-star me-2 text-warning"></i>Servicios Extras</h5>
                     <div id="servicios_container" class="d-flex flex-wrap">
-                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="col-lg-5">
+                <div class="modern-card mt-4">
+                    <h4 class="fw-bold mb-3" style="color: var(--primary);"><i class="fas fa-comments me-2"></i>Valoraciones</h4>
+                    
+                    <div class="d-flex align-items-center mb-4">
+                        <h2 class="fw-bold mb-0 me-3" id="media-estrellas" style="font-size: 2.5rem; color: var(--text-main);">-.-</h2>
+                        <div>
+                            <div class="text-warning fs-5" id="estrellas-container">
+                                <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                            </div>
+                            <span class="text-muted small" id="total-valoraciones">0 opiniones</span>
+                        </div>
+                    </div>
+
+                    <div id="lista-comentarios" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                        <div class="text-center text-muted py-3">
+                            <i class="fas fa-spinner fa-spin mb-2"></i><br>Cargando opiniones...
+                        </div>
+                    </div>
+                </div>
+
+            </div> <div class="col-lg-5">
                 
                 <div class="modern-card p-2 mb-4">
                     <div id="map"></div>
@@ -222,8 +241,7 @@ $_SESSION['anfitrion_id'] = $_GET['id'];
                     </button>
                 </div>
 
-            </div>
-        </div>
+            </div> </div>
     </div>
 
     <script>
@@ -430,6 +448,58 @@ $_SESSION['anfitrion_id'] = $_GET['id'];
                 });
             });
         }
+
+        // ======= INICIO: LÓGICA DE VALORACIONES =======
+        const estId = new URLSearchParams(window.location.search).get('id');
+
+        function cargarValoraciones() {
+            fetch(`obtener_valoraciones.php?id_establecimiento=${estId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('media-estrellas').textContent = data.media > 0 ? parseFloat(data.media).toFixed(1) : '-.-';
+                        document.getElementById('total-valoraciones').textContent = `${data.total} opiniones`;
+                        
+                        let estrellasHTML = '';
+                        let notaRedondeada = Math.round(data.media);
+                        for(let i = 1; i <= 5; i++) {
+                            estrellasHTML += i <= notaRedondeada ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                        }
+                        document.getElementById('estrellas-container').innerHTML = estrellasHTML;
+
+                        const lista = document.getElementById('lista-comentarios');
+                        lista.innerHTML = '';
+                        
+                        if (data.total === 0) {
+                            lista.innerHTML = '<div class="text-center text-muted py-4"><i class="far fa-comment-dots fs-1 mb-2"></i><br>Aún no hay opiniones. ¡Sé el primero!</div>';
+                        } else {
+                            data.valoraciones.forEach(val => {
+                                let starsUser = '';
+                                for(let i = 1; i <= 5; i++) {
+                                    starsUser += i <= val.valoracion ? '<i class="fas fa-star text-warning"></i>' : '<i class="far fa-star text-warning"></i>';
+                                }
+                                let fecha = new Date(val.created_at).toLocaleDateString('es-ES', {year: 'numeric', month: 'short', day: 'numeric'});
+                                
+                                lista.innerHTML += `
+                                    <div class="border-bottom py-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <strong style="color: var(--text-main); font-size: 0.95rem;">
+                                                <i class="fas fa-user-circle me-1 text-secondary"></i> Nómada
+                                            </strong>
+                                            <small class="text-muted" style="font-size: 0.8rem;">${fecha}</small>
+                                        </div>
+                                        <div class="mb-2" style="font-size: 0.8rem;">${starsUser}</div>
+                                        <p class="mb-0 text-muted" style="font-size: 0.95rem;">${val.comentario}</p>
+                                    </div>
+                                `;
+                            });
+                        }
+                    }
+                })
+                .catch(err => console.error("Error al cargar valoraciones", err));
+        }
+        cargarValoraciones();
+        // ======= FIN: LÓGICA DE VALORACIONES =======
     </script>
 </body>
 </html>

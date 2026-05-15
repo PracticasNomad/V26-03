@@ -167,9 +167,12 @@ $dotenv->load();
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('loading-spinner').style.display = 'flex';
-            const url = "getReservasNomada.php";
+            
+            // TRUCO ANTI-CACHÉ: Le añadimos la hora exacta en milisegundos a la URL
+            // Así el navegador cree que es un archivo nuevo y SIEMPRE pregunta al servidor
+            const url = "getReservasNomada.php?nocache=" + new Date().getTime();
 
-            fetch(url)
+            fetch(url, { cache: "no-store" })
                 .then(response => response.json())
                 .then(data => {
                     if (data.length === 0) {
@@ -198,13 +201,28 @@ $dotenv->load();
 
             function appendData(data, galleryImages) {
                 var contenedor = document.getElementById("container");
-                const today = new Date().toISOString().split('T')[0];
+                
+                // CÁLCULO DE FECHA LOCAL (Sin fallos de zona horaria)
+                const dateObj = new Date();
+                const year = dateObj.getFullYear();
+                const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const day = String(dateObj.getDate()).padStart(2, '0');
+                const today = `${year}-${month}-${day}`;
+                
                 const defaultImage = "https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg";
 
-                if (data.length === 0) {
+                // Contamos cuántas reservas ACTIVAS hay realmente
+                let reservasActivasCount = 0;
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].day >= today && data[i].cancelada == false) {
+                        reservasActivasCount++;
+                    }
+                }
+
+                if (reservasActivasCount === 0) {
                     contenedor.innerHTML += `
                         <div class="alert alert-info mt-3" role="alert">
-                            <i class="far fa-calendar-times me-2"></i> No tienes reservas programadas.
+                            <i class="far fa-calendar-times me-2"></i> No tienes reservas programadas o activas.
                         </div>
                     `;
                     return;
@@ -212,6 +230,7 @@ $dotenv->load();
 
                 for (var i = 0; i < data.length; i++) {
                     if (data[i].day >= today && data[i].cancelada == false) {
+                        
                         const fecha = new Date(data[i].day);
                         const opciones = {
                             weekday: 'long',
