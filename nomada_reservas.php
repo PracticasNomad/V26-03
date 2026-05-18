@@ -157,9 +157,9 @@ $dotenv->load();
     </div>
     <div class="page-shell">
         <?php include 'headerNomada.php'; ?>
-    </div>
-
-    <div id="container" class="container mt-4" style="min-height: 50vh;">
+        
+        <div id="container" class="mt-4" style="min-height: 50vh;">
+        </div>
     </div>
 
     <?php include 'footerNomada.php'; ?>
