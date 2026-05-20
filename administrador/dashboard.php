@@ -39,7 +39,6 @@ function getApiData($endpoint)
     if ($httpCode >= 200 && $httpCode < 300) {
         return json_decode($response, true) ?: [];
     } elseif ($httpCode == 404 || $httpCode == 400) {
-        // Fallback silencioso si no encuentra la tabla o columna
         return [];
     } else {
         $errorDb = "Error BD (HTTP $httpCode) en: " . explode('?', $endpoint)[0];
@@ -48,15 +47,39 @@ function getApiData($endpoint)
 }
 
 // -------------------------------------------------------------------
-// 1. RECOPILACIÓN DE DATOS BASE (Con tus nombres de tablas exactos)
+// 0. NUEVO: RECOPILLAR DATOS DEL ADMINISTRADOR LOGUEADO (SOLUCIÓN CABECERA)
+// -------------------------------------------------------------------
+$loggedAdminId = $_SESSION['user_id'] ?? null; // ID set by verificar_sesion_admin.php
+$currentAdminName = "Admin";
+$currentAdminRole = "Admin";
+$currentAdminAvatar = "../favicon-color.png"; // Fallback por defecto
+
+if ($loggedAdminId) {
+    // Usamos el rol service_role para leer cualquier tabla
+    $adminQuery = getApiData('admin?id=eq.' . $loggedAdminId . '&select=*');
+    $adminData = $adminQuery[0] ?? null;
+
+    if ($adminData) {
+        $currentAdminName = htmlspecialchars($adminData['name'] ?? 'Admin User');
+        // Si no tienes columna 'role' en tu tabla admin, se quedará como "Super Admin" (fallback visual)
+        $currentAdminRole = htmlspecialchars($adminData['role'] ?? 'Super Admin');
+
+        if (!empty($adminData['avatar_url'])) {
+            $currentAdminAvatar = htmlspecialchars($adminData['avatar_url']);
+        }
+    }
+}
+
+// -------------------------------------------------------------------
+// 1. RECOPILACIÓN DE DATOS BASE AGREGADOS
 // -------------------------------------------------------------------
 
-// Nómadas (Tabla: user)
+// Nómadas (user)
 $nomadas = getApiData('user?select=id');
 $totalNomadas = count($nomadas);
 $nomadasNuevos = intval($totalNomadas * 0.15);
 
-// Anfitriones (Tabla: host)
+// Anfitriones (host)
 $anfitriones = getApiData('host?select=*');
 $totalAnfitriones = count($anfitriones);
 $subsAnfitriones = 0;
@@ -71,7 +94,7 @@ foreach ($anfitriones as $h) {
     }
 }
 
-// Gestoras (Tabla: gestor)
+// Gestoras (gestor)
 $gestoras = getApiData('gestor?select=*');
 $totalGestoras = count($gestoras);
 $subsGestoras = 0;
@@ -83,7 +106,7 @@ foreach ($gestoras as $g) {
     }
 }
 
-// Reservas (Tabla: reservation - AQUÍ ESTABA EL ERROR 404)
+// Reservas (reservation)
 $reservas = getApiData('reservation?select=*');
 $totalReservas = count($reservas);
 $volumenReservas = 0;
@@ -96,54 +119,113 @@ foreach ($reservas as $res) {
 
 $gastoPromedio = $totalReservas > 0 ? ($volumenReservas / $totalReservas) : 0;
 
-// Ingresos Teóricos
+// Ingresos Teóricos (Basado en planes reales)
 $ingresoPorHost = ($subsAnfitriones - $anfitrionesPremium) * 19.99 + ($anfitrionesPremium * 49.99);
 $ingresosSubsHost = $ingresoPorHost;
-$ingresosSubsGestoras = $subsGestoras * 1900;
+// Ajustado para que el plan de Gestora tenga un precio real, no 1900€
+$ingresosSubsGestoras = $subsGestoras * 49.99;
 $ingresosTotales = $ingresosSubsHost + $ingresosSubsGestoras + $volumenReservas;
 
 // -------------------------------------------------------------------
-// 2. DATOS PARA GRÁFICOS Y TABLAS
+// 2. DATOS PARA GRÁFICOS Y TABLAS (Conexión real Establecimientos-Reservas)
 // -------------------------------------------------------------------
 
-// Establecimientos (Tabla: establecimiento)
 $establecimientos = getApiData('establecimiento?select=*');
-$conteoPorCiudad = [];
+$mapaEstablecimientos = [];
 $topEstablecimientos = [];
 
+// Creamos un mapa rápido de ID de establecimiento -> Ciudad
 foreach ($establecimientos as $est) {
-    // Buscamos la localidad en varias columnas posibles por si acaso
+    $idEst = $est['id'] ?? null;
     $loc = trim($est['localidad'] ?? $est['city'] ?? $est['ciudad'] ?? 'Desconocida');
-    if (!empty($loc) && $loc !== 'Desconocida') {
-        if (!isset($conteoPorCiudad[$loc])) $conteoPorCiudad[$loc] = 0;
-        $conteoPorCiudad[$loc] += 150;
+    if ($idEst) {
+        $mapaEstablecimientos[$idEst] = $loc;
     }
-
-    $nombreEst = $est['nombre'] ?? $est['name'] ?? 'Sin Nombre';
-
-    $topEstablecimientos[] = [
-        'nombre' => $nombreEst,
-        'visitas' => rand(10, 150),
-        'tiempo_medio' => rand(1, 6) . 'h',
-        'ingresos' => rand(100, 2000)
-    ];
 }
 
+// Sumamos los ingresos reales de la tabla 'reservation' agrupados por su ciudad
+$conteoPorCiudad = [];
+foreach ($reservas as $res) {
+    $idEst = $res['establecimiento_id'] ?? null;
+    $precio = $res['precio_total'] ?? $res['total_price'] ?? $res['total'] ?? $res['price'] ?? 0;
+
+    if ($idEst && isset($mapaEstablecimientos[$idEst])) {
+        $loc = $mapaEstablecimientos[$idEst];
+        if (!isset($conteoPorCiudad[$loc])) {
+            $conteoPorCiudad[$loc] = 0;
+        }
+        $conteoPorCiudad[$loc] += floatval($precio);
+    }
+}
+
+// Calculamos las visitas y ganancias reales por cada establecimiento
+foreach ($establecimientos as $est) {
+    $idEst = $est['id'] ?? null;
+    $nombreEst = $est['nombre'] ?? $est['name'] ?? 'Sin Nombre';
+
+    $visitas = 0;
+    $ingresosEst = 0;
+    foreach ($reservas as $res) {
+        if (($res['establecimiento_id'] ?? null) == $idEst) {
+            $visitas++;
+            $precio = $res['precio_total'] ?? $res['total_price'] ?? $res['total'] ?? $res['price'] ?? 0;
+            $ingresosEst += floatval($precio);
+        }
+    }
+
+    // Solo mostramos el establecimiento si tiene alguna visita real
+    if ($visitas > 0) {
+        $topEstablecimientos[] = [
+            'nombre' => $nombreEst,
+            'visitas' => $visitas,
+            'tiempo_medio' => '3h', // Tiempo estimado
+            'ingresos' => $ingresosEst
+        ];
+    }
+}
+
+// Ordenamos las ciudades de mayor a menor ingreso
 arsort($conteoPorCiudad);
 $ciudadesTop = array_slice(array_keys($conteoPorCiudad), 0, 5);
 $ingresosCiudades = array_slice(array_values($conteoPorCiudad), 0, 5);
 
+// Fallback visual si la BD está vacía
 if (empty($ciudadesTop)) {
-    $ciudadesTop = ['Madrid', 'Barcelona', 'Valencia', 'Alicante', 'Málaga'];
-    $ingresosCiudades = [1200, 900, 600, 400, 200];
+    $ciudadesTop = ['Alcoy', 'Cocentaina', 'Alicante', 'Valencia', 'Madrid'];
+    $ingresosCiudades = [0, 0, 0, 0, 0];
 }
 
+// Ordenamos establecimientos por ingresos
 usort($topEstablecimientos, function ($a, $b) {
     return $b['ingresos'] <=> $a['ingresos'];
 });
 $topEstablecimientos = array_slice($topEstablecimientos, 0, 5);
 
-// Gestoras para el gráfico
+// -------------------------------------------------------------------
+// 3. LECTURA REAL DE ESPACIOS
+// -------------------------------------------------------------------
+$espacios = getApiData('space?select=*');
+$conteoEspacios = ['Mesas' => 0, 'Salas' => 0, 'Despachos' => 0, 'Cabinas' => 0];
+
+foreach ($espacios as $esp) {
+    $tipo = strtolower($esp['tipo'] ?? $esp['type'] ?? $esp['nombre'] ?? $esp['name'] ?? '');
+    if (strpos($tipo, 'sala') !== false || strpos($tipo, 'reunion') !== false || strpos($tipo, 'reunión') !== false) {
+        $conteoEspacios['Salas']++;
+    } elseif (strpos($tipo, 'despacho') !== false || strpos($tipo, 'privad') !== false) {
+        $conteoEspacios['Despachos']++;
+    } elseif (strpos($tipo, 'cabina') !== false) {
+        $conteoEspacios['Cabinas']++;
+    } else {
+        $conteoEspacios['Mesas']++;
+    }
+}
+if (array_sum($conteoEspacios) === 0 && count($espacios) > 0) {
+    $conteoEspacios['Mesas'] = count($espacios);
+}
+
+// -------------------------------------------------------------------
+// 4. LECTURA GESTORAS (Gráfico)
+// -------------------------------------------------------------------
 $nombresGestoras = [];
 $pagosGestoras = [];
 $volumenGestoras = [];
@@ -151,14 +233,14 @@ $volumenGestoras = [];
 foreach (array_slice($gestoras, 0, 5) as $gestora) {
     $nombresGestoras[] = $gestora['name'] ?? $gestora['nombre'] ?? 'Gestora ' . substr($gestora['id'], 0, 4);
     $plan = strtolower($gestora['plan'] ?? '');
-    $pagosGestoras[] = ($plan === 'premium' || $plan === 'pro') ? 1900 : 0;
-    $volumenGestoras[] = rand(1000, 8000);
+    $pagosGestoras[] = ($plan === 'premium' || $plan === 'pro') ? 49.99 : 0;
+    $volumenGestoras[] = 0; // Marcador real para volumen generado
 }
 
 if (empty($nombresGestoras)) {
     $nombresGestoras = ['Gestora A', 'Gestora B'];
-    $pagosGestoras = [1900, 0];
-    $volumenGestoras = [4500, 1200];
+    $pagosGestoras = [0, 0];
+    $volumenGestoras = [0, 0];
 }
 ?>
 
@@ -179,19 +261,140 @@ if (empty($nombresGestoras)) {
     <style>
         :root {
             --primary-color: #dc3545;
+            --white: #ffffff;
+            --light-bg: #f4f7fb;
+            --text-dark: #1f2933;
+            --text-muted: #6b7c93;
+            --border-color: #e1e5eb;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f4f7fb;
+            background-color: var(--light-bg);
+            /* Espacio abajo para el footer móvil */
+            padding-bottom: 120px !important;
         }
 
+        /* -------------------------------------------------------------------
+           NUEVOS ESTILOS CABECERA (SOLUCIÓN CAPTURA)
+           ------------------------------------------------------------------- */
+        .main-header {
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+
+        .header-logo-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-logo-text:hover {
+            color: var(--text-dark);
+        }
+
+        .profile-dropdown-toggle {
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            text-align: left;
+            text-decoration: none !important;
+            cursor: pointer;
+        }
+
+        .profile-dropdown-toggle:after {
+            display: none;
+            /* Quitamos flecha Bootstrap por defecto */
+        }
+
+        .avatar-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .profile-role {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .bell-icon-wrapper {
+            position: relative;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            text-decoration: none;
+            margin-right: 25px;
+            transition: color 0.2s;
+        }
+
+        .bell-icon-wrapper:hover {
+            color: var(--primary-color);
+        }
+
+        .bell-icon-wrapper .notification-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            border: 1px solid #fff;
+        }
+
+        .dropdown-menu-custom {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 15px !important;
+        }
+
+        .dropdown-item-custom {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .dropdown-item-custom:hover {
+            background-color: var(--light-bg);
+        }
+
+        .dropdown-item-custom.text-danger:hover {
+            background-color: #fff1f0;
+        }
+
+        /* -------------------------------------------------------------------
+           ESTILOS KPI DASHBOARD (ORIGINALES MANTENIDOS)
+           ------------------------------------------------------------------- */
         .kpi-card {
-            background: white;
+            background: var(--white);
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
-            border: 1px solid #e1e5eb;
+            border: 1px solid var(--border-color);
             transition: transform 0.2s;
             height: 100%;
         }
@@ -204,13 +407,13 @@ if (empty($nombresGestoras)) {
         .kpi-value {
             font-size: 2rem;
             font-weight: 800;
-            color: #1f2933;
+            color: var(--text-dark);
             line-height: 1;
             margin: 10px 0;
         }
 
         .kpi-label {
-            color: #6b7c93;
+            color: var(--text-muted);
             font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -248,7 +451,7 @@ if (empty($nombresGestoras)) {
 
         .nav-pills .nav-link {
             border-radius: 50px;
-            color: #6b7c93;
+            color: var(--text-muted);
             font-weight: 700;
             padding: 10px 20px;
             margin-right: 5px;
@@ -258,7 +461,7 @@ if (empty($nombresGestoras)) {
 
         .nav-pills .nav-link.active {
             background-color: var(--primary-color);
-            color: white;
+            color: var(--white);
             box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
         }
 
@@ -267,16 +470,16 @@ if (empty($nombresGestoras)) {
         }
 
         .table-custom th {
-            color: #6b7c93;
+            color: var(--text-muted);
             font-size: 0.8rem;
             text-transform: uppercase;
-            border-bottom: 2px solid #e1e5eb;
+            border-bottom: 2px solid var(--border-color);
         }
 
         .table-custom td {
             vertical-align: middle;
             font-weight: 600;
-            color: #1f2933;
+            color: var(--text-dark);
         }
     </style>
 </head>
@@ -285,8 +488,48 @@ if (empty($nombresGestoras)) {
 
     <div class="page-shell">
 
-        <?php include 'headerAdmin.php'; ?>
+        <header class="main-header">
+            <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+                <a href="dashboard.php" class="header-logo-text">
+                    <img src="../favicon-color.png" alt="Logo Nomadapp" class="me-2" style="height: 35px;">
+                    NOMADAPP
+                </a>
 
+                <div class="d-flex align-items-center">
+                    <a href="#" class="bell-icon-wrapper">
+                        <i class="far fa-bell"></i>
+                        <span class="notification-dot"></span>
+                    </a>
+
+                    <div class="dropdown">
+                        <a class="profile-dropdown-toggle dropdown-toggle" href="#" role="button" id="adminProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="<?= $currentAdminAvatar ?>" alt="Foto Perfil Admin" class="avatar-circle me-3">
+                            <div class="d-none d-md-block me-3">
+                                <div class="profile-name"><?= $currentAdminName ?></div>
+                                <div class="profile-role"><?= $currentAdminRole ?></div>
+                            </div>
+                            <i class="fas fa-angle-down text-muted fs-7"></i>
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="adminProfileDropdown">
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom" href="tuPerfil.php">
+                                    <i class="fas fa-user-cog text-muted me-2"></i> Mi Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider bg-light">
+                            </li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom text-danger" href="cerrarSesion.php">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
         <div class="container-fluid px-4 mt-4">
 
             <?php if ($flash): ?>
@@ -424,14 +667,20 @@ if (empty($nombresGestoras)) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($topEstablecimientos as $est): ?>
+                                    <?php if (empty($topEstablecimientos)): ?>
                                         <tr>
-                                            <td><i class="fas fa-store text-muted me-2"></i> <?php echo htmlspecialchars($est['nombre']); ?></td>
-                                            <td><span class="badge bg-light text-dark border"><?php echo $est['visitas']; ?></span></td>
-                                            <td><i class="far fa-clock text-warning"></i> <?php echo $est['tiempo_medio']; ?></td>
-                                            <td class="text-success fw-bold">€<?php echo number_format($est['ingresos'], 2); ?></td>
+                                            <td colspan="4" class="text-center text-muted py-4">Aún no hay reservas registradas.</td>
                                         </tr>
-                                    <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <?php foreach ($topEstablecimientos as $est): ?>
+                                            <tr>
+                                                <td><i class="fas fa-store text-muted me-2"></i> <?php echo htmlspecialchars($est['nombre']); ?></td>
+                                                <td><span class="badge bg-light text-dark border"><?php echo $est['visitas']; ?></span></td>
+                                                <td><i class="far fa-clock text-warning"></i> <?php echo $est['tiempo_medio']; ?></td>
+                                                <td class="text-success fw-bold">€<?php echo number_format($est['ingresos'], 2); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -469,7 +718,7 @@ if (empty($nombresGestoras)) {
                     </div>
                     <div class="kpi-card">
                         <h5 class="fw-bold mb-3">Qué nos dan los Anfitriones (Distribución de Espacios)</h5>
-                        <canvas id="espaciosHostChart" height="60"></canvas>
+                        <canvas id="espaciosHostChart" height="100"></canvas>
                     </div>
                 </div>
 
@@ -483,7 +732,7 @@ if (empty($nombresGestoras)) {
                         </div>
                         <div class="col-md-3">
                             <div class="kpi-card border-bottom border-primary border-4">
-                                <div class="kpi-label text-primary">Suscripciones Activas (Pro/Premium)</div>
+                                <div class="kpi-label text-primary">Suscripciones Activas</div>
                                 <div class="kpi-value"><?php echo $subsGestoras; ?></div>
                             </div>
                         </div>
@@ -508,7 +757,7 @@ if (empty($nombresGestoras)) {
                             <div class="kpi-card">
                                 <h5 class="fw-bold mb-3">Análisis de Rentabilidad de Gestoras</h5>
                                 <p class="text-muted mb-4">Relación entre la suscripción que pagan y el volumen de reservas que generan en su zona.</p>
-                                <canvas id="rentabilidadGestorasChart" height="80"></canvas>
+                                <canvas id="rentabilidadGestorasChart" height="120"></canvas>
                             </div>
                         </div>
                     </div>
@@ -517,17 +766,19 @@ if (empty($nombresGestoras)) {
             </div>
         </div>
 
-    </div> <?php include 'footerAdmin.php'; ?>
+    </div>
+
+    <?php include 'footerAdmin.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 1. Mapa de Calor
+        // 1. Mapa de Calor - Ingresos por Zona
         new Chart(document.getElementById('mapaCalorChart').getContext('2d'), {
             type: 'bar',
             data: {
                 labels: <?php echo json_encode($ciudadesTop); ?>,
                 datasets: [{
-                    label: 'Ingresos Estimados por Zona (€)',
+                    label: 'Ingresos Estimados (€)',
                     data: <?php echo json_encode($ingresosCiudades); ?>,
                     backgroundColor: ['#dc3545', '#e4606d', '#eb8c95', '#f1b8bd', '#f8e4e6'],
                     borderRadius: 8
@@ -545,7 +796,8 @@ if (empty($nombresGestoras)) {
                     x: {
                         grid: {
                             display: false
-                        }
+                        },
+                        beginAtZero: true
                     },
                     y: {
                         grid: {
@@ -579,14 +831,19 @@ if (empty($nombresGestoras)) {
             }
         });
 
-        // 3. Tipos de Espacios
+        // 3. Tipos de Espacios (Real de la base de datos)
         new Chart(document.getElementById('espaciosHostChart').getContext('2d'), {
             type: 'bar',
             data: {
                 labels: ['Mesas Compartidas', 'Salas de Reuniones', 'Despachos Privados', 'Cabinas'],
                 datasets: [{
-                    label: 'Cantidad Ofrecida por Hosts',
-                    data: [350, 120, 85, 40],
+                    label: 'Cantidad Ofrecida',
+                    data: [
+                        <?php echo $conteoEspacios['Mesas']; ?>,
+                        <?php echo $conteoEspacios['Salas']; ?>,
+                        <?php echo $conteoEspacios['Despachos']; ?>,
+                        <?php echo $conteoEspacios['Cabinas']; ?>
+                    ],
                     backgroundColor: '#0d6efd',
                     borderRadius: 5
                 }]
@@ -629,8 +886,20 @@ if (empty($nombresGestoras)) {
                 ]
             },
             options: {
-                responsive: true
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             }
+        });
+
+        // Solución para que los gráficos dentro de pestañas ocultas se rendericen al hacer clic
+        document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', () => {
+                window.dispatchEvent(new Event('resize'));
+            });
         });
     </script>
 
