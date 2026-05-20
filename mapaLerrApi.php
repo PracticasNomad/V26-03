@@ -7,7 +7,7 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-$select = '*,gallery(image_url),space(id,schedule(has_monday,has_tuesday,has_wednesday,has_thursday,has_friday,has_saturday,has_sunday))';
+$select = '*,gallery(image_url),space(id,schedule(has_monday,has_tuesday,has_wednesday,has_thursday,has_friday,has_saturday,has_sunday)),valoraciones(valoracion)';
 $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/establecimiento?select=' . rawurlencode($select);
 
 $ch = curl_init($url);
@@ -15,7 +15,8 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     'Content-Type: application/json',
     'Accept: application/json',
-    'apikey: ' . $_ENV['DATABASE_APIKEY']
+    'apikey: ' . $_ENV['DATABASE_APIKEY'],
+    'Authorization: Bearer ' . $_ENV['SERVICE_APIKEY']
 ));
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
 
@@ -39,6 +40,23 @@ if (is_array($data)) {
             $item['imagen'] = $establecimiento['gallery'][0]['image_url'];
         } else {
             $item['imagen'] = null;
+        }
+
+        // Cálculo nota media
+        $sumaValoraciones = 0;
+        $totalValoraciones = 0;
+        
+        if (isset($establecimiento['valoraciones']) && is_array($establecimiento['valoraciones'])) {
+            $totalValoraciones = count($establecimiento['valoraciones']);
+            foreach ($establecimiento['valoraciones'] as $val) {
+                $sumaValoraciones += (float)$val['valoracion'];
+            }
+        }
+        
+        if ($totalValoraciones > 0) {
+            $item['media_valoracion'] = round($sumaValoraciones / $totalValoraciones, 1);
+        } else {
+            $item['media_valoracion'] = null;
         }
 
         $hasAvailability = false;
@@ -65,7 +83,8 @@ if (is_array($data)) {
 
         unset($item['gallery']);
         unset($item['space']);
-
+        unset($item['valoraciones']);
+             
         $processedData[] = $item;
     }
 }

@@ -81,6 +81,7 @@ if (isset($_POST['cerrar'])) {
             max-width: 100%;
             margin: 0 auto;
             padding: 0 15px;
+            margin-bottom: 30px;
         }
 
         .header {
@@ -653,10 +654,18 @@ if (isset($_POST['cerrar'])) {
                     iconoParking.className = "fas fa-car";
                     iconos.appendChild(iconoParking);
                 }
-
+                
                 var puntuacion = document.createElement("div");
                 puntuacion.className = "star";
-                puntuacion.innerHTML = '<i class="fas fa-star"></i> 4.5';
+                
+                // Comprobación estricta para evitar fallos si la nota es un número bajo
+                var tieneNota = (anfitrion.media_valoracion !== null && anfitrion.media_valoracion !== undefined);
+                
+                var notaMedia = tieneNota ? parseFloat(anfitrion.media_valoracion).toFixed(1) : 'Nuevo';
+                var estrellaHtml = tieneNota ? '<i class="fas fa-star"></i> ' : '<i class="far fa-star"></i> ';
+                puntuacion.innerHTML = estrellaHtml + notaMedia;
+
+
 
                 var enlace = document.createElement("div");
                 enlace.className = "enlace";
