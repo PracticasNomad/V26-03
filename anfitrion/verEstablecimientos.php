@@ -796,7 +796,7 @@ function formatearDireccion($direccion, $piso = "")
                 });
         }
     </script>
-    <?php include '../zendesk_widget.php'; ?>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>
