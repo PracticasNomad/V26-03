@@ -245,6 +245,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             </form>
         </div>
     </div>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

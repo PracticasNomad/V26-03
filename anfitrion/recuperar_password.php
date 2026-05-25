@@ -207,6 +207,7 @@ if (isset($_POST['email'])) {
             </form>
         </div>
     </div>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

@@ -640,6 +640,7 @@ $premiumPriceParts = getWholeAndDecimal($precioMensualPremium);
             });
         });
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

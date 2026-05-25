@@ -824,6 +824,7 @@ $horarios = isset($_SESSION['espacio_trabajo']['horarios']) ? $_SESSION['espacio
             }
         });
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

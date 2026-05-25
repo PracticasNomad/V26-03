@@ -913,6 +913,7 @@ if ($num_espacios >= $limites[$plan]) {
             }
         });
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

@@ -670,6 +670,7 @@ if (isset($_POST['siguiente'])) {
             }, 500);
         });
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

@@ -770,6 +770,7 @@ $dotenv->load();
             document.getElementById('inputImagen').value = "";
         }
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

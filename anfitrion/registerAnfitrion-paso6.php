@@ -464,6 +464,7 @@ $premiumPriceParts = getWholeAndDecimal($precioMensualPremium);
             element.classList.add('selected');
         }
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

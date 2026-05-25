@@ -285,7 +285,7 @@ require_once 'verificar_sesion_host.php';
 
 
     <?php include 'footerAnfitrion.php'; ?>
-
+<?php include '../typebot.php'; ?>
 </body>
 
 </html>
