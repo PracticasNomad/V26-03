@@ -606,6 +606,7 @@ if (isset($_POST['enviar'])) {
             }
         }
     </script>
+    <?php include 'typebot.php'; ?>
 </body>
 
 </html>
