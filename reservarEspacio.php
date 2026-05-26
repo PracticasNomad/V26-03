@@ -380,7 +380,10 @@ $space = $spaceData[0];
 
                             <div class="mb-3">
                                 <label for="dni" class="form-label">DNI/NIE</label>
-                                <input type="text" class="form-control" id="dni" name="dni" required>
+                                <input type="text" class="form-control" id="dni" name="dni" required maxlength="9">
+                                <div id="dniAlert" class="text-danger small mt-1 d-none fw-bold">
+                                    <i class="fas fa-exclamation-circle"></i> El DNI o NIE introducido no es válido.
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -544,14 +547,48 @@ $space = $spaceData[0];
                 input.addEventListener('change', validateSchedule);
             });
 
+            // --- FUNCIÓN MATEMÁTICA PARA VALIDAR DNI/NIE ---
+            function validarDNI(dni) {
+                let numero, letraIngresada, letraCalculada;
+                const expresion_regular_dni = /^[XYZ]?\d{5,8}[A-Z]$/i;
+                dni = dni.trim().toUpperCase();
+
+                if (expresion_regular_dni.test(dni) === true) {
+                    numero = dni.substr(0, dni.length - 1);
+                    numero = numero.replace('X', 0).replace('Y', 1).replace('Z', 2);
+                    letraIngresada = dni.substr(dni.length - 1, 1); // Extraemos la letra que ha puesto el usuario
+                    numero = numero % 23;
+                    letraCalculada = 'TRWAGMYFPDXBNJZSQVHLCKE'.substring(numero, numero + 1); // Calculamos la real
+                    return letraCalculada === letraIngresada;
+                }
+                return false;
+            }
+
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
 
+                // 1. Validar el horario
                 if (!validateSchedule()) {
                     return false;
                 }
 
+                // 2. Validar el DNI/NIE
+                const inputDni = document.getElementById('dni');
+                const dniAlert = document.getElementById('dniAlert');
+                
+                if (!validarDNI(inputDni.value)) {
+                    inputDni.classList.add('is-invalid');
+                    dniAlert.classList.remove('d-none');
+                    inputDni.focus();
+                    return false; // Cortamos el envío aquí
+                } else {
+                    inputDni.classList.remove('is-invalid');
+                    dniAlert.classList.add('d-none');
+                }
+
+                // Si pasamos las dos validaciones, guardamos y enviamos
                 const formData = new FormData(form);
+
                 const reservationData = {
                     spaceId: '<?php echo $space['id']; ?>',
                     date: formData.get('reservationDate'),
