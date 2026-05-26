@@ -384,13 +384,26 @@ if (!empty($establecimientos)) {
             color: var(--brand-ink);
         }
 
-        /* .page-shell {
+        .page-shell {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 15px;
             box-sizing: border-box;
-        } */
+        }
 
+        
+        .bloque-margen-general {
+            margin-left: 2.5rem;
+            margin-right: 2.5rem;
+        }
+
+       
+        @media (max-width: 768px) {
+            .bloque-margen-general {
+                margin-left: 0.5rem;
+                margin-right: 0.5rem;
+            }
+        }
         /* FILTROS */
         .search-bar-wrapper {
             margin: 0 auto 2rem;
