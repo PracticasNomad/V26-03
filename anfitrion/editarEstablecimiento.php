@@ -952,5 +952,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         document.getElementById('establecimiento-form').addEventListener('submit', handleFormSubmit);
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 </html>

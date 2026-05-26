@@ -290,6 +290,7 @@ if (isset($_SESSION['code_generated_time'])) {
             if (e.target.value.length === 6) {}
         });
     </script>
+    
 </body>
 
 </html>

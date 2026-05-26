@@ -369,6 +369,7 @@ $dotenv->load();
             });
         });
     </script>
+    <?php include 'typebot.php'; ?>
 </body>
 
 </html>

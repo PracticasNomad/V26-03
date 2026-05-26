@@ -1040,6 +1040,7 @@ if (isset($_POST['siguiente'])) {
             });
         });
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

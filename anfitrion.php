@@ -501,5 +501,6 @@ $_SESSION['anfitrion_id'] = $_GET['id'];
         cargarValoraciones();
         // ======= FIN: LÓGICA DE VALORACIONES =======
     </script>
+    <?php include 'typebot.php'; ?>
 </body>
 </html>

@@ -395,6 +395,7 @@ if (isset($_POST['nueva_password']) && isset($_POST['confirmar_password'])) {
             }
         });
     </script>
+    
 </body>
 
 </html>

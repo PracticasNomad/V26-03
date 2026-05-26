@@ -621,6 +621,7 @@ if (isset($_POST['regenerar'])) {
             });
         });
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

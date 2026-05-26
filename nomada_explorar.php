@@ -684,6 +684,7 @@ if (isset($_POST['cerrar'])) {
             });
         }
     </script>
+    <?php include 'typebot.php'; ?>
 </body>
 
 </html>

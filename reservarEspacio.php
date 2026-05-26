@@ -605,6 +605,7 @@ $space = $spaceData[0];
             });
         });
     </script>
+    <?php include 'typebot.php'; ?>
 </body>
 
 </html>

@@ -894,6 +894,7 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
                 updateSessionCoordinates(lat, lng);
             }
         </script>
+        <?php include '../typebot.php'; ?>
 </body>
 
 </html>

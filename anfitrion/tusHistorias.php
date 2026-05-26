@@ -303,7 +303,7 @@ require_once 'verificar_sesion_host.php';
     </div>
 
     <?php include 'footerAnfitrion.php'; ?>
-
+<?php include '../typebot.php'; ?>
 </body>
 
 </html>

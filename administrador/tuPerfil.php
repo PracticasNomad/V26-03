@@ -232,18 +232,20 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
             color: var(--dark-text);
             word-break: break-word;
         }
-        
+
         .btn-light {
             background-color: #e9ecef !important;
-            color: var(--dark-text) !important; /* Fuerza el texto a color oscuro */
+            color: var(--dark-text) !important;
+            /* Fuerza el texto a color oscuro */
             border: 1px solid #dee2e6;
         }
 
         .btn-light:hover {
             background-color: #d3d9df !important;
-            color: #000 !important; /* Texto negro al pasar el ratón */
+            color: #000 !important;
+            /* Texto negro al pasar el ratón */
         }
-        
+
         /* Botones */
         .btn-custom {
             transition: all 0.3s ease;
@@ -375,12 +377,14 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
         }
 
         .modal-footer .btn-light {
-            margin: 0 15px 0 0 !important; /* Le quita el automático y le da 15px de separación a la derecha */
+            margin: 0 15px 0 0 !important;
+            /* Le quita el automático y le da 15px de separación a la derecha */
             width: auto !important;
         }
 
         .modal-footer .btn-brand {
-            margin: 0 !important; /* Le quita el automático para que no salga volando */
+            margin: 0 !important;
+            /* Le quita el automático para que no salga volando */
             width: auto !important;
         }
 
@@ -647,9 +651,14 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;" id="btnGuardarImagen">Guardar foto</button>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-outline-danger rounded-pill px-4 fw-bold" id="btnBorrarImagen">
+                        <i class="fas fa-trash-alt me-1"></i> Borrar
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;" id="btnGuardarImagen">Guardar foto</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -774,6 +783,46 @@ if (!empty($rawUrl) && $rawUrl != '../img/perfil.png') {
                     btn.textContent = "Guardar foto";
                 });
         });
+
+        // Lógica para el botón de Borrar Imagen
+        const btnBorrar = document.getElementById('btnBorrarImagen');
+        if (btnBorrar) {
+            btnBorrar.addEventListener('click', function() {
+                if (!confirm("¿Seguro que quieres eliminar tu foto de perfil?")) return;
+
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
+
+                // Ajusta la ruta '../borrar-imagen-perfil.php' dependiendo de dónde pusiste el archivo
+                fetch("../borrar-imagen-perfil.php?tipo=admin", {
+                        method: "POST"
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Actualizamos todas las imágenes de perfil visibles en la pantalla
+                            if (document.getElementById("fotoPerfil")) document.getElementById("fotoPerfil").src = data.avatarUrl;
+                            if (document.getElementById("fotoPerfilMovil")) document.getElementById("fotoPerfilMovil").src = data.avatarUrl;
+                            if (document.getElementById("previewImagen")) document.getElementById("previewImagen").src = data.avatarUrl;
+
+                            // Si la cabecera superior tiene la foto, también la actualizamos
+                            const avatarCabecera = document.querySelector('.main-header .avatar-circle');
+                            if (avatarCabecera) avatarCabecera.src = data.avatarUrl;
+
+                            mostrarNotificacion("Foto eliminada correctamente", "success");
+                            bootstrap.Modal.getInstance(document.getElementById('cambiarImagenModal')).hide();
+                        } else {
+                            mostrarNotificacion("Error: " + data.message, "error");
+                        }
+                    })
+                    .catch(error => mostrarNotificacion("Ha ocurrido un error de conexión", "error"))
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-trash-alt me-1"></i> Borrar';
+                    });
+            });
+        }
     </script>
 </body>
 

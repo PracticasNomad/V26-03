@@ -710,6 +710,7 @@ if (isset($_POST['actualizar'])) {
             <?php endif; ?>
         });
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

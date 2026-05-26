@@ -661,6 +661,7 @@ if (isset($_POST['insertar'])) {
             $('#add-horario').click();
         });
     </script>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>
