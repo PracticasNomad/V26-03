@@ -70,7 +70,9 @@ HTML;
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="../img/favicon-color.png">
+    <link rel="icon" href="../favicon-color.png">
+    <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>TheNomadapp - Tu perfil Gestora</title>
 
     <style>
@@ -424,7 +426,7 @@ HTML;
 </head>
 
 <body>
-    <!-- <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 10500">
         <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert"
             aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -432,7 +434,7 @@ HTML;
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
-    </div> -->
+    </div>
     <?php include 'headerGestor.php'; ?>
     <div class="contenedorPerfil mt-5">
 
@@ -688,11 +690,14 @@ HTML;
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer d-flex justify-content-between">
-                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold"
-                        data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;"
-                        id="btnGuardarImagen">Guardar foto</button>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-outline-danger rounded-pill px-4 fw-bold" id="btnBorrarImagen">
+                        <i class="fas fa-trash-alt me-1"></i> Borrar
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;" id="btnGuardarImagen">Guardar foto</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -825,6 +830,46 @@ HTML;
                     btn.textContent = "Guardar foto";
                 });
         });
+
+        // Lógica para el botón de Borrar Imagen
+        const btnBorrar = document.getElementById('btnBorrarImagen');
+        if (btnBorrar) {
+            btnBorrar.addEventListener('click', function() {
+                if (!confirm("¿Seguro que quieres eliminar tu foto de perfil?")) return;
+
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
+
+                // Ajusta la ruta '../borrar-imagen-perfil.php' dependiendo de dónde pusiste el archivo
+                fetch("../borrar-imagen-perfil.php?tipo=gestor", {
+                        method: "POST"
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Actualizamos todas las imágenes de perfil visibles en la pantalla
+                            if (document.getElementById("fotoPerfil")) document.getElementById("fotoPerfil").src = data.avatarUrl;
+                            if (document.getElementById("fotoPerfilMovil")) document.getElementById("fotoPerfilMovil").src = data.avatarUrl;
+                            if (document.getElementById("previewImagen")) document.getElementById("previewImagen").src = data.avatarUrl;
+
+                            // Si la cabecera superior tiene la foto, también la actualizamos
+                            const avatarCabecera = document.querySelector('.main-header .avatar-circle');
+                            if (avatarCabecera) avatarCabecera.src = data.avatarUrl;
+
+                            mostrarNotificacion("Foto eliminada correctamente", "success");
+                            bootstrap.Modal.getInstance(document.getElementById('cambiarImagenModal')).hide();
+                        } else {
+                            mostrarNotificacion("Error: " + data.message, "error");
+                        }
+                    })
+                    .catch(error => mostrarNotificacion("Ha ocurrido un error de conexión", "error"))
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-trash-alt me-1"></i> Borrar';
+                    });
+            });
+        }
     </script>
 </body>
 
