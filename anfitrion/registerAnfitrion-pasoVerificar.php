@@ -235,6 +235,8 @@ function insertarDatos()
         'parking_price' => $parking_price,
         'has_wifi' => $_SESSION['establecimiento']['has_wifi'] == 1,
         'wifi_price' => $wifi_price,
+        'has_food' => isset($_SESSION['establecimiento']['has_food']) ? ($_SESSION['establecimiento']['has_food'] == 1) : false,
+        'has_accommodation' => isset($_SESSION['establecimiento']['has_accommodation']) ? ($_SESSION['establecimiento']['has_accommodation'] == 1) : false,
         'direccion' => $_SESSION['establecimiento']['calle'] . ", " . $_SESSION['establecimiento']['numero'],
         'localidad' => $_SESSION['establecimiento']['localidad'],
         'provincia' => $_SESSION['establecimiento']['provincia'],

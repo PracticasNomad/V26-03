@@ -1,7 +1,6 @@
 <?php
 require_once 'verificar_sesion_guest.php';
 
-
 require './vendor/autoload.php';
 
 use Dotenv\Dotenv;
@@ -15,17 +14,6 @@ if (isset($_COOKIE[$nombreCookie])) {
     $tiempoExpiracion = time() + 60 * 60 * 24 * 30;
     setcookie($nombreCookie, true, $tiempoExpiracion);
 }
-/*
-if (isset($_POST['cerrar'])) {
-    session_unset();
-    session_destroy();
-    $nombreCookie = "mi_cookie_visitas";
-    $tiempoExpiracion = time() - 1;
-    setcookie($nombreCookie, "", $tiempoExpiracion);
-    header('Location: https://nomadappme.yonomad.app/login.php');
-    exit;
-}
-*/
 ?>
 
 <!DOCTYPE html>
@@ -46,8 +34,7 @@ if (isset($_POST['cerrar'])) {
     <link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Explorar espacios</title>
 
-    <!-- Mapa -->
-     <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+    <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
     <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
 
     <script>
@@ -173,6 +160,7 @@ if (isset($_POST['cerrar'])) {
             font-weight: 600;
             color: #333;
             cursor: pointer;
+            font-size: 0.95rem;
         }
 
         .clear-filters-btn {
@@ -215,13 +203,6 @@ if (isset($_POST['cerrar'])) {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             margin-bottom: 0 !important;
             flex-grow: 0;
-        }
-
-        .page-shell {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 15px;
-            box-sizing: border-box;
         }
 
         @media (max-width: 992px) {
@@ -268,9 +249,9 @@ if (isset($_POST['cerrar'])) {
 
         .icons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 15px;
-            color: #28a745;
+            color: #ccc;
         }
 
         .icons i {
@@ -382,7 +363,7 @@ if (isset($_POST['cerrar'])) {
                     <i class="fas fa-filter"></i> Filtrar espacios
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="filter-group">
                             <label class="filter-label">Localidad</label>
                             <select id="filter-localidad" class="filter-select">
@@ -390,7 +371,7 @@ if (isset($_POST['cerrar'])) {
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="filter-group">
                             <label class="filter-label">Provincia</label>
                             <select id="filter-provincia" class="filter-select">
@@ -398,22 +379,32 @@ if (isset($_POST['cerrar'])) {
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="filter-group">
                             <label class="filter-label">Servicios</label>
                             <div class="row g-2">
-                                <div class="col-6">
+                                <div class="col-6 col-md-3">
                                     <div class="filter-checkbox-group">
                                         <input type="checkbox" id="filter-wifi" class="filter-checkbox">
-                                        <label for="filter-wifi" class="filter-checkbox-label"><i class="fas fa-wifi"></i>
-                                            WiFi</label>
+                                        <label for="filter-wifi" class="filter-checkbox-label"><i class="fas fa-wifi text-primary"></i> WiFi</label>
                                     </div>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-6 col-md-3">
                                     <div class="filter-checkbox-group">
                                         <input type="checkbox" id="filter-parking" class="filter-checkbox">
-                                        <label for="filter-parking" class="filter-checkbox-label"><i class="fas fa-car"></i>
-                                            Parking</label>
+                                        <label for="filter-parking" class="filter-checkbox-label"><i class="fas fa-car text-secondary"></i> Parking</label>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="filter-checkbox-group">
+                                        <input type="checkbox" id="filter-food" class="filter-checkbox">
+                                        <label for="filter-food" class="filter-checkbox-label"><i class="fas fa-utensils text-warning"></i> Comida</label>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="filter-checkbox-group">
+                                        <input type="checkbox" id="filter-bed" class="filter-checkbox">
+                                        <label for="filter-bed" class="filter-checkbox-label"><i class="fas fa-bed text-info"></i> Dormir</label>
                                     </div>
                                 </div>
                             </div>
@@ -453,26 +444,24 @@ if (isset($_POST['cerrar'])) {
 
         L.mapbox.accessToken = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
         var map = L.mapbox.map('map')
-            .setView([40.416775, -3.703790], 6) // Centrado en España
+            .setView([40.416775, -3.703790], 6)
             .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
         var myIcon = L.icon({
-            iconUrl: 'img/posicionAnfitrion.png', // Ruta del icono (desde la raíz)
+            iconUrl: 'img/posicionAnfitrion.png',
             iconSize: [30, 30],
             iconAnchor: [15, 32],
         });
 
-        var markersLayer = new L.LayerGroup().addTo(map); // Capa para poder borrar los marcadores al filtrar
+        var markersLayer = new L.LayerGroup().addTo(map); 
 
         function updateMap(data) {
-            markersLayer.clearLayers(); // Borramos los marcadores anteriores
+            markersLayer.clearLayers(); 
             data.forEach(element => {
                 if (element.latitude != null && element.longitude != null) {
                     
-                    // 1. Recreamos la misma URL exacta que usan las tarjetas
                     var urlDetalles = 'anfitrion.php?nombre=' + element.nombre + '&id=' + element.id + '&direccion=' + element.direccion + ", " + element.localidad + '&coordinates0=' + element.longitude + '&coordinates1=' + element.latitude + '&fromIndex=false';
 
-                    // 2. Añadimos el botón al final del popup con estilos inline para no tocar el CSS general
                     var popupContent = 
                         '<div class="text-center">' +
                             '<b style="color: #28a745;">' + (element.nombre || 'Sin nombre') + '</b><br>' +
@@ -500,7 +489,7 @@ if (isset($_POST['cerrar'])) {
 
                 populateFilters(data);
                 appendData(filteredAnfitriones);
-                updateMap(filteredAnfitriones); // Añadido el mapa
+                updateMap(filteredAnfitriones);
                 updateResultsCount();
 
                 document.getElementById("loading-spinner").style.display = "none";
@@ -538,19 +527,25 @@ if (isset($_POST['cerrar'])) {
         document.getElementById('filter-provincia').addEventListener('change', applyFilters);
         document.getElementById('filter-wifi').addEventListener('change', applyFilters);
         document.getElementById('filter-parking').addEventListener('change', applyFilters);
+        document.getElementById('filter-food').addEventListener('change', applyFilters);
+        document.getElementById('filter-bed').addEventListener('change', applyFilters);
 
         function applyFilters() {
             const localidadFilter = document.getElementById('filter-localidad').value;
             const provinciaFilter = document.getElementById('filter-provincia').value;
             const wifiFilter = document.getElementById('filter-wifi').checked;
             const parkingFilter = document.getElementById('filter-parking').checked;
+            const foodFilter = document.getElementById('filter-food').checked;
+            const bedFilter = document.getElementById('filter-bed').checked;
 
             filteredAnfitriones = allAnfitriones.filter(anfitrion => {
                 let matches = true;
                 if (localidadFilter && anfitrion.localidad !== localidadFilter) matches = false;
                 if (provinciaFilter && (anfitrion.provincia || 'Sin provincia') !== provinciaFilter) matches = false;
-                if (wifiFilter && !anfitrion.has_wifi) matches = false;
-                if (parkingFilter && !anfitrion.has_parking) matches = false;
+                if (wifiFilter && (anfitrion.has_wifi != 1 && anfitrion.has_wifi !== true)) matches = false;
+                if (parkingFilter && (anfitrion.has_parking != 1 && anfitrion.has_parking !== true)) matches = false;
+                if (foodFilter && (anfitrion.has_food != 1 && anfitrion.has_food !== true)) matches = false;
+                if (bedFilter && (anfitrion.has_accommodation != 1 && anfitrion.has_accommodation !== true)) matches = false;
                 return matches;
             });
 
@@ -560,7 +555,7 @@ if (isset($_POST['cerrar'])) {
             } else {
                 appendData(filteredAnfitriones);
             }
-            updateMap(filteredAnfitriones); // Se añade el mapa
+            updateMap(filteredAnfitriones); 
             updateResultsCount();
         }
 
@@ -569,11 +564,13 @@ if (isset($_POST['cerrar'])) {
             document.getElementById('filter-provincia').value = '';
             document.getElementById('filter-wifi').checked = false;
             document.getElementById('filter-parking').checked = false;
+            document.getElementById('filter-food').checked = false;
+            document.getElementById('filter-bed').checked = false;
 
             filteredAnfitriones = [...allAnfitriones];
             document.getElementById("contenedor").innerHTML = '';
             appendData(filteredAnfitriones);
-            updateMap(filteredAnfitriones); // Se añade el mapa
+            updateMap(filteredAnfitriones);
             updateResultsCount();
         }
 
@@ -607,7 +604,6 @@ if (isset($_POST['cerrar'])) {
                 var imgContainer = document.createElement("div");
                 imgContainer.className = "anfitrion-img";
 
-                // MAGIA DE URLS AQUÍ: Limpiamos la URL y aplicamos la de MINIO_URL inyectada por PHP
                 if (anfitrion.imagen) {
                     let cleanUrl = anfitrion.imagen;
                     try {
@@ -640,32 +636,42 @@ if (isset($_POST['cerrar'])) {
                 iconos.className = "icons";
 
                 var iconoEdificio = document.createElement("i");
-                iconoEdificio.className = "fas fa-building";
+                iconoEdificio.className = "fas fa-building text-dark";
                 iconos.appendChild(iconoEdificio);
 
-                if (anfitrion.has_wifi) {
+                if (anfitrion.has_wifi == 1 || anfitrion.has_wifi === true) {
                     var iconoWifi = document.createElement("i");
-                    iconoWifi.className = "fas fa-wifi";
+                    iconoWifi.className = "fas fa-wifi text-primary";
                     iconos.appendChild(iconoWifi);
                 }
 
-                if (anfitrion.has_parking) {
+                if (anfitrion.has_parking == 1 || anfitrion.has_parking === true) {
                     var iconoParking = document.createElement("i");
-                    iconoParking.className = "fas fa-car";
+                    iconoParking.className = "fas fa-car text-secondary";
                     iconos.appendChild(iconoParking);
+                }
+
+                // NUEVOS ICONOS EN LA TARJETA
+                if (anfitrion.has_food == 1 || anfitrion.has_food === true) {
+                    var iconoFood = document.createElement("i");
+                    iconoFood.className = "fas fa-utensils text-warning";
+                    iconos.appendChild(iconoFood);
+                }
+
+                if (anfitrion.has_accommodation == 1 || anfitrion.has_accommodation === true) {
+                    var iconoBed = document.createElement("i");
+                    iconoBed.className = "fas fa-bed text-info";
+                    iconos.appendChild(iconoBed);
                 }
                 
                 var puntuacion = document.createElement("div");
                 puntuacion.className = "star";
                 
-                // Comprobación estricta para evitar fallos si la nota es un número bajo
                 var tieneNota = (anfitrion.media_valoracion !== null && anfitrion.media_valoracion !== undefined);
                 
                 var notaMedia = tieneNota ? parseFloat(anfitrion.media_valoracion).toFixed(1) : 'Nuevo';
                 var estrellaHtml = tieneNota ? '<i class="fas fa-star"></i> ' : '<i class="far fa-star"></i> ';
                 puntuacion.innerHTML = estrellaHtml + notaMedia;
-
-
 
                 var enlace = document.createElement("div");
                 enlace.className = "enlace";

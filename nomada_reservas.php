@@ -157,30 +157,36 @@ $dotenv->load();
     </div>
     <div class="page-shell">
         <?php include 'headerNomada.php'; ?>
-        
-        <div id="container" class="mt-4" style="min-height: 50vh;">
-        </div>
+
+        <div id="container" class="mt-4" style="min-height: 50vh;"></div>
     </div>
 
     <?php include 'footerNomada.php'; ?>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('loading-spinner').style.display = 'flex';
-            
-            // TRUCO ANTI-CACHÉ: Le añadimos la hora exacta en milisegundos a la URL
-            // Así el navegador cree que es un archivo nuevo y SIEMPRE pregunta al servidor
+
             const url = "getReservasNomada.php?nocache=" + new Date().getTime();
 
             fetch(url, { cache: "no-store" })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.length === 0) {
+                    if (!data || data.length === 0) {
+                        document.getElementById('loading-spinner').style.display = 'none';
+                        appendData([], {});
+                        return;
+                    }
+
+                    // ESCUDO ANTI-NULOS: Extraemos IDs solo si existen
+                    const establecimientoIds = [...new Set(data.map(r => r.space?.establecimiento?.id).filter(id => id != null))];
+
+                    if (establecimientoIds.length === 0) {
                         document.getElementById('loading-spinner').style.display = 'none';
                         appendData(data, {});
                         return;
                     }
-                    const establecimientoIds = [...new Set(data.map(reserva => reserva.space.establecimiento.id))];
+
                     return fetch(`getGalleryImages.php?ids=${establecimientoIds.join(',')}`)
                         .then(response => response.json())
                         .then(galleryImages => {
@@ -189,32 +195,35 @@ $dotenv->load();
                         });
                 })
                 .catch(err => {
+                    console.error("Error crítico de carga:", err);
                     document.getElementById('loading-spinner').style.display = 'none';
-                    // Ahora esto no fallará porque el ID 'container' ya existe
                     document.getElementById('container').innerHTML += `
                         <div class="alert alert-danger mt-3" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            Error al cargar las reservas. Por favor, intenta de nuevo más tarde.
+                            Error al cargar las reservas. Revisa la consola para más detalles.
                         </div>
                     `;
                 });
 
             function appendData(data, galleryImages) {
                 var contenedor = document.getElementById("container");
-                
-                // CÁLCULO DE FECHA LOCAL (Sin fallos de zona horaria)
+
                 const dateObj = new Date();
                 const year = dateObj.getFullYear();
                 const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                 const day = String(dateObj.getDate()).padStart(2, '0');
                 const today = `${year}-${month}-${day}`;
-                
+
                 const defaultImage = "https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg";
 
-                // Contamos cuántas reservas ACTIVAS hay realmente
                 let reservasActivasCount = 0;
+
                 for (var i = 0; i < data.length; i++) {
-                    if (data[i].day >= today && data[i].cancelada == false) {
+                    let isCanceled = false;
+                    if (data[i].cancelada === true || data[i].cancelada == 1) isCanceled = true;
+                    if (data[i].estado_cancelacion === true || data[i].estado_cancelacion == 1 || (data[i].estado_cancelacion && String(data[i].estado_cancelacion).toLowerCase() === 'cancelada')) isCanceled = true;
+
+                    if (data[i].day >= today && !isCanceled) {
                         reservasActivasCount++;
                     }
                 }
@@ -229,29 +238,44 @@ $dotenv->load();
                 }
 
                 for (var i = 0; i < data.length; i++) {
-                    if (data[i].day >= today && data[i].cancelada == false) {
-                        
+                    let isCanceled = false;
+                    if (data[i].cancelada === true || data[i].cancelada == 1) isCanceled = true;
+                    if (data[i].estado_cancelacion === true || data[i].estado_cancelacion == 1 || (data[i].estado_cancelacion && String(data[i].estado_cancelacion).toLowerCase() === 'cancelada')) isCanceled = true;
+
+                    if (data[i].day >= today && !isCanceled) {
+
                         const fecha = new Date(data[i].day);
-                        const opciones = {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        };
+                        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                         const fechaFormateada = fecha.toLocaleDateString('es-ES', opciones);
                         const fechaFormateadaFinal = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
 
-                        const establecimientoId = data[i].space.establecimiento.id;
-                        let imageUrl = galleryImages[establecimientoId] || defaultImage;
+                        // ESCUDO ANTI-NULOS: Valores por defecto si el local es nuevo e incompleto
+                        const est = data[i].space?.establecimiento || {};
+                        const estNombre = est.nombre || 'Establecimiento en proceso';
+                        const estDireccion = est.direccion || 'Dirección no disponible';
+                        const estLocalidad = est.localidad || '';
+                        const estProvincia = est.provincia || '';
+                        const estId = est.id || null;
 
-                        // PARCHE MAGICO DE URL CON MINIO
+                        let imageUrl = (estId && galleryImages[estId]) ? galleryImages[estId] : defaultImage;
+
                         if (imageUrl !== defaultImage) {
                             try {
                                 let tempUrl = imageUrl.startsWith('http') ? imageUrl : 'http://' + imageUrl;
                                 let urlObj = new URL(tempUrl);
                                 imageUrl = MINIO_URL + urlObj.pathname;
-                            } catch (e) {}
+                            } catch (e) { }
                         }
+
+                        // ICONOS SEGUROS
+                        let serviciosHtml = '';
+                        if (est.has_wifi) serviciosHtml += '<i class="fas fa-wifi text-primary me-2" title="WiFi"></i>';
+                        if (est.has_parking) serviciosHtml += '<i class="fas fa-car text-secondary me-2" title="Parking"></i>';
+                        if (est.has_food) serviciosHtml += '<i class="fas fa-utensils text-warning me-2" title="Comida"></i>';
+                        if (est.has_accommodation) serviciosHtml += '<i class="fas fa-bed text-info me-2" title="Dormir"></i>';
+
+                        const startTimeStr = data[i].start_time ? data[i].start_time.substring(0, 5) : '--:--';
+                        const endTimeStr = data[i].end_time ? data[i].end_time.substring(0, 5) : '--:--';
 
                         const card = document.createElement("div");
                         card.className = "card reservation-card mb-4 shadow-sm";
@@ -271,19 +295,21 @@ $dotenv->load();
                                         </div>
                                     </div>
                                     <div class="col-md-8">
-                                        <h4 class="card-title">${data[i].space.establecimiento.nombre}</h4>
-                                        <p class="card-text">
+                                        <h4 class="card-title">${estNombre}</h4>
+                                        <p class="card-text mb-2">
                                             <i class="fas fa-map-marker-alt text-danger me-2"></i>
-                                            ${data[i].space.establecimiento.direccion}<br>
-                                            <span class="ms-4">${data[i].space.establecimiento.localidad}, ${data[i].space.establecimiento.provincia}</span>
+                                            ${estDireccion}<br>
+                                            <span class="ms-4">${estLocalidad} ${estProvincia ? ', ' + estProvincia : ''}</span>
                                         </p>
+                                        <div class="mb-3 ms-4">
+                                            ${serviciosHtml}
+                                        </div>
                                         <div class="d-flex justify-content-between align-items-center mt-3">
                                             <div class="horario">
-                                                <span class="badge bg-info text-dark"><i class="far fa-clock me-1"></i> Inicio: ${data[i].start_time.substring(0, 5)}</span>
-                                                <span class="badge bg-secondary ms-2"><i class="fas fa-hourglass-end me-1"></i> Fin: ${data[i].end_time.substring(0, 5)}</span>
+                                                <span class="badge bg-info text-dark"><i class="far fa-clock me-1"></i> Inicio: ${startTimeStr}</span>
+                                                <span class="badge bg-secondary ms-2"><i class="fas fa-hourglass-end me-1"></i> Fin: ${endTimeStr}</span>
                                             </div>
-                                            <a href="reservadetalles.php?nombre=${data[i].space.establecimiento.nombre}&direccion=${data[i].space.establecimiento.direccion}&poblacion=${data[i].space.establecimiento.localidad}+, ${data[i].space.establecimiento.provincia}&horaInicio=${data[i].start_time}&horaFinal=${data[i].end_time}&reservaId=${data[i].id}&anfitrionId=${data[i].space.host_id}&Id=${data[i].user_id}&coordinates0=${data[i].space.establecimiento.longitude}&coordinates1=${data[i].space.establecimiento.latitude}" 
-                                            class="btn btn-primary">
+                                            <a href="reservadetalles.php?reservaId=${data[i].id}" class="btn btn-primary">
                                                 <i class="fas fa-info-circle me-1"></i> Ver detalles
                                             </a>
                                         </div>

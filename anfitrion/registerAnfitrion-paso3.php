@@ -8,6 +8,8 @@ if (isset($_POST['siguiente'])) {
     $precio_parking = ($has_parking && isset($_POST['precio_parking'])) ? trim($_POST['precio_parking']) : '';
     $has_wifi = isset($_POST['has_wifi']) ? 1 : 0;
     $precio_wifi = ($has_wifi && isset($_POST['precio_wifi'])) ? trim($_POST['precio_wifi']) : '';
+    $has_food = isset($_POST['has_food']) ? 1 : 0;
+    $has_accommodation = isset($_POST['has_accommodation']) ? 1 : 0;
     $calle = trim($_POST['calle']);
     $numero = trim($_POST['numero']);
     $piso = trim($_POST['piso']);
@@ -103,6 +105,8 @@ if (isset($_POST['siguiente'])) {
             'precio_parking',
             'has_wifi',
             'precio_wifi',
+            'has_food',
+            'has_accommodation',
             'calle',
             'numero',
             'piso',
@@ -116,6 +120,8 @@ if (isset($_POST['siguiente'])) {
         $_SESSION['establecimiento']['precio_parking'] = $precio_parking;
         $_SESSION['establecimiento']['has_wifi'] = $has_wifi;
         $_SESSION['establecimiento']['precio_wifi'] = $precio_wifi;
+        $_SESSION['establecimiento']['has_food'] = $has_food;
+        $_SESSION['establecimiento']['has_accommodation'] = $has_accommodation;
         $_SESSION['establecimiento']['calle'] = $calle;
         $_SESSION['establecimiento']['numero'] = $numero;
         $_SESSION['establecimiento']['piso'] = $piso;
@@ -414,33 +420,58 @@ if (isset($_SESSION['host']['domicilio_facturacion_mismo'])) {
                     <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required
                         placeholder="Describe tu establecimiento"><?php echo isset($_SESSION['establecimiento']['descripcion']) ? htmlspecialchars($_SESSION['establecimiento']['descripcion']) : ''; ?></textarea>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">¿Dispone de parking?</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="has_parking" name="has_parking" <?php echo (isset($_SESSION['establecimiento']['has_parking']) && $_SESSION['establecimiento']['has_parking'] == 1) ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="has_parking">Sí</label>
+               <div class="col-12 mt-4 mb-2">
+                    <h5 class="fw-bold" style="color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+                        <i class="fas fa-concierge-bell text-warning me-2"></i>Servicios del Establecimiento
+                    </h5>
+                </div>
+                
+                <div class="col-12 mb-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="has_parking" name="has_parking" <?php echo (isset($_SESSION['establecimiento']['has_parking']) && $_SESSION['establecimiento']['has_parking'] == 1) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-bold" for="has_parking"><i class="fas fa-parking me-1 text-secondary"></i> Ofrece Parking</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-sm-12" id="parking_price_container" style="<?php echo (isset($_SESSION['establecimiento']['has_parking']) && $_SESSION['establecimiento']['has_parking'] == 1) ? '' : 'display:none;'; ?>">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light fw-bold">Precio (€/día)</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="precio_parking" name="precio_parking" placeholder="0.00" value="<?php echo isset($_SESSION['establecimiento']['precio_parking']) ? htmlspecialchars($_SESSION['establecimiento']['precio_parking']) : ''; ?>">
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6" id="parking_price_container"
-                    style="<?php echo (isset($_SESSION['establecimiento']['has_parking']) && $_SESSION['establecimiento']['has_parking'] == 1) ? '' : 'display:none'; ?>">
-                    <label for="precio_parking" class="form-label fw-bold">Precio del parking (€/día) *</label>
-                    <input type="number" step="0.01" min="0" class="form-control" id="precio_parking"
-                        name="precio_parking" placeholder="0.00"
-                        value="<?php echo isset($_SESSION['establecimiento']['precio_parking']) ? htmlspecialchars($_SESSION['establecimiento']['precio_parking']) : ''; ?>">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">¿Ofrece WiFi?</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="has_wifi" name="has_wifi" <?php echo (isset($_SESSION['establecimiento']['has_wifi']) && $_SESSION['establecimiento']['has_wifi'] == 1) ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="has_wifi">Sí</label>
+
+                <div class="col-12 mb-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 col-sm-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="has_wifi" name="has_wifi" <?php echo (isset($_SESSION['establecimiento']['has_wifi']) && $_SESSION['establecimiento']['has_wifi'] == 1) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-bold" for="has_wifi"><i class="fas fa-wifi me-1 text-primary"></i> Ofrece WiFi</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-sm-12" id="wifi_price_container" style="<?php echo (isset($_SESSION['establecimiento']['has_wifi']) && $_SESSION['establecimiento']['has_wifi'] == 1) ? '' : 'display:none;'; ?>">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light fw-bold">Precio (€/hora)</span>
+                                <input type="number" step="0.01" min="0" class="form-control" id="precio_wifi" name="precio_wifi" placeholder="0.00" value="<?php echo isset($_SESSION['establecimiento']['precio_wifi']) ? htmlspecialchars($_SESSION['establecimiento']['precio_wifi']) : ''; ?>">
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6" id="wifi_price_container"
-                    style="<?php echo (isset($_SESSION['establecimiento']['has_wifi']) && $_SESSION['establecimiento']['has_wifi'] == 1) ? '' : 'display:none'; ?>">
-                    <label for="precio_wifi" class="form-label fw-bold">Precio del WiFi (€/hora) *</label>
-                    <input type="number" step="0.01" min="0" class="form-control" id="precio_wifi" name="precio_wifi"
-                        placeholder="0.00"
-                        value="<?php echo isset($_SESSION['establecimiento']['precio_wifi']) ? htmlspecialchars($_SESSION['establecimiento']['precio_wifi']) : ''; ?>">
+
+                <div class="col-12 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="has_food" name="has_food" <?php echo (isset($_SESSION['establecimiento']['has_food']) && $_SESSION['establecimiento']['has_food'] == 1) ? 'checked' : ''; ?>>
+                        <label class="form-check-label fw-bold" for="has_food"><i class="fas fa-utensils me-1 text-warning"></i> Ofrece Comida y Bebida</label>
+                    </div>
+                </div>
+
+                <div class="col-12 mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="has_accommodation" name="has_accommodation" <?php echo (isset($_SESSION['establecimiento']['has_accommodation']) && $_SESSION['establecimiento']['has_accommodation'] == 1) ? 'checked' : ''; ?>>
+                        <label class="form-check-label fw-bold" for="has_accommodation"><i class="fas fa-bed me-1 text-info"></i> Opción Work & Travel (Alojamiento)</label>
+                    </div>
                 </div>
                 <div class="col-md-8">
                     <label for="calle" class="form-label fw-bold">Calle *</label>

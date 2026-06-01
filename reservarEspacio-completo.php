@@ -10,13 +10,8 @@ $dotenv->load();
 function generateUuidV4()
 {
     $data = random_bytes(16);
-
-    // Establece los bits de versión (0100 para versión 4)
     $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
-
-    // Establece los bits del variant (10xxxxxx)
     $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
-
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }
 
@@ -27,6 +22,7 @@ if (!isset($_SESSION['reserva']) || !isset($_SESSION['spaceId'])) {
     exit;
 }
 
+// Guardamos los datos en variables locales para poder usarlos en el HTML después
 $reserva = $_SESSION['reserva'];
 $spaceId = $_SESSION['spaceId'];
 
@@ -52,109 +48,94 @@ if (empty($spaceData)) {
 
 $space = $spaceData[0];
 
-// Inicializar variables de control
-if (!isset($_SESSION['reservaExitosa'])) {
-    $_SESSION['reservaExitosa'] = false;
-}
-
 $correoEnviado = false;
 $mensajeError = '';
-$reservaYaProcesada = false;
 
-function insertarReserva($reservaData)
+function insertarReserva($reservaData, $codigoUnico)
 {
     $url = 'http://' . $_ENV['SERVER_IP'] . ':' . $_ENV['DATABASE_PORT'] . '/rest/v1/reservation';
     $ch = curl_init($url);
     $data = array(
-        "id" => $_SESSION['codigo_reserva'],
+        "id" => $codigoUnico,
         "user_id" => $_SESSION['user_id'],
         "space_id" => $reservaData['spaceId'],
         "start_time" => $reservaData['startTime'],
         "end_time" => $reservaData['endTime'],
         "day" => $reservaData['date'],
         "message" => $reservaData['message'] ?? '',
-        "dni_nomada" => $reservaData['dni'],
-        "direccion" => $reservaData['direccion']
+        "dni_nomada" => $reservaData['dni'] ?? null,
+        "direccion" => $reservaData['direccion'] ?? null
     );
     $payload = json_encode($data);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Authorization: Bearer ' . $_SESSION['token'],
         'Content-Type: application/json',
-        'apikey: ' . $_ENV['DATABASE_APIKEY']
+        'apikey: ' . $_ENV['DATABASE_APIKEY'],
+        'Prefer: return=representation'
     ));
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
     $response = curl_exec($ch);
-
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    return $httpCode >= 200 && $httpCode < 300;
+    curl_close($ch);
+    
+    if ($httpCode >= 200 && $httpCode < 300) {
+        return true;
+    } else {
+        $errorData = json_decode($response, true);
+        $_SESSION['db_error_message'] = isset($errorData['message']) ? $errorData['message'] : $response;
+        return false;
+    }
 }
 
 function enviarCorreo($reservaData, $spaceData)
 {
     $emailAnfitrion = $spaceData['establecimiento']['host']['email'];
-
     $parameters = urlencode('nombre') . '=' . urlencode($_SESSION['name']) . '&' .
         urlencode('establecimiento') . '=' . urlencode($spaceData['establecimiento']['nombre']) . '&' .
         urlencode('espacio') . '=' . urlencode($spaceData['name']) . '&' .
         urlencode('fecha') . '=' . urlencode(date('d/m/Y', strtotime($reservaData['date']))) . '&' .
         urlencode('hora') . '=' . urlencode($reservaData['startTime'] . ' - ' . $reservaData['endTime']) . '&' .
-        urlencode('email_anfitrion') . '=' . urlencode($emailAnfitrion);
+        urlencode('email_anfitrion') . '=' . urlencode($emailAnfitrion) . '&' .
+        urlencode('email') . '=' . urlencode($_SESSION['email']);
 
-    header('Location: ../emails/confirmarReserva.php?email=' . $_SESSION['email'] . '&' . $parameters);
-    exit;
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+    $url = $protocol . "://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/../emails/confirmarReserva.php?' . $parameters;
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 3); 
+    curl_exec($ch);
+    curl_close($ch);
+    
+    return true;
 }
 
-// Verificar si ya se procesó esta reserva
-if (isset($_SESSION['reserva_procesada']) && $_SESSION['reserva_procesada'] === true) {
-    $reservaYaProcesada = true;
-}
-
-// Procesar la reserva solo si no se ha procesado ya
-if (!$reservaYaProcesada) {
-    if (!isset($_SESSION['codigo_reserva'])) {
-        $codigoReserva = generateUuidV4();
-        $_SESSION['codigo_reserva'] = $codigoReserva;
-        $_SESSION['reservaExitosa'] = false;
-    }
-
-    if ($sendEmail && $_SESSION['reservaExitosa'] === false) {
-        $_SESSION['reservaExitosa'] = insertarReserva($reserva);
-
-        // Marcar como procesada para evitar duplicados
-        if ($_SESSION['reservaExitosa']) {
-            $_SESSION['reserva_procesada'] = true;
-        }
-    }
-}
-
-if ($_SESSION['reservaExitosa'] == true) {
-    $correoEnviado = false;
-    if ($sendEmail && !$reservaYaProcesada) {
+// =======================================================
+// EL GRAN ARREGLO: LÓGICA A PRUEBA DE FALLOS FANTASMA
+// =======================================================
+if ($sendEmail) {
+    // 1. Generamos un código único y limpio SÍ O SÍ
+    $codigoReserva = generateUuidV4();
+    $_SESSION['codigo_reserva'] = $codigoReserva;
+    
+    // 2. Obligamos a ejecutar el INSERT en la Base de Datos
+    $_SESSION['reservaExitosa'] = insertarReserva($reserva, $codigoReserva);
+    
+    if ($_SESSION['reservaExitosa']) {
         $correoEnviado = enviarCorreo($reserva, $space);
-    }
-
-    if ($correoEnviado || $reservaYaProcesada) {
-        // Reserva exitosa
+        
+        // 3. LIMPIAMOS LA SESIÓN AL INSTANTE
+        // Esto evita que si vas a hacer otra reserva asuma que ya está hecha
+        unset($_SESSION['reserva']);
+        unset($_SESSION['spaceId']);
     } else {
-        $mensajeError = 'Se ha registrado tu reserva, pero hubo un problema al enviar el correo de confirmación.';
+        // MODO CHIVATO: Si Supabase la rechaza ahora (por ej. por ser de noche), 
+        // ¡Por fin lo veremos en letras rojas en tu pantalla!
+        $errorDB = isset($_SESSION['db_error_message']) ? $_SESSION['db_error_message'] : 'Error desconocido.';
+        $mensajeError = 'La base de datos ha rechazado la reserva. ERROR: ' . $errorDB;
     }
-} else if (!$reservaYaProcesada) {
-    $mensajeError = 'Hubo un problema al procesar tu reserva. Por favor, inténtalo de nuevo más tarde.';
-}
-
-// Función para limpiar sesiones de reserva
-function limpiarSesionesReserva()
-{
-    unset($_SESSION['reserva']);
-    unset($_SESSION['spaceId']);
-    unset($_SESSION['reservaExitosa']);
-    unset($_SESSION['codigo_reserva']);
-    unset($_SESSION['reserva_procesada']);
-    unset($_SESSION['already_host']);
 }
 ?>
 

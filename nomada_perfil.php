@@ -339,10 +339,12 @@ $dotenv->load();
     </div>
 
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 10050">
-        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="liveToast" class="toast align-items-center text-white border-0 custom-toast" role="alert"
+            aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body fw-bold" id="toastMessage"></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
             </div>
         </div>
     </div>
@@ -358,6 +360,7 @@ $dotenv->load();
                 </div>
             </div>
 
+            <!-- BOTONES ESCRITORIO -->
             <div class="perfilFotoBotones">
                 <div class="profile-image-container">
                     <img id="fotoPerfil" src="img/perfil.png" alt="Tu foto">
@@ -367,6 +370,10 @@ $dotenv->load();
                 </button>
                 <button type="button" class="btn-custom btn-brand btn-edit-profile">
                     <i class="fas fa-user-edit"></i> Editar perfil
+                </button>
+                <!-- Botón Nomad Party -->
+                <button type="button" class="btn-custom btn-brand mt-2" onclick="abrirNomadParty()">
+                    <i class="fas fa-glass-cheers"></i> Nomad Party
                 </button>
                 <button type="button" class="btn-custom btn-logout mt-2" onclick="location.href='logout.php'">
                     <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -403,12 +410,17 @@ $dotenv->load();
                 </div>
             </div>
 
+            <!-- BOTONES MÓVIL -->
             <div class="botonesMovil">
                 <button type="button" class="btn-custom btn-brand btn-change-image">
                     <i class="fas fa-camera"></i> Cambiar imagen
                 </button>
                 <button type="button" class="btn-custom btn-brand btn-edit-profile">
                     <i class="fas fa-user-edit"></i> Editar perfil
+                </button>
+                <!-- Botón Nomad Party -->
+                <button type="button" class="btn-custom btn-brand mt-2" onclick="abrirNomadParty()">
+                    <i class="fas fa-glass-cheers"></i> Nomad Party
                 </button>
                 <button type="button" class="btn-custom btn-logout mt-3" onclick="location.href='logout.php'">
                     <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -430,7 +442,9 @@ $dotenv->load();
                             <img id="previewImagen" src="img/perfil.png" alt="Vista previa">
                         </div>
                         <div class="text-start mb-2">
-                            <label for="inputImagen" class="form-label fw-bold text-muted small text-uppercase">Selecciona una imagen de tu galería</label>
+                            <label for="inputImagen"
+                                class="form-label fw-bold text-muted small text-uppercase">Selecciona una imagen de tu
+                                galería</label>
                             <input type="file" class="form-control" id="inputImagen" name="imagen" accept="image/*">
                             <input type="hidden" id="imagenAnfitrionId" name="anfitrionId" value="">
                         </div>
@@ -441,8 +455,10 @@ $dotenv->load();
                         <i class="fas fa-trash-alt me-1"></i> Borrar
                     </button>
                     <div>
-                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;" id="btnGuardarImagen">Guardar foto</button>
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-brand rounded-pill px-4" style="margin:0; width:auto;"
+                            id="btnGuardarImagen">Guardar foto</button>
                     </div>
                 </div>
             </div>
@@ -459,31 +475,42 @@ $dotenv->load();
                 <div class="modal-body">
                     <form id="formEditarPerfil">
                         <div class="mb-3">
-                            <label for="editNombre" class="form-label text-muted small text-uppercase fw-bold">Nombre completo</label>
+                            <label for="editNombre" class="form-label text-muted small text-uppercase fw-bold">Nombre
+                                completo</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-user text-muted"></i></span>
-                                <input type="text" class="form-control border-start-0 ps-0" id="editNombre" name="nombre">
+                                <span class="input-group-text bg-white border-end-0"><i
+                                        class="fas fa-user text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="editNombre"
+                                    name="nombre">
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="editEmail" class="form-label text-muted small text-uppercase fw-bold">E-mail (No editable)</label>
+                            <label for="editEmail" class="form-label text-muted small text-uppercase fw-bold">E-mail (No
+                                editable)</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-muted"></i></span>
-                                <input type="email" class="form-control border-start-0 ps-0" id="editEmail" name="email" readonly>
+                                <span class="input-group-text bg-light border-end-0"><i
+                                        class="fas fa-envelope text-muted"></i></span>
+                                <input type="email" class="form-control border-start-0 ps-0" id="editEmail" name="email"
+                                    readonly>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="editTelefono" class="form-label text-muted small text-uppercase fw-bold">Teléfono</label>
+                            <label for="editTelefono"
+                                class="form-label text-muted small text-uppercase fw-bold">Teléfono</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-phone-alt text-muted"></i></span>
-                                <input type="text" class="form-control border-start-0 ps-0" id="editTelefono" name="telefono">
+                                <span class="input-group-text bg-white border-end-0"><i
+                                        class="fas fa-phone-alt text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="editTelefono"
+                                    name="telefono">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
-                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-brand rounded-pill px-4" style="width: auto; margin:0;" id="btnGuardarCambios">Guardar cambios</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold"
+                        data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-brand rounded-pill px-4" style="width: auto; margin:0;"
+                        id="btnGuardarCambios">Guardar cambios</button>
                 </div>
             </div>
         </div>
@@ -512,7 +539,7 @@ $dotenv->load();
             toast.show();
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById("loadingOverlay").style.display = "flex";
 
             const url = "getNomadaByEmailAsync.php";
@@ -562,18 +589,18 @@ $dotenv->load();
                 button.addEventListener('click', () => imageModal.show());
             });
 
-            document.getElementById("inputImagen").addEventListener('change', function(event) {
+            document.getElementById("inputImagen").addEventListener('change', function (event) {
                 const file = event.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         document.getElementById("previewImagen").src = e.target.result;
                     };
                     reader.readAsDataURL(file);
                 }
             });
 
-            document.getElementById("btnGuardarImagen").addEventListener('click', function() {
+            document.getElementById("btnGuardarImagen").addEventListener('click', function () {
                 const formData = new FormData();
                 const inputImagen = document.getElementById("inputImagen");
 
@@ -588,9 +615,9 @@ $dotenv->load();
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
                 fetch("subir-imagen-minio.php", {
-                        method: "POST",
-                        body: formData
-                    })
+                    method: "POST",
+                    body: formData
+                })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
@@ -641,9 +668,9 @@ $dotenv->load();
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
             fetch("actualizarNomada.php", {
-                    method: "POST",
-                    body: formData
-                })
+                method: "POST",
+                body: formData
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -668,7 +695,7 @@ $dotenv->load();
         // Lógica para el botón de Borrar Imagen
         const btnBorrar = document.getElementById('btnBorrarImagen');
         if (btnBorrar) {
-            btnBorrar.addEventListener('click', function() {
+            btnBorrar.addEventListener('click', function () {
                 if (!confirm("¿Seguro que quieres eliminar tu foto de perfil?")) return;
 
                 const btn = this;
@@ -677,8 +704,8 @@ $dotenv->load();
 
                 // Ajusta la ruta '../borrar-imagen-perfil.php' dependiendo de dónde pusiste el archivo
                 fetch("../borrar-imagen-perfil.php?tipo=user", {
-                        method: "POST"
-                    })
+                    method: "POST"
+                })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
@@ -703,6 +730,34 @@ $dotenv->load();
                         btn.innerHTML = '<i class="fas fa-trash-alt me-1"></i> Borrar';
                     });
             });
+        }
+        
+        function abrirNomadParty() {
+            // 1. Creamos un formulario invisible
+            const form = document.createElement('form');
+            form.method = 'POST';
+            // 2. Lo enviamos al archivo "puente" que crearemos en el otro servidor
+            form.action = 'https://nomadparty.yonomad.app/autologin.php';
+            form.target = '_blank';
+
+            // 3. Metemos el Token de seguridad de Supabase
+            const tokenField = document.createElement('input');
+            tokenField.type = 'hidden';
+            tokenField.name = 'token';
+            tokenField.value = '<?php echo isset($_SESSION["token"]) ? $_SESSION["token"] : ""; ?>';
+            form.appendChild(tokenField);
+
+            // 4. Metemos el ID del Nómada
+            const userField = document.createElement('input');
+            userField.type = 'hidden';
+            userField.name = 'user_id';
+            userField.value = '<?php echo isset($_SESSION["user_id"]) ? $_SESSION["user_id"] : ""; ?>';
+            form.appendChild(userField);
+
+            // 5. Enviamos y destruimos el rastro
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
         }
     </script>
     <?php include 'typebot.php'; ?>

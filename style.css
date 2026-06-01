@@ -488,3 +488,11 @@ width:fit-content !important;
     }
 
 }
+
+@media (max-width: 768px) {
+    typebot-bubble {
+        bottom: 80px !important;
+        position: fixed !important;
+        z-index: 99999 !important;
+    }
+}

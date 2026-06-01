@@ -33,6 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'descripcion' => $_POST['descripcion'],
         'has_wifi' => isset($_POST['has_wifi']) ? 1 : 0,
         'has_parking' => isset($_POST['has_parking']) ? 1 : 0,
+        'has_food' => isset($_POST['has_food']) ? 1 : 0,
+        'has_accommodation' => isset($_POST['has_accommodation']) ? 1 : 0,
         'wifi_price' => isset($_POST['wifi_price']) ? floatval($_POST['wifi_price']) : 0.0,
         'parking_price' => isset($_POST['parking_price']) ? floatval($_POST['parking_price']) : 0.0,
         'direccion' => $_POST['direccion'] . ", " . $_POST['numero'],
@@ -331,6 +333,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
                     </div>
+                    <!-- NUEVO: COMIDA Y BEBIDA -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="has_food" name="has_food">
+                            <label class="form-check-label" for="has_food"><i class="fas fa-utensils me-1"></i> Ofrece Comida y Bebida</label>
+                        </div>
+                    </div>
+
+                    <!-- NUEVO: WORK & TRAVEL -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="has_accommodation" name="has_accommodation">
+                            <label class="form-check-label" for="has_accommodation"><i class="fas fa-bed me-1"></i> Work & Travel (Alojamiento)</label>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-section">
@@ -387,7 +404,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
                 </div>
-            </div>
+        
 
             <div class="buttons-container">
                 <a href="verEstablecimientos.php" class="btn btn-secondary btn-action">

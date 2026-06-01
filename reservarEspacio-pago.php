@@ -287,7 +287,8 @@ $_SESSION['reserva']['price'] = [
                         <h4 class="mb-0">Confirmar Reserva</h4>
                     </div>
                     <div class="card-body">
-                        <form id="paymentForm" method="POST" action="paylands/crearPagoPaylands.php">
+                         <form id="paymentForm" method="POST" action="paylands/crearPagoPaylands.php"> 
+                         <!-- <form id="paymentForm" method="POST" action="reservarEspacio-completo.php?sendEmail=true"></form> -->
                             <div class="reservation-info mb-4">
                                 <h5 class="mb-3">Resumen de tu Reserva</h5>
                                 <div class="row">

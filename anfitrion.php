@@ -286,6 +286,7 @@ $_SESSION['anfitrion_id'] = $_GET['id'];
             });
 
         // Aplicar los datos básicos y la galería
+       // Aplicar los datos básicos y la galería
         function applyAnfitrionData(data) {
             document.getElementById("about_us").innerHTML = data.descripcion || "Este anfitrión no ha proporcionado una descripción todavía.";
 
@@ -296,13 +297,19 @@ $_SESSION['anfitrion_id'] = $_GET['id'];
             if (data.has_wifi) {
                 serviciosContainer.innerHTML += `<div class="service-badge"><i class="fas fa-wifi"></i> WiFi Disponible</div>`;
             }
-            if (data.has_food) {
-                serviciosContainer.innerHTML += `<div class="service-badge"><i class="fas fa-utensils"></i> Restauración</div>`;
-            }
             if (data.has_parking) {
                 const precio = data.parking_price > 0 ? `(${data.parking_price}€)` : "(Gratis)";
                 serviciosContainer.innerHTML += `<div class="service-badge parking"><i class="fas fa-car"></i> Parking ${precio}</div>`;
             }
+            // NUEVOS SERVICIOS AÑADIDOS
+            if (data.has_food) {
+                serviciosContainer.innerHTML += `<div class="service-badge" style="background: #fff3cd; color: #d39e00;"><i class="fas fa-utensils"></i> Comida y Bebida</div>`;
+            }
+            if (data.has_accommodation) {
+                serviciosContainer.innerHTML += `<div class="service-badge" style="background: #cff4fc; color: #087990;"><i class="fas fa-bed"></i> Alojamiento (Work & Travel)</div>`;
+            }
+            // FIN NUEVOS SERVICIOS
+
             if (serviciosContainer.innerHTML === '') {
                 serviciosContainer.innerHTML = `<span class="text-muted">No hay servicios extra especificados.</span>`;
             }

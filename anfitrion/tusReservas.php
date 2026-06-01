@@ -3,26 +3,25 @@ require_once 'verificar_sesion_host.php';
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
     <link href="style.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/b8814a2854.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <link rel="icon" href="../favicon-color.png">
     <link rel="icon" href="../favicon-negro.png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="../favicon-color.png" media="(prefers-color-scheme: dark)">
     <title>Tus reservas</title>
 
-
     <script>
-        window.onload = function() {
+        window.onload = function () {
             const today = new Date().toISOString().split('T')[0];
             const container = document.getElementById('container');
 
@@ -34,7 +33,6 @@ require_once 'verificar_sesion_host.php';
                 .then(response => response.json())
                 .then(data => {
                     hideLoadingIndicator();
-                    console.log(data);
                     appendData(data);
                 })
                 .catch(err => {
@@ -54,7 +52,7 @@ require_once 'verificar_sesion_host.php';
                 `;
             }
 
-            function hideLoadingIndicator() {}
+            function hideLoadingIndicator() { }
 
             function showErrorMessage() {
                 container.innerHTML = `
@@ -70,92 +68,64 @@ require_once 'verificar_sesion_host.php';
                 let reservasEncontradas = false;
 
                 for (var i = 0; i < data.length; i++) {
-                    if (data[i].space.establecimiento) {
-                        if (data[i].day >= today && data[i].cancelada == false) {
+                    if (data[i].space && data[i].space.establecimiento) {
+
+                        let isCanceled = false;
+                        if (data[i].cancelada === true || data[i].cancelada == 1) isCanceled = true;
+                        if (data[i].estado_cancelacion === true || data[i].estado_cancelacion == 1 || (data[i].estado_cancelacion && String(data[i].estado_cancelacion).toLowerCase() === 'cancelada')) isCanceled = true;
+
+                        if (data[i].day >= today && !isCanceled) {
                             reservasEncontradas = true;
                             const fechaReserva = new Date(data[i].day);
-                            const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-                            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                            const fechaFormateada = fechaReserva.toLocaleDateString('es-ES', opciones);
+                            const fechaFormateadaFinal = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
 
-                            const diaSemana = diasSemana[fechaReserva.getDay()];
-                            const dia = fechaReserva.getDate();
-                            const mes = meses[fechaReserva.getMonth()];
-                            const anio = fechaReserva.getFullYear();
+                            const nombreUsuario = data[i].user ? data[i].user.name : 'Usuario Desconocido';
 
-                            const fechaFormateada = `${diaSemana}, ${dia} de ${mes} del ${anio}`;
+                            var card = document.createElement("div");
+                            card.className = "card reservation-card mb-4 shadow-sm";
 
-                            var div = document.createElement("div");
-                            div.style.backgroundColor = '#f8fbff';
-                            div.style.marginTop = '20px';
-                            div.className = "row pt-3 px-4 pb-3 mb-3 border rounded shadow-sm reserva-card";
-                            div.style.borderColor = '#90caf9';
-                            div.style.borderWidth = '1px';
-                            container.appendChild(div);
-
-                            var divFecha = document.createElement("div");
-                            divFecha.className = "col-12 fecha fw-bold h5 pt-1 mb-3 text-center py-2 rounded";
-                            divFecha.style.backgroundColor = '#2196f3';
-                            divFecha.style.color = 'white';
-                            divFecha.textContent = fechaFormateada;
-                            div.appendChild(divFecha);
-
-                            var divContenido = document.createElement("div");
-                            divContenido.className = "col-12";
-                            div.appendChild(divContenido);
-
-                            var divEspacio = document.createElement("div");
-                            divEspacio.className = "h6 mb-3";
-                            divEspacio.innerHTML = '<i class="fas fa-map-marker-alt me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Espacio:</strong> ' + data[i].space.name;
-                            divContenido.appendChild(divEspacio);
-
-                            var divHorario = document.createElement("div");
-                            divHorario.className = "mb-3";
-                            divHorario.innerHTML = '<i class="far fa-clock me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Horario:</strong> ' +
-                                data[i].start_time.substring(0, 5) + ' - ' + data[i].end_time.substring(0, 5);
-                            divContenido.appendChild(divHorario);
-
-                            var divUsuario = document.createElement("div");
-                            divUsuario.className = "mb-3";
-                            divUsuario.innerHTML = '<i class="far fa-user me-2" style="color: #1976d2;"></i><strong style="color: #1976d2;">Reservado por:</strong> ' + data[i].user.name;
-                            divContenido.appendChild(divUsuario);
-
-                            var divider = document.createElement("hr");
-                            divider.style.borderColor = '#bbdefb';
-                            divider.style.opacity = '0.5';
-                            divContenido.appendChild(divider);
-
-                            var divBoton = document.createElement("div");
-                            divBoton.className = "mt-3 text-end";
-                            divContenido.appendChild(divBoton);
-
-                            var botonDetalles = document.createElement("a");
-                            botonDetalles.href = 'detalles_reserva.php?id=' + data[i].id;
-                            botonDetalles.className = "btn btn-sm";
-                            botonDetalles.style.backgroundColor = '#1976d2';
-                            botonDetalles.style.color = 'white';
-                            botonDetalles.style.boxShadow = '0 2px 5px rgba(33, 150, 243, 0.3)';
-                            botonDetalles.innerHTML = '<i class="fas fa-info-circle me-1"></i>Mostrar detalles';
-
-                            botonDetalles.onmouseover = function() {
-                                this.style.backgroundColor = '#0d47a1';
-                                this.style.transition = 'background-color 0.3s';
-                            };
-                            botonDetalles.onmouseout = function() {
-                                this.style.backgroundColor = '#1976d2';
-                            };
-
-                            divBoton.appendChild(botonDetalles);
+                            card.innerHTML = `
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>${fechaFormateadaFinal}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h4 class="mb-1 text-dark">${data[i].space.name}</h4>
+                                            <p class="text-muted mb-3"><i class="fas fa-building me-1"></i> ${data[i].space.establecimiento.nombre}</p>
+                                            
+                                            <p class="mb-2" style="font-size: 1.05rem;">
+                                                <i class="fas fa-user-check text-primary me-2"></i>
+                                                <strong>Reservado por:</strong> ${nombreUsuario}
+                                            </p>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center mt-4 pt-2 border-top">
+                                                <div>
+                                                    <span class="badge bg-info text-dark">Inicio: ${data[i].start_time.substring(0, 5)}</span>
+                                                    <span class="badge bg-secondary ms-2">Fin: ${data[i].end_time.substring(0, 5)}</span>
+                                                </div>
+                                                <div>
+                                                    <a href="detalles_reserva.php?id=${data[i].id}" class="btn btn-secondary">
+                                                        Ver detalles
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            container.appendChild(card);
                         }
-
                     }
-
                 }
 
                 if (!reservasEncontradas) {
                     container.innerHTML = `
-                        <div class="alert alert-info mt-4" role="alert">
-                            <i class="fas fa-info-circle me-2"></i>
-                            No tienes reservas próximas.
+                        <div class="empty-state">
+                            <div class="empty-state__icon"><i class="fas fa-calendar-day"></i></div>
+                            <div class="empty-state__text">No hay reservas próximas.</div>
                         </div>
                     `;
                 }
@@ -185,47 +155,50 @@ require_once 'verificar_sesion_host.php';
             box-sizing: border-box;
         }
 
-        label,
-        .form-check input[type=checkbox] {
-            position: static;
+        .reservation-card {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 15px;
         }
 
-        #res:checked~#lbl_res,
-        #his:checked~#lbl_his,
-        #esp:checked~#lbl_esp,
-        #per:checked~#lbl_per {
-            color: #00B7CF !important;
+        .reservation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
         }
 
-        a,
-        a:visited,
-        a:active {
-            color: black;
-            text-decoration: none;
+        .card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: none;
         }
 
-        .fecha {
-            border-radius: 0.5rem;
+        .btn-secondary {
+            background-color: #6c757d !important;
+            color: white !important;
+            border: none;
+            font-weight: bold;
         }
 
-        .espacio {
-            border-radius: 1rem;
-            background: #f3f3f3ff;
+        .btn-secondary:hover {
+            background-color: #5a6268 !important;
         }
 
-        .hora {
-            color: #00B7CF;
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #6c757d;
         }
 
-        .spinner-border {
-            color: #1976d2;
+        .empty-state__icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.4;
         }
 
-        #per:checked~#lbl_per .icon-container,
-        #res:checked~#lbl_res .icon-container,
-        #his:checked~#lbl_his .icon-container,
-        #esp:checked~#lbl_esp .icon-container {
-            color: #007bff;
+        .empty-state__text {
+            font-size: 1.05rem;
+            font-weight: 600;
         }
 
         .header-main {
@@ -266,26 +239,17 @@ require_once 'verificar_sesion_host.php';
             color: var(--host-accent-dark);
             border-bottom: 3px solid var(--host-accent);
         }
-
-        .reserva-card {
-            border-radius: 24px;
-            overflow: hidden;
-        }
     </style>
 </head>
 
 <body>
-
     <div class="page-shell">
-
         <?php include 'headerAnfitrion.php'; ?>
-
         <div id="container" style="max-width: 100%; overflow-x: hidden; box-sizing: border-box;"></div>
     </div>
 
-
     <?php include 'footerAnfitrion.php'; ?>
-<?php include '../typebot.php'; ?>
+    <?php include '../typebot.php'; ?>
 </body>
 
 </html>

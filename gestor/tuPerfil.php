@@ -444,6 +444,7 @@ HTML;
             </div>
         </div>
 
+        <!-- ZONA DE BOTONES ESCRITORIO -->
         <div class="perfilFotoBotones">
             <div class="profile-image-container">
                 <img id="fotoPerfil" src="<?= htmlspecialchars($avatarUrl) ?>" alt="Profile Image">
@@ -458,6 +459,10 @@ HTML;
             </button>
             <button type="button" class="btn-custom btn-brand" onclick="window.location.href='Suscripciones.php'">
                 <i class="fas fa-exchange-alt"></i> Cambiar plan
+            </button>
+            <!-- BOTÓN DESTINO SMARTABLE (SIN AUTOLOGIN) -->
+            <button type="button" class="btn-custom btn-brand mt-2" onclick="window.open('https://destino.smartable.io/index.php', '_blank')">
+                <i class="fas fa-map-marked-alt"></i> Destino
             </button>
             <button type="button" class="btn-custom btn-logout mt-2" onclick="window.location.href='cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -555,6 +560,7 @@ HTML;
                 value="<?= htmlspecialchars($gestora['registro_mercantil'] ?? '') ?>">
         </div>
 
+        <!-- ZONA DE BOTONES MÓVIL -->
         <div class="botonesMovil">
             <button type="button" class="btn-custom btn-brand" data-bs-toggle="modal"
                 data-bs-target="#cambiarImagenModal">
@@ -567,12 +573,17 @@ HTML;
             <button type="button" class="btn-custom btn-brand" onclick="window.location.href='Suscripciones.php'">
                 <i class="fas fa-exchange-alt"></i> Cambiar plan
             </button>
+            <!-- BOTÓN DESTINO SMARTABLE MÓVIL (SIN AUTOLOGIN) -->
+            <button type="button" class="btn-custom btn-brand mt-3" onclick="window.open('https://destino.smartable.io/index.php', '_blank')">
+                <i class="fas fa-map-marked-alt"></i> Destino
+            </button>
             <button type="button" class="btn-custom btn-logout mt-3" onclick="window.location.href='cerrarSesion.php'">
                 <i class="fas fa-sign-out-alt"></i> Cerrar sesión
             </button>
         </div>
     </div>
 
+    <!-- MODALES (Siguen intactos) -->
     <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
@@ -831,7 +842,6 @@ HTML;
                 });
         });
 
-        // Lógica para el botón de Borrar Imagen
         const btnBorrar = document.getElementById('btnBorrarImagen');
         if (btnBorrar) {
             btnBorrar.addEventListener('click', function() {
@@ -841,19 +851,16 @@ HTML;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
 
-                // Ajusta la ruta '../borrar-imagen-perfil.php' dependiendo de dónde pusiste el archivo
                 fetch("../borrar-imagen-perfil.php?tipo=gestor", {
                         method: "POST"
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Actualizamos todas las imágenes de perfil visibles en la pantalla
                             if (document.getElementById("fotoPerfil")) document.getElementById("fotoPerfil").src = data.avatarUrl;
                             if (document.getElementById("fotoPerfilMovil")) document.getElementById("fotoPerfilMovil").src = data.avatarUrl;
                             if (document.getElementById("previewImagen")) document.getElementById("previewImagen").src = data.avatarUrl;
 
-                            // Si la cabecera superior tiene la foto, también la actualizamos
                             const avatarCabecera = document.querySelector('.main-header .avatar-circle');
                             if (avatarCabecera) avatarCabecera.src = data.avatarUrl;
 

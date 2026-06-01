@@ -521,6 +521,13 @@ function formatearDireccion($direccion, $piso = "")
                                     <?php if ($establecimiento['has_parking']): ?>
                                         <i class="fas fa-parking text-secondary fs-6" title="Parking"></i>
                                     <?php endif; ?>
+                                    <!-- NUEVOS ICONOS -->
+                                    <?php if ($establecimiento['has_food']): ?>
+                                        <i class="fas fa-utensils text-warning fs-6" title="Comida y Bebida"></i>
+                                    <?php endif; ?>
+                                    <?php if ($establecimiento['has_accommodation']): ?>
+                                        <i class="fas fa-bed text-info fs-6" title="Work & Travel"></i>
+                                    <?php endif; ?>
                                 </div>
 
                                 <p class="descripcionCorta">
@@ -559,6 +566,13 @@ function formatearDireccion($direccion, $piso = "")
 
                                         <?php if ($establecimiento['has_parking']): ?>
                                             <p><strong><i class="fas fa-parking text-success me-2"></i>Parking:</strong> <span class="precio-tag"><i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['parking_price'], 2); ?>/día</span></p>
+                                        <?php endif; ?>
+                                        <?php if ($establecimiento['has_food']): ?>
+                                            <p><strong><i class="fas fa-utensils text-success me-2"></i>Comida:</strong> Servicio de comida y bebida disponible</p>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($establecimiento['has_accommodation']): ?>
+                                            <p><strong><i class="fas fa-bed text-success me-2"></i>Alojamiento:</strong> Opción Work & Travel disponible</p>
                                         <?php endif; ?>
                                     </div>
 

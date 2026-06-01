@@ -190,12 +190,11 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'delete_error') {
     $flashType = 'danger';
 }
 
-// ======= NUEVA LÓGICA DE FILTRADO Y OBTENCIÓN DE ANFITRIONES =======
+// ======= LÓGICA DE FILTRADO Y OBTENCIÓN DE ANFITRIONES =======
 $filtro_host_id = $_GET['host_id'] ?? null;
 $nombresAnfitriones = [];
-$uniqueHostNames = []; // Para el desplegable
+$uniqueHostNames = []; 
 
-// $establecimientos viene de establecimientos_logic.php
 if (isset($establecimientos) && is_array($establecimientos)) {
     if ($filtro_host_id) {
         $establecimientos = array_values(array_filter($establecimientos, function ($est) use ($filtro_host_id) {
@@ -235,13 +234,12 @@ if (isset($establecimientos) && is_array($establecimientos)) {
         if (is_array($hostsData)) {
             foreach ($hostsData as $h) {
                 $nombresAnfitriones[$h['id']] = $h['name'];
-                $uniqueHostNames[$h['name']] = $h['name']; // Guardamos para el select
+                $uniqueHostNames[$h['name']] = $h['name']; 
             }
-            sort($uniqueHostNames); // Ordenamos alfabéticamente
+            sort($uniqueHostNames); 
         }
     }
 }
-// ====================================================================
 ?>
 
 <!DOCTYPE html>
@@ -271,465 +269,62 @@ if (isset($establecimientos) && is_array($establecimientos)) {
             --card-radius: 16px;
         }
 
-        body {
-            font-family: 'Nunito', sans-serif;
-            background: #eef2f5;
-            padding-bottom: 50px;
-            color: var(--brand-ink);
-        }
-
-        .contenedor-principal {
-            max-width: 1400px;
-            margin: 1.5rem auto;
-            padding: 0 20px;
-        }
-
-        /* FILTROS */
-        .search-bar-wrapper {
-            margin: 0 auto 2rem;
-            max-width: 1400px;
-            padding: 0 15px;
-        }
-
-        .search-bar-container {
-            background: white;
-            border-radius: 12px;
-            padding: 5px 20px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(15, 76, 92, 0.1);
-            transition: all 0.3s;
-            height: 100%;
-        }
-
-        .search-bar-container:focus-within {
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            border-color: #17a2b8;
-        }
-
-        .search-bar-icon {
-            color: #17a2b8;
-            font-size: 1.2rem;
-            margin-right: 15px;
-        }
-
-        .search-bar-input {
-            border: none;
-            box-shadow: none;
-            font-size: 1.05rem;
-            padding: 10px 0;
-            background: transparent;
-            width: 100%;
-            color: #2c3e50;
-        }
-
-        .search-bar-input:focus {
-            outline: none;
-            box-shadow: none;
-        }
-
-        .filter-select {
-            border-radius: 12px;
-            border: 1px solid rgba(15, 76, 92, 0.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            padding: 12px 15px;
-            color: #2c3e50;
-            font-weight: 600;
-            height: 100%;
-            transition: all 0.3s;
-        }
-
-        .filter-select:focus {
-            border-color: #17a2b8;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            outline: none;
-        }
-
-        .establecimiento-card {
-            background-color: white;
-            border-radius: var(--card-radius);
-            box-shadow: 0 10px 25px rgba(31, 41, 51, 0.09);
-            margin-bottom: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(15, 76, 92, 0.08);
-        }
-
-        .establecimiento-card:hover {
-            box-shadow: 0 18px 36px rgba(31, 41, 51, 0.15);
-            transform: translateY(-3px);
-        }
-
-        .card-header {
-            position: relative;
-            height: 140px;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: flex-end;
-            background-color: #f8f9fa;
-        }
-
-        .card-header.default-image {
-            background-image: none !important;
-            background-color: #c4ccd3;
-        }
-
-        .card-header-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.45);
-        }
-
-        .card-title {
-            color: white;
-            padding: 15px;
-            font-weight: 700;
-            font-size: 1.3rem;
-            position: relative;
-            width: 100%;
-            z-index: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .service-icons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .service-icon {
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #333;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .validation-badge {
-            color: white !important;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            font-size: 1rem;
-        }
-
-        .validation-badge.bg-success {
-            background-color: #6f8f79 !important;
-        }
-
-        .validation-badge.bg-warning {
-            background-color: #c3b37a !important;
-            color: #2e2a18 !important;
-        }
-
-        .card-body {
-            padding: 16px;
-        }
-
-        .info-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 6px;
-            gap: 8px;
-        }
-
-        .info-icon {
-            color: #28a745;
-            width: 18px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .collapsed-content {
-            max-height: 0;
-            overflow: hidden;
-            padding-top: 0;
-            border-top: 1px solid #e9ecef;
-            margin-top: 0;
-            transition: all 0.3s ease;
-            opacity: 0;
-        }
-
-        .collapsed-content.show {
-            max-height: 1500px;
-            padding-top: 8px;
-            margin-top: 8px;
-            opacity: 1;
-        }
-
-        .btn-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            flex: 1;
-            border-radius: 8px;
-            padding: 0.4rem 0.8rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            transition: all 0.2s ease;
-            font-size: 0.85rem;
-        }
-
-        .btn-toggle {
-            background-color: #f3f6f8;
-            border: 1px solid #d8e0e6;
-            color: #4b5a66;
-            width: 100%;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .btn-toggle:hover {
-            background-color: #e7edf2;
-            border-color: #b5c1ca;
-        }
-
-        .btn-spaces {
-            background-color: #6b7280;
-            border: none;
-            color: white;
-        }
-
-        .btn-spaces:hover {
-            background-color: #4b5563;
-        }
-
-        .btn-edit {
-            background-color: #17a2b8;
-            border: none;
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background-color: #138496;
-            color: white;
-        }
-
-        .btn-delete {
-            background-color: #dc3545;
-            border: none;
-            color: white;
-        }
-
-        .btn-delete:hover {
-            background-color: #c82333;
-        }
-
-        .map-container {
-            height: 220px;
-            border-radius: 8px;
-            overflow: hidden;
-            margin: 8px 0;
-            border: 1px solid #dee2e6;
-        }
-
-        .est-card-col {
-            margin-bottom: 12px;
-        }
-
-        .establecimientos-grid {
-            --bs-gutter-x: 0.75rem;
-            row-gap: 0.2rem;
-        }
-
-        .no-establecimientos {
-            background-color: white;
-            border-radius: 18px;
-            box-shadow: 0 12px 28px rgba(31, 41, 51, 0.12);
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .page-hero {
-            max-width: 1400px;
-            margin: 1.2rem auto 0.5rem;
-            padding: 0 15px;
-        }
-
-        .page-hero-inner {
-            border-radius: 20px;
-            background: #254654;
-            color: #ffffff;
-            padding: 1.1rem 1.2rem;
-            box-shadow: 0 14px 30px rgba(15, 76, 92, 0.25);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .page-hero-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            letter-spacing: 0.2px;
-            margin: 0;
-        }
-
-        .hero-title-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .info-hint-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.45);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.12);
-            cursor: pointer;
-            transition: 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .info-hint-btn:hover {
-            background: rgba(255, 255, 255, 0.22);
-            transform: translateY(-1px);
-        }
-
-        .stats-grid .card {
-            border: 1px solid rgba(15, 76, 92, 0.08);
-            border-radius: 14px;
-            box-shadow: 0 8px 18px rgba(31, 41, 51, 0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .stats-grid .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(31, 41, 51, 0.12);
-        }
-
-        .stats-grid .card-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin-bottom: 0.15rem;
-            color: var(--brand-deep) !important;
-        }
-
-        .stats-grid .col-md-4:nth-child(2) .card-title {
-            color: #4f9c67 !important;
-        }
-
-        .stats-grid .col-md-4:nth-child(3) .card-title {
-            color: #c3a643 !important;
-        }
-
-        .stats-grid .card-text {
-            color: #5f6d79;
-            font-weight: 600;
-            margin-bottom: 0;
-        }
-
-        .precio-tag {
-            background-color: #28a745;
-            color: white;
-            border-radius: 20px;
-            padding: 3px 8px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            margin-left: 8px;
-        }
-
-        .modal-confirm .modal-content {
-            padding: 20px;
-            border-radius: 15px;
-            border: none;
-        }
-
-        .modal-confirm .modal-header {
-            border-bottom: none;
-            position: relative;
-            text-align: center;
-            margin: -20px -20px 0;
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-            padding: 35px;
-        }
-
-        .modal-confirm .modal-header.delete {
-            background-color: #f7d7db;
-        }
-
-        .modal-confirm h4 {
-            text-align: center;
-            font-size: 26px;
-            margin: 30px 0 -15px;
-            color: #333;
-        }
-
-        .modal-confirm .icon-box {
-            color: #fff;
-            position: absolute;
-            margin: 0 auto;
-            left: 0;
-            right: 0;
-            top: -70px;
-            width: 95px;
-            height: 95px;
-            border-radius: 50%;
-            background-color: #f15e5e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9;
-            box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-confirm .icon-box i {
-            font-size: 58px;
-        }
-
-        .modal-confirm.modal-dialog {
-            margin-top: 80px;
-        }
+        body { font-family: 'Nunito', sans-serif; background: #eef2f5; padding-bottom: 50px; color: var(--brand-ink); }
+        .contenedor-principal { max-width: 1400px; margin: 1.5rem auto; padding: 0 20px; }
+        .search-bar-wrapper { margin: 0 auto 2rem; max-width: 1400px; padding: 0 15px; }
+        .search-bar-container { background: white; border-radius: 12px; padding: 5px 20px; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(15, 76, 92, 0.1); transition: all 0.3s; height: 100%; }
+        .search-bar-container:focus-within { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); border-color: #17a2b8; }
+        .search-bar-icon { color: #17a2b8; font-size: 1.2rem; margin-right: 15px; }
+        .search-bar-input { border: none; box-shadow: none; font-size: 1.05rem; padding: 10px 0; background: transparent; width: 100%; color: #2c3e50; }
+        .search-bar-input:focus { outline: none; box-shadow: none; }
+        .filter-select { border-radius: 12px; border: 1px solid rgba(15, 76, 92, 0.1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); padding: 12px 15px; color: #2c3e50; font-weight: 600; height: 100%; transition: all 0.3s; }
+        .filter-select:focus { border-color: #17a2b8; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); outline: none; }
+        
+        .establecimiento-card { background-color: white; border-radius: var(--card-radius); box-shadow: 0 10px 25px rgba(31, 41, 51, 0.09); margin-bottom: 0; overflow: hidden; transition: all 0.3s ease; border: 1px solid rgba(15, 76, 92, 0.08); }
+        .establecimiento-card:hover { box-shadow: 0 18px 36px rgba(31, 41, 51, 0.15); transform: translateY(-3px); }
+        .card-header { position: relative; height: 140px; background-size: cover; background-position: center; display: flex; align-items: flex-end; background-color: #f8f9fa; }
+        .card-header.default-image { background-image: none !important; background-color: #c4ccd3; }
+        .card-header-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.45); }
+        .card-title { color: white; padding: 15px; font-weight: 700; font-size: 1.3rem; position: relative; width: 100%; z-index: 1; display: flex; justify-content: space-between; align-items: center; }
+        .service-icons { display: flex; gap: 15px; }
+        .service-icon { background-color: rgba(255, 255, 255, 0.9); color: #333; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 1px solid rgba(0, 0, 0, 0.1); }
+        .validation-badge { color: white !important; border: 2px solid rgba(255, 255, 255, 0.3); font-size: 1rem; }
+        .validation-badge.bg-success { background-color: #6f8f79 !important; }
+        .validation-badge.bg-warning { background-color: #c3b37a !important; color: #2e2a18 !important; }
+        .card-body { padding: 16px; }
+        .info-row { display: flex; align-items: center; margin-bottom: 6px; gap: 8px; }
+        .info-icon { color: #28a745; width: 18px; text-align: center; font-size: 0.9rem; }
+        .collapsed-content { max-height: 0; overflow: hidden; padding-top: 0; border-top: 1px solid #e9ecef; margin-top: 0; transition: all 0.3s ease; opacity: 0; }
+        .collapsed-content.show { max-height: 1500px; padding-top: 8px; margin-top: 8px; opacity: 1; }
+        .btn-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .btn-action { flex: 1; border-radius: 8px; padding: 0.4rem 0.8rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s ease; font-size: 0.85rem; }
+        .btn-toggle { background-color: #f3f6f8; border: 1px solid #d8e0e6; color: #4b5a66; width: 100%; margin-bottom: 8px; border-radius: 8px; padding: 6px 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s ease; font-size: 0.9rem; }
+        .btn-toggle:hover { background-color: #e7edf2; border-color: #b5c1ca; }
+        .btn-spaces { background-color: #6b7280; border: none; color: white; }
+        .btn-spaces:hover { background-color: #4b5563; }
+        .btn-edit { background-color: #17a2b8; border: none; color: white; }
+        .btn-edit:hover { background-color: #138496; color: white; }
+        .btn-delete { background-color: #dc3545; border: none; color: white; }
+        .btn-delete:hover { background-color: #c82333; }
+        .map-container { height: 220px; border-radius: 8px; overflow: hidden; margin: 8px 0; border: 1px solid #dee2e6; }
+        .est-card-col { margin-bottom: 12px; }
+        .establecimientos-grid { --bs-gutter-x: 0.75rem; row-gap: 0.2rem; }
+        .no-establecimientos { background-color: white; border-radius: 18px; box-shadow: 0 12px 28px rgba(31, 41, 51, 0.12); padding: 2rem; text-align: center; }
+        
+        .stats-grid .card { border: 1px solid rgba(15, 76, 92, 0.08); border-radius: 14px; box-shadow: 0 8px 18px rgba(31, 41, 51, 0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .stats-grid .card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(31, 41, 51, 0.12); }
+        .stats-grid .card-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.15rem; color: var(--brand-deep) !important; }
+        .stats-grid .col-md-4:nth-child(2) .card-title { color: #4f9c67 !important; }
+        .stats-grid .col-md-4:nth-child(3) .card-title { color: #c3a643 !important; }
+        .stats-grid .card-text { color: #5f6d79; font-weight: 600; margin-bottom: 0; }
+        .precio-tag { background-color: #28a745; color: white; border-radius: 20px; padding: 3px 8px; font-size: 0.75rem; font-weight: 500; display: inline-flex; align-items: center; gap: 3px; margin-left: 8px; }
 
         @media (max-width: 767px) {
-            .btn-actions {
-                flex-direction: column;
-            }
-
-            .btn-action {
-                width: 100%;
-            }
-
-            .search-bar-wrapper .row>div {
-                margin-bottom: 10px;
-            }
+            .btn-actions { flex-direction: column; }
+            .btn-action { width: 100%; }
+            .search-bar-wrapper .row>div { margin-bottom: 10px; }
         }
-
-        body {
-            padding-bottom: 15%;
-        }
+        body { padding-bottom: 15%; }
     </style>
     <script>
         const mapasInicializados = {};
@@ -809,27 +404,10 @@ if (isset($establecimientos) && is_array($establecimientos)) {
 
             new bootstrap.Modal(document.getElementById('editModal')).show();
         }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function (el) {
-                new bootstrap.Tooltip(el);
-            });
-        });
     </script>
 </head>
 
 <body>
-    <!-- <section class="page-hero">
-        <div class="page-hero-inner">
-            <div class="hero-title-row">
-                <div class="page-hero-title">Gestión de Establecimientos</div>
-                <span class="info-hint-btn" data-bs-toggle="tooltip" data-bs-placement="right"
-                    title="Controla imagen, estado, ubicacion y datos clave de tus negocios desde un solo panel."><i
-                        class="fas fa-info"></i></span>
-            </div>
-        </div>
-    </section> -->
     <?php include 'headerGestor.php'; ?>
 
     <?php if ($filtro_host_id): ?>
@@ -936,42 +514,46 @@ if (isset($establecimientos) && is_array($establecimientos)) {
                                 <div class="card-title">
                                     <div class="d-flex flex-column">
                                         <span><?php echo htmlspecialchars($establecimiento['nombre']); ?></span>
-                                        <span
-                                            style="font-size: 0.85rem; font-weight: 500; margin-top: 4px; color: #e9ecef; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
+                                        <span style="font-size: 0.85rem; font-weight: 500; margin-top: 4px; color: #e9ecef; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">
                                             <i class="fas fa-user-tie me-1"></i> Creado por:
                                             <?php echo htmlspecialchars($nombreAnfitrion); ?>
                                         </span>
                                     </div>
+                                    
+                                    <!-- AQUI ESTÁN LOS ICONOS DE SERVICIOS -->
                                     <div class="service-icons">
                                         <?php
                                         $estadoValidacion = $establecimiento['estaValidado'] ?? $establecimiento['estavalidado'] ?? null;
                                         if ($estadoValidacion === true || $estadoValidacion === 'true' || $estadoValidacion === 't' || $estadoValidacion === 1 || $estadoValidacion === '1') {
-                                            $estadoClass = 'success';
-                                            $estadoText = 'Aprobado';
-                                            $estadoIcon = 'check-circle';
+                                            $estadoClass = 'success'; $estadoText = 'Aprobado'; $estadoIcon = 'check-circle';
                                         } elseif ($estadoValidacion === false || $estadoValidacion === 'false' || $estadoValidacion === 'f' || $estadoValidacion === 0 || $estadoValidacion === '0') {
-                                            $estadoClass = 'danger';
-                                            $estadoText = 'Rechazado';
-                                            $estadoIcon = 'ban';
+                                            $estadoClass = 'danger'; $estadoText = 'Rechazado'; $estadoIcon = 'ban';
                                         } else {
-                                            $estadoClass = 'warning';
-                                            $estadoText = 'Pendiente';
-                                            $estadoIcon = 'clock';
+                                            $estadoClass = 'warning'; $estadoText = 'Pendiente'; $estadoIcon = 'clock';
                                         }
                                         ?>
-                                        <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>"
-                                            title="<?php echo $estadoText; ?>">
-                                            <i class="fas fa-<?php echo $estadoIcon; ?>"></i>
-                                            <span class="d-none"><?php echo $estadoText; ?></span>
+                                        <div class="service-icon validation-badge bg-<?php echo $estadoClass; ?>" title="<?php echo $estadoText; ?>">
+                                            <i class="fas fa-<?php echo $estadoIcon; ?>"></i><span class="d-none"><?php echo $estadoText; ?></span>
                                         </div>
+                                        
                                         <?php if ($establecimiento['has_wifi']): ?>
                                             <div class="service-icon" title="WiFi disponible">
-                                                <i class="fas fa-wifi"></i><span class="d-none">wifi</span>
+                                                <i class="fas fa-wifi text-primary"></i><span class="d-none">wifi</span>
                                             </div>
                                         <?php endif; ?>
                                         <?php if ($establecimiento['has_parking']): ?>
                                             <div class="service-icon" title="Parking disponible">
-                                                <i class="fas fa-parking"></i><span class="d-none">parking</span>
+                                                <i class="fas fa-parking text-secondary"></i><span class="d-none">parking</span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($establecimiento['has_food'])): ?>
+                                            <div class="service-icon" title="Servicio de comida">
+                                                <i class="fas fa-utensils text-warning"></i><span class="d-none">comida</span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($establecimiento['has_accommodation'])): ?>
+                                            <div class="service-icon" title="Alojamiento disponible">
+                                                <i class="fas fa-bed text-info"></i><span class="d-none">alojamiento</span>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -999,40 +581,31 @@ if (isset($establecimientos) && is_array($establecimientos)) {
                                         <div><strong>Descripción:</strong>
                                             <?php echo htmlspecialchars($establecimiento['descripcion']); ?></div>
                                     </div>
-                                    <div class="info-row">
-                                        <div class="info-icon"><i class="fas fa-map"></i></div>
-                                        <div><strong>Provincia:</strong>
-                                            <?php echo htmlspecialchars($establecimiento['provincia']); ?></div>
-                                    </div>
-                                    <div class="info-row">
-                                        <div class="info-icon"><i class="fas fa-map-pin"></i></div>
-                                        <div><strong>Código Postal:</strong>
-                                            <?php echo htmlspecialchars($establecimiento['codigo_postal']); ?></div>
-                                    </div>
-
+                                    
                                     <?php if ($establecimiento['has_wifi']): ?>
                                         <div class="info-row">
-                                            <div class="info-icon"><i class="fas fa-wifi"></i></div>
-                                            <div><strong>WiFi disponible</strong> <span class="precio-tag"><i
-                                                        class="fas fa-euro-sign"></i>
-                                                    <?php echo number_format($establecimiento['wifi_price'], 2); ?>/hora</span>
-                                            </div>
+                                            <div class="info-icon"><i class="fas fa-wifi text-primary"></i></div>
+                                            <div><strong>WiFi disponible</strong> <span class="precio-tag"><i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['wifi_price'], 2); ?>/hora</span></div>
                                         </div>
                                     <?php endif; ?>
                                     <?php if ($establecimiento['has_parking']): ?>
                                         <div class="info-row">
-                                            <div class="info-icon"><i class="fas fa-parking"></i></div>
-                                            <div><strong>Parking disponible</strong> <span class="precio-tag"><i
-                                                        class="fas fa-euro-sign"></i>
-                                                    <?php echo number_format($establecimiento['parking_price'], 2); ?>/día</span>
-                                            </div>
+                                            <div class="info-icon"><i class="fas fa-parking text-secondary"></i></div>
+                                            <div><strong>Parking disponible</strong> <span class="precio-tag"><i class="fas fa-euro-sign"></i> <?php echo number_format($establecimiento['parking_price'], 2); ?>/día</span></div>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if (!empty($establecimiento['piso'])): ?>
+                                    
+                                    <!-- AQUI ESTA LA INFORMACIÓN DE COMIDA Y ALOJAMIENTO DETALLADA -->
+                                    <?php if (!empty($establecimiento['has_food'])): ?>
                                         <div class="info-row">
-                                            <div class="info-icon"><i class="fas fa-building"></i></div>
-                                            <div><strong>Piso:</strong> <?php echo htmlspecialchars($establecimiento['piso']); ?>
-                                            </div>
+                                            <div class="info-icon"><i class="fas fa-utensils text-warning"></i></div>
+                                            <div><strong>Servicio de comida disponible</strong></div>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($establecimiento['has_accommodation'])): ?>
+                                        <div class="info-row">
+                                            <div class="info-icon"><i class="fas fa-bed text-info"></i></div>
+                                            <div><strong>Alojamiento disponible</strong></div>
                                         </div>
                                     <?php endif; ?>
 
@@ -1145,7 +718,6 @@ if (isset($establecimientos) && is_array($establecimientos)) {
 
     <script>
         $(document).ready(function () {
-            // Lógica Combinada (Buscador + Select)
             function filterEstablecimientos() {
                 const searchTerm = $('#searchInputEst').val().toLowerCase();
                 const hostTerm = $('#filterHostEst').val().toLowerCase();

@@ -14,12 +14,13 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 	<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;600;700&display=swap" rel="stylesheet">
 	<script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
 	<link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+		crossorigin="anonymous"></script>
 	<link rel="icon" href="favicon-color.png">
-
 	<link rel="icon" href="favicon-negro.png" media="(prefers-color-scheme: light)">
-
 	<link rel="icon" href="favicon-color.png" media="(prefers-color-scheme: dark)">
 
 	<title>Detalles de Reserva</title>
@@ -254,7 +255,8 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 <body>
 	<div class="container p-0">
 		<div class="header-container">
-			<img class="header-img" src="https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg" alt="Space Image">
+			<img class="header-img" src="https://cdn.pixabay.com/photo/2016/11/18/14/05/brick-wall-1834784_960_720.jpg"
+				alt="Space Image">
 			<div id="headerContent" class="header-overlay">
 				<div class="text-center">
 					<h1 id="spaceName" class="fw-bold mb-2">Cargando detalles...</h1>
@@ -272,27 +274,24 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 						<h4 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Detalles de la Reserva</h4>
 					</div>
 					<div class="card-body">
-						<div id="reservationDetails" class="reservation-details">
-						</div>
+						<div id="reservationDetails" class="reservation-details"></div>
 
 						<h5 class="section-title"><i class="fas fa-info-circle me-2"></i>Información del Espacio</h5>
-						<div id="spaceInfo" class="mb-4">
-						</div>
+						<div id="spaceInfo" class="mb-4"></div>
 
-						<h5 class="section-title"><i class="fas fa-building me-2"></i>Información del Establecimiento</h5>
-						<div id="establishmentInfo" class="mb-4 establishment-details">
-						</div>
+						<h5 class="section-title"><i class="fas fa-building me-2"></i>Información del Establecimiento
+						</h5>
+						<div id="establishmentInfo" class="mb-4 establishment-details"></div>
 
 						<h5 class="section-title"><i class="fas fa-user me-2"></i>Información del Anfitrión</h5>
-						<div id="hostInfo" class="mb-4 host-details">
-						</div>
+						<div id="hostInfo" class="mb-4 host-details"></div>
 
 						<h5 class="section-title"><i class="fas fa-concierge-bell me-2"></i>Servicios Disponibles</h5>
-						<div id="services" class="mb-4">
-						</div>
+						<div id="services" class="mb-4"></div>
 
 						<div class="text-center mt-4">
-							<button type="button" class="btn btn-danger-soft me-3" id="botonCancelar" data-bs-toggle="modal" data-bs-target="#cancelReasonModal">
+							<button type="button" class="btn btn-danger-soft me-3" id="botonCancelar"
+								data-bs-toggle="modal" data-bs-target="#cancelReasonModal">
 								<i class="fas fa-times-circle me-2"></i>Cancelar Reserva
 							</button>
 							<a href="nomada_reservas.php" class="btn btn-nomad">
@@ -309,34 +308,35 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 						<h4 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Ubicación</h4>
 					</div>
 					<div class="card-body p-0">
-						<div id="map">
-						</div>
+						<div id="map"></div>
 					</div>
 					<div class="card-footer bg-white">
-						<div id="address" class="pt-2">
-						</div>
+						<div id="address" class="pt-2"></div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- Modal para motivo de cancelación -->
-	<div class="modal fade" id="cancelReasonModal" tabindex="-1" aria-labelledby="cancelReasonModalLabel" aria-hidden="true">
+	<div class="modal fade" id="cancelReasonModal" tabindex="-1" aria-labelledby="cancelReasonModalLabel"
+		aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header cancel-reason">
-					<h5 class="modal-title" id="cancelReasonModalLabel"><i class="fas fa-question-circle me-2"></i>Motivo de Cancelación</h5>
+					<h5 class="modal-title" id="cancelReasonModalLabel"><i
+							class="fas fa-question-circle me-2"></i>Motivo de Cancelación</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
 					<form id="cancelReasonForm">
 						<div class="mb-3">
-							<label for="motivoCancelacion" class="form-label fw-bold">¿Cuál es el motivo de tu cancelación? *</label>
+							<label for="motivoCancelacion" class="form-label fw-bold">¿Cuál es el motivo de tu
+								cancelación? *</label>
 							<select class="form-select" id="motivoCancelacion" required>
 								<option value="">Selecciona un motivo</option>
 								<option value="Motivos personales">Motivos personales</option>
-								<option value="Problemas con el espacio o servicio">Problemas con el espacio o servicio</option>
+								<option value="Problemas con el espacio o servicio">Problemas con el espacio o servicio
+								</option>
 								<option value="Error en la reserva">Error en la reserva</option>
 								<option value="Otro motivo">Otro motivo</option>
 							</select>
@@ -344,40 +344,43 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 
 						<div class="mb-3" id="otroMotivoInput">
 							<label for="otroMotivoTexto" class="form-label fw-bold">Especifica el motivo:</label>
-							<input type="text" class="form-control" id="otroMotivoTexto" placeholder="Describe brevemente el motivo">
+							<input type="text" class="form-control" id="otroMotivoTexto"
+								placeholder="Describe brevemente el motivo">
 						</div>
 
 						<div class="mb-3">
-							<label for="informacionAdicional" class="form-label fw-bold">Información adicional (opcional)</label>
-							<textarea class="form-control" id="informacionAdicional" rows="3" placeholder="Comparte cualquier información adicional que consideres relevante..."></textarea>
+							<label for="informacionAdicional" class="form-label fw-bold">Información adicional
+								(opcional)</label>
+							<textarea class="form-control" id="informacionAdicional" rows="3"
+								placeholder="Comparte cualquier información adicional que consideres relevante..."></textarea>
 						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Volver</button>
-					<button type="button" id="proceedCancel" class="btn btn-danger" disabled>Continuar con la cancelación</button>
+					<button type="button" id="proceedCancel" class="btn btn-danger" disabled>Continuar con la
+						cancelación</button>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- Modal de confirmación de cancelación -->
 	<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="cancelModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar Cancelación</h5>
+					<h5 class="modal-title" id="cancelModalLabel"><i
+							class="fas fa-exclamation-triangle me-2"></i>Confirmar Cancelación</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
 					<p class="fs-5">¿Estás seguro que deseas cancelar esta reserva?</p>
 					<p class="text-muted">Esta acción no se puede deshacer.</p>
-					<div id="cancelSummary" class="mt-3 p-3 bg-light rounded">
-						<!-- Aquí se mostrará el resumen del motivo de cancelación -->
-					</div>
+					<div id="cancelSummary" class="mt-3 p-3 bg-light rounded"></div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, mantener reserva</button>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, mantener
+						reserva</button>
 					<button type="button" id="confirmCancel" class="btn btn-danger">Sí, cancelar reserva</button>
 				</div>
 			</div>
@@ -387,16 +390,12 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 	<script>
 		let cancelationData = {};
 
-		if ('<?php isset($_SESSION['reservaId']) ?>') {
-			console.log("esta si que lo esta");
-		}
-		document.addEventListener('DOMContentLoaded', function() {
+		document.addEventListener('DOMContentLoaded', function () {
 			const reservaId = '<?php echo $_SESSION["reservaId"]; ?>';
 
 			fetch('getReservaById.php')
 				.then(response => response.json())
 				.then(data => {
-					console.log(data);
 					renderReservationData(data);
 				})
 				.catch(err => {
@@ -404,7 +403,7 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 					document.getElementById('headerContent').innerHTML = '<div class="text-center"><h2>Error al cargar los datos</h2></div>';
 				});
 
-			document.getElementById('motivoCancelacion').addEventListener('change', function() {
+			document.getElementById('motivoCancelacion').addEventListener('change', function () {
 				const otroMotivoDiv = document.getElementById('otroMotivoInput');
 				const proceedBtn = document.getElementById('proceedCancel');
 				const otroMotivoTexto = document.getElementById('otroMotivoTexto');
@@ -412,30 +411,24 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 				if (this.value === 'Otro motivo') {
 					otroMotivoDiv.style.display = 'block';
 					otroMotivoTexto.required = true;
-
-					// Si es "Otro motivo", verificar que el campo de texto no esté vacío
 					proceedBtn.disabled = otroMotivoTexto.value.trim() === '';
 				} else {
 					otroMotivoDiv.style.display = 'none';
 					otroMotivoTexto.required = false;
 					otroMotivoTexto.value = '';
-
-					// Para otros motivos, habilitar si hay un motivo seleccionado
 					proceedBtn.disabled = this.value === '';
 				}
 			});
 
-			document.getElementById('otroMotivoTexto').addEventListener('input', function() {
+			document.getElementById('otroMotivoTexto').addEventListener('input', function () {
 				const proceedBtn = document.getElementById('proceedCancel');
 				const motivoSelect = document.getElementById('motivoCancelacion');
-
-				// Solo verificar el texto cuando el motivo seleccionado es "Otro motivo"
 				if (motivoSelect.value === 'Otro motivo') {
 					proceedBtn.disabled = this.value.trim() === '';
 				}
 			});
 
-			document.getElementById('proceedCancel').addEventListener('click', function() {
+			document.getElementById('proceedCancel').addEventListener('click', function () {
 				const motivo = document.getElementById('motivoCancelacion').value;
 				const otroMotivo = document.getElementById('otroMotivoTexto').value;
 				const infoAdicional = document.getElementById('informacionAdicional').value;
@@ -460,7 +453,7 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 				}, 300);
 			});
 
-			document.getElementById('confirmCancel').addEventListener('click', function() {
+			document.getElementById('confirmCancel').addEventListener('click', function () {
 				cancelReservation(reservaId);
 			});
 		});
@@ -470,12 +463,7 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 			document.getElementById('hostName').textContent = data[0].space.establecimiento.nombre;
 
 			const reservationDate = new Date(data[0].day);
-			const formattedDate = reservationDate.toLocaleDateString('es-ES', {
-				weekday: 'long',
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric'
-			});
+			const formattedDate = reservationDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
 			document.getElementById('reservationDetails').innerHTML = `
 					<div class="reservation-date">${formattedDate}</div>
@@ -500,11 +488,12 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 				direccionCompleta += `, ${establecimiento.piso}`;
 			}
 
+			// AÑADIMOS TODOS LOS SERVICIOS AL PANEL DE DETALLES
 			let additionalServicesHTML = '';
 			if (establecimiento.has_wifi) {
 				additionalServicesHTML += `
 						<div class="info-item">
-							<div class="info-icon"><i class="fas fa-wifi"></i></div>
+							<div class="info-icon"><i class="fas fa-wifi text-primary"></i></div>
 							<div><strong>WiFi:</strong> Disponible${establecimiento.wifi_price ? ` (${establecimiento.wifi_price}€)` : ''}</div>
 						</div>
 					`;
@@ -513,8 +502,26 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 			if (establecimiento.has_parking) {
 				additionalServicesHTML += `
 						<div class="info-item">
-							<div class="info-icon"><i class="fas fa-parking"></i></div>
+							<div class="info-icon"><i class="fas fa-car text-secondary"></i></div>
 							<div><strong>Parking:</strong> Disponible (${establecimiento.parking_price}€)</div>
+						</div>
+					`;
+			}
+
+			if (establecimiento.has_food) {
+				additionalServicesHTML += `
+						<div class="info-item">
+							<div class="info-icon"><i class="fas fa-utensils text-warning"></i></div>
+							<div><strong>Comida y Bebida:</strong> Servicio disponible en el establecimiento</div>
+						</div>
+					`;
+			}
+
+			if (establecimiento.has_accommodation) {
+				additionalServicesHTML += `
+						<div class="info-item">
+							<div class="info-icon"><i class="fas fa-bed text-info"></i></div>
+							<div><strong>Alojamiento:</strong> Modalidad Work & Travel disponible</div>
 						</div>
 					`;
 			}
@@ -535,38 +542,19 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 
 			const host = data[0].space.establecimiento.host;
 			document.getElementById('hostInfo').innerHTML = `
-					<div class="info-item">
-						<div class="info-icon"><i class="fas fa-building"></i></div>
-						<div><strong>Empresa:</strong> ${host.empresa || 'No especificada'}</div>
-					</div>
-					<div class="info-item">
-						<div class="info-icon"><i class="fas fa-envelope"></i></div>
-						<div><strong>Email:</strong> ${host.email}</div>
-					</div>
-					<div class="info-item">
-						<div class="info-icon"><i class="fas fa-phone"></i></div>
-						<div><strong>Teléfono:</strong> ${host.phone}</div>
-					</div>
+					<div class="info-item"><div class="info-icon"><i class="fas fa-building"></i></div><div><strong>Empresa:</strong> ${host.empresa || 'No especificada'}</div></div>
+					<div class="info-item"><div class="info-icon"><i class="fas fa-envelope"></i></div><div><strong>Email:</strong> ${host.email}</div></div>
+					<div class="info-item"><div class="info-icon"><i class="fas fa-phone"></i></div><div><strong>Teléfono:</strong> ${host.phone}</div></div>
 				`;
 
 			const startTime = data[0].start_time;
 			const endTime = data[0].end_time;
 			const reservationDay = new Date(data[0].day).getDay();
 
-			const dayMap = {
-				0: 'has_sunday',
-				1: 'has_monday',
-				2: 'has_tuesday',
-				3: 'has_wednesday',
-				4: 'has_thursday',
-				5: 'has_friday',
-				6: 'has_saturday'
-			};
-
+			const dayMap = { 0: 'has_sunday', 1: 'has_monday', 2: 'has_tuesday', 3: 'has_wednesday', 4: 'has_thursday', 5: 'has_friday', 6: 'has_saturday' };
 			const dayProperty = dayMap[reservationDay];
 
 			let matchingSchedule = null;
-
 			for (const schedule of data[0].space.schedule) {
 				if (schedule[dayProperty]) {
 					if (startTime >= schedule.start_time && endTime <= schedule.end_time) {
@@ -590,8 +578,7 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 					servicesHTML += '<div class="mt-3">';
 					matchingSchedule.services.forEach((service, index) => {
 						servicesHTML += `
-								<div class="service-badge" data-bs-toggle="tooltip" data-bs-html="true" 
-									title="${service.description || 'Sin descripción disponible'}">
+								<div class="service-badge" data-bs-toggle="tooltip" data-bs-html="true" title="${service.description || 'Sin descripción disponible'}">
 									<i class="fas fa-concierge-bell"></i> ${service.name} (${service.price}€)
 									<i class="fas fa-info-circle info-icon-badge"></i>
 								</div>
@@ -603,12 +590,9 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 				}
 
 				servicesDiv.innerHTML = servicesHTML;
-
 				var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-				var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-					return new bootstrap.Tooltip(tooltipTriggerEl, {
-						trigger: 'hover focus click'
-					});
+				var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+					return new bootstrap.Tooltip(tooltipTriggerEl, { trigger: 'hover focus click' });
 				});
 			} else {
 				servicesDiv.innerHTML = '<p class="text-muted">No se encontró un horario coincidente para esta reserva</p>';
@@ -634,12 +618,8 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 		}
 
 		function initMap(lat, lng, placeName, direccion) {
-			if (lat == null || lat == undefined) {
-				lat = 0;
-			}
-			if (lng == null || lng == undefined) {
-				lng = 0;
-			}
+			if (lat == null || lat == undefined) { lat = 0; }
+			if (lng == null || lng == undefined) { lng = 0; }
 			L.mapbox.accessToken = 'pk.eyJ1IjoiYW5kcnplamJhbmFzIiwiYSI6ImNrcHdrZXIyYTAyZWkyb3AwNGtpbmtrbXYifQ.PN_iZ4Mh08-V5EXHAHpCSg';
 			const map = L.mapbox.map('map')
 				.setView([lat, lng], 15)
@@ -651,23 +631,14 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 				iconAnchor: [18, 36],
 			});
 
-			const marker = L.marker([lat, lng], {
-				icon: myIcon
-			}).addTo(map);
-
+			const marker = L.marker([lat, lng], { icon: myIcon }).addTo(map);
 			marker.bindPopup(`<p><b>${placeName}</b></p><p>${direccion}</p>`).openPopup();
 		}
 
 		function cancelReservation(reservaId) {
-			console.log('Datos de cancelación:', cancelationData);
-
 			let cancelUrl = 'eliminarReserva.php?id=' + reservaId;
-			if (cancelationData.motivo) {
-				cancelUrl += '&motivo=' + encodeURIComponent(cancelationData.motivo);
-			}
-			if (cancelationData.informacionAdicional) {
-				cancelUrl += '&info_adicional=' + encodeURIComponent(cancelationData.informacionAdicional);
-			}
+			if (cancelationData.motivo) { cancelUrl += '&motivo=' + encodeURIComponent(cancelationData.motivo); }
+			if (cancelationData.informacionAdicional) { cancelUrl += '&info_adicional=' + encodeURIComponent(cancelationData.informacionAdicional); }
 
 			fetch(cancelUrl)
 				.then(data => {
@@ -680,6 +651,7 @@ $_SESSION['reservaId'] = $_GET['reservaId'];
 				});
 		}
 	</script>
+	<?php include 'typebot.php'; ?>
 </body>
 
 </html>
